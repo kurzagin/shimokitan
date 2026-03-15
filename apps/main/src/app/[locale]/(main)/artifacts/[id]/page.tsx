@@ -209,17 +209,17 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                     Tablet:  2-col (md:grid-cols-12)
                     Desktop: 3-col (lg:grid-cols-12)
                 ══════════════════════════════════════════════════════════ */}
-                <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:divide-x lg:divide-zinc-900 lg:overflow-hidden lg:min-h-0">
+                <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:divide-x lg:divide-zinc-900">
 
                     {/* ── B. RECORD PANEL ───────────────────────────────
                         Mobile/Tablet: shown below media (reordered via order-*)
                         Desktop: left column (3 cols)
                     ─────────────────────────────────────────────────── */}
-                    <div className="order-3 lg:order-none lg:col-span-3 flex flex-col border-t lg:border-t-0 border-zinc-900 lg:overflow-hidden">
+                    <div className="order-3 lg:order-none lg:col-span-3 flex flex-col border-t lg:border-t-0 border-zinc-900">
 
                         <PanelHeader label="Record_Panel" dot />
 
-                        <div className="flex flex-col divide-y divide-zinc-900 lg:overflow-y-auto lg:scrollbar-none lg:flex-1 lg:min-h-0">
+                        <div className="flex flex-col divide-y divide-zinc-900">
 
                             {/* Category & Status handled elsewhere or removed per request */}
                             
@@ -359,7 +359,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                         Mobile/Tablet: first in flow (order-1)
                         Desktop: middle 5 cols
                     ─────────────────────────────────────────────────── */}
-                    <div className="order-1 lg:order-none lg:col-span-5 flex flex-col lg:overflow-hidden">
+                    <div className="order-1 lg:order-none lg:col-span-5 flex flex-col">
 
                         <PanelHeader
                             label="Media_Hub"
@@ -443,7 +443,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                             On desktop: fills remaining height with scroll
                             On mobile/tablet: natural height, fully visible
                         ────────────────────────────────────────────── */}
-                        <div className="shrink-0 lg:flex-1 border-t border-zinc-900 px-4 pt-4 pb-5 flex flex-col gap-3 lg:overflow-y-auto lg:scrollbar-none lg:min-h-0">
+                        <div className="shrink-0 border-t border-zinc-900 px-4 pt-4 pb-8 flex flex-col gap-3">
                             <div className="flex items-center gap-2 shrink-0">
                                 <div className="w-0.5 h-4 bg-violet-600 shrink-0" />
                                 <span className="text-xs text-violet-500 uppercase tracking-[0.35em] font-black">Editorial_Analysis</span>
@@ -460,7 +460,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                         </div>
 
                         {/* ── ECHO FLUX — HIDDEN on mobile/tablet, visible on desktop ── */}
-                        <div className="flex flex-col overflow-hidden border-t border-zinc-900 min-h-0 max-h-64 lg:max-h-none lg:flex-1">
+                        <div className="flex flex-col border-t border-zinc-900 pb-12">
                             <PanelHeader
                                 label="Echo_Flux"
                                 right={
@@ -470,7 +470,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                 }
                             />
 
-                            <div className="overflow-y-auto flex flex-col divide-y divide-zinc-900/60 scrollbar-none min-h-0">
+                            <div className="flex flex-col divide-y divide-zinc-900/60 min-h-0">
                                 {artifact.zines?.length ? artifact.zines.map((zine: any, idx: number) => (
                                     <div key={zine.id} className="flex gap-3 px-4 py-4 hover:bg-zinc-900/20 transition-colors group/zine shrink-0">
                                         <div className="flex flex-col items-center gap-0.5 shrink-0 pt-1">
@@ -504,11 +504,11 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                         Tablet: right half (order-2, spans 5 cols in md grid)
                         Desktop: right 4 cols
                     ─────────────────────────────────────────────────── */}
-                    <div className="order-4 md:order-2 lg:order-none lg:col-span-4 flex flex-col border-t lg:border-t-0 border-zinc-900 lg:overflow-hidden">
+                    <div className="order-4 md:order-2 lg:order-none lg:col-span-4 flex flex-col border-t lg:border-t-0 border-zinc-900">
 
                         <PanelHeader label="Provenance_Tree" icon="lucide:cpu" />
 
-                        <div className="lg:flex-1 lg:overflow-y-auto px-3 py-4 flex flex-col gap-5 lg:scrollbar-none lg:min-h-0">
+                        <div className="px-3 py-4 flex flex-col gap-5 pb-20">
 
                             {/* 1. CANON_WORK (IP Anchor - The core of the tree) */}
                             {artifact.work && (
