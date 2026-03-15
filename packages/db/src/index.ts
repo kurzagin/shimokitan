@@ -81,6 +81,7 @@ export async function getArtifactBySlug(slug: string) {
 const artifactRelations = {
     credits: {
         with: {
+            translations: true,
             entity: {
                 with: {
                     translations: true,
@@ -115,6 +116,38 @@ const artifactRelations = {
                 }
             }
         }
+    },
+    work: {
+        with: {
+            translations: true,
+            thumbnail: true,
+            poster: true,
+            tags: {
+                with: {
+                    tag: {
+                        with: {
+                            translations: true
+                        }
+                    }
+                }
+            },
+            credits: {
+                with: {
+                    translations: true,
+                    entity: {
+                        with: {
+                            translations: true,
+                            avatar: true
+                        }
+                    }
+                }
+            }
+        }
+    },
+    media: {
+        with: {
+            media: true
+        }
     }
 } as const;
 
@@ -147,6 +180,47 @@ export async function getAllEntities() {
       }
     }
   });
+}
+
+export async function getAllWorks() {
+    const db = getDb();
+    if (!db) return [];
+    return await db.query.works.findMany({
+        where: isNull(schema.works.deletedAt),
+        orderBy: [desc(schema.works.createdAt), desc(schema.works.resonance)],
+        with: {
+            translations: true,
+            thumbnail: true,
+            poster: true,
+            tags: {
+                with: {
+                    tag: {
+                        with: {
+                            translations: true
+                        }
+                    }
+                }
+            },
+            artifacts: {
+                with: {
+                    translations: true,
+                    thumbnail: true,
+                    resources: true
+                }
+            },
+            credits: {
+                with: {
+                    translations: true,
+                    entity: {
+                        with: {
+                            translations: true,
+                            avatar: true
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
 export async function getEntityById(id: string) {

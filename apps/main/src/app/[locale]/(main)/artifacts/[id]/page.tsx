@@ -25,9 +25,11 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
     const title = translation?.title || s.artifact_untitled;
     const description = s.artifact_description.replace('{title}', title);
     const imageUrl = artifact.poster?.url || artifact.thumbnail?.url || "/tokyo.jpg";
+    const workTitle = artifact.work ? resolveTranslation(artifact.work.translations, locale)?.title : null;
+    const fullTitle = workTitle ? `${title} // ${workTitle}` : title;
 
     return {
-        title,
+        title: fullTitle,
         description,
         alternates: {
             languages: {
@@ -37,13 +39,13 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
             }
         },
         openGraph: {
-            title, description,
+            title: fullTitle, description,
             images: [{ url: imageUrl, alt: title }],
             type: "music.song"
         },
         twitter: {
             card: "summary_large_image",
-            title, description,
+            title: fullTitle, description,
             images: [imageUrl]
         }
     };
@@ -59,44 +61,66 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
     const title = translation?.title || "Untitled";
     const description = translation?.description || "";
 
-    const originalArtistCredits = artifact.credits?.filter((c: any) => c.isOriginalArtist) || [];
     const primaryResource = artifact.resources?.find((r: any) => r.isPrimary) || artifact.resources?.[0];
 
+    // ── CREDIT MERGING & DEDUPLICATION ──
+    // Merge Work-level credits with Artifact-level credits.
+    const rawArtifactCredits = artifact.credits || [];
+    const rawWorkCredits = (artifact as any).work?.credits || [];
+    const mergedCreditsMap = new Map();
+    [...rawWorkCredits, ...rawArtifactCredits].forEach((c: any) => {
+        const key = `${c.entityId}-${c.role}`;
+        mergedCreditsMap.set(key, c);
+    });
+    const allCredits = Array.from(mergedCreditsMap.values());
+
     const primaryCredit =
-        artifact.credits?.find((c: any) => c.isPrimary && c.contributorClass === 'author') ||
-        artifact.credits?.find((c: any) => c.isPrimary) ||
-        artifact.credits?.[0];
+        allCredits.find((c: any) => c.isPrimary && c.contributorClass === 'author') ||
+        allCredits.find((c: any) => c.isPrimary) ||
+        allCredits[0];
     const primaryEntity = primaryCredit?.entity;
-    const primaryArtistName =
-        resolveTranslation(primaryEntity?.translations, locale)?.name ||
-        "ANONYMOUS_SOURCE";
+    const primaryArtistName = resolveTranslation(primaryEntity?.translations, locale)?.name || "ANONYMOUS_SOURCE";
 
     const specs = (artifact.specs as Record<string, any>) || {};
     const hasSpecs = Object.keys(specs).length > 0;
 
-    const authorCredits = artifact.credits?.filter(
-        (c: any) => c.contributorClass === 'author' && !c.isOriginalArtist
-    ) || [];
-    const collaboratorCredits = artifact.credits?.filter(
-        (c: any) => c.contributorClass === 'collaborator' && !c.isOriginalArtist
-    ) || [];
-    const staffCredits = artifact.credits?.filter(
-        (c: any) => c.contributorClass === 'staff' && !c.isOriginalArtist
-    ) || [];
+    // ── CREDIT CATEGORIZATION ──
+    // Strategy: Strictly separate Heritage (Source IP) from Manifestation (Station/Artifact)
+    // We check both the DB flag and semantic role/class to be safe.
+    const heritageCredits = allCredits.filter((c: any) => 
+        c.isOriginalArtist === true || 
+        c.role?.toUpperCase() === 'ORIGINAL' ||
+        c.contributorClass === 'author' && (artifact as any).work?.id && c.workId === (artifact as any).work.id
+    );
 
-    const hasProvenance = artifact.sourceArtifact || artifact.externalOriginal || originalArtistCredits.length > 0;
+    const manifestationCredits = allCredits.filter((c: any) => {
+        // Exclude heritage from manifestation
+        const isHeritage = heritageCredits.some(hc => hc.entityId === c.entityId && hc.role === c.role);
+        return !isHeritage;
+    });
+
+    // Manifestation sub-groups (only for current version creators)
+    const stationAuthorCredits = manifestationCredits.filter((c: any) => c.contributorClass === 'author');
+    const stationCollaboratorCredits = manifestationCredits.filter((c: any) => c.contributorClass === 'collaborator');
+    const stationStaffCredits = manifestationCredits.filter((c: any) => c.contributorClass === 'staff');
+
+    const hasProvenance = artifact.sourceArtifact || artifact.externalOriginal || heritageCredits.length > 0;
+
 
     const hostedAudio = artifact.resources?.find((r: any) => r.role === 'hosted_audio');
 
     const trackData: StationTrack | null = hostedAudio ? {
         title,
         artist: primaryArtistName,
-        album: artifact.category || "Single",
+        album: (artifact.work ? resolveTranslation(artifact.work.translations, locale)?.title : null) || artifact.category || "Single",
         cover: artifact.vinyl?.url || artifact.thumbnail?.url || "",
         bitrate: (specs.bitrate as string) || "1411 KBPS",
         format: (specs.format as string) || "LOSSLESS",
         src: hostedAudio.value
     } : null;
+
+    const workTranslation = artifact.work ? resolveTranslation(artifact.work.translations, locale) : null;
+    const galleryItems = artifact.media?.filter((m: any) => m.role === 'gallery') || [];
 
     const jsonLd = {
         "@context": "https://schema.org",
@@ -197,11 +221,47 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
 
                         <div className="flex flex-col divide-y divide-zinc-900 lg:overflow-y-auto lg:scrollbar-none lg:flex-1 lg:min-h-0">
 
-                            {/* Primary source */}
-                            <div className="px-4 py-4 flex flex-col gap-1.5 shrink-0">
-                                <span className="text-[10px] text-zinc-600 uppercase tracking-[0.35em]">Primary_Source</span>
-                                <span className="text-base font-black italic text-white uppercase leading-tight">{primaryArtistName}</span>
-                            </div>
+                            {/* Category & Status handled elsewhere or removed per request */}
+                            
+                            {artifact.work && (
+                                <div className="flex flex-col shrink-0 overflow-hidden border-b border-zinc-900">
+                                    <div className="bg-violet-600 px-4 py-2.5 flex items-center gap-2">
+                                        <Icon icon="lucide:anchor" width={14} className="text-violet-950" />
+                                        <span className="text-[10px] text-violet-950 font-black uppercase tracking-[0.2em]">Master_IP_Anchor</span>
+                                    </div>
+                                    <div className="bg-zinc-950/40 p-4 py-6 flex flex-col gap-5 relative">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-2xl font-black italic text-white uppercase leading-none tracking-tighter">
+                                                {workTranslation?.title}
+                                            </span>
+                                            <span className="text-[9px] text-violet-500 font-bold uppercase tracking-[0.3em] opacity-80">Canonical_Identity</span>
+                                        </div>
+
+                                        {heritageCredits.length > 0 && (
+                                            <div className="flex flex-col gap-4">
+                                                <div className="flex flex-col gap-3.5">
+                                                    {heritageCredits.map((c: any, i: number) => {
+                                                        const name = resolveTranslation(c.entity?.translations, locale)?.name || "ANON";
+                                                        return (
+                                                            <div key={i} className="flex flex-col gap-1.5">
+                                                                <Link href={getEntityUrl(c.entity)} className="text-lg font-black italic uppercase text-violet-200 hover:text-white transition-colors truncate leading-tight">
+                                                                    {name}
+                                                                </Link>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="px-1.5 py-0.5 bg-violet-600/10 border border-violet-500/20 text-[8px] text-violet-400 font-black uppercase tracking-widest leading-none">
+                                                                        {resolveTranslation(c.translations, locale)?.role || c.role || "ORIGIN"}
+                                                                    </div>
+                                                                    <span className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.1em]">Heritage_Root</span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Specs */}
                             {hasSpecs && (
@@ -323,6 +383,12 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                             <h1 className="text-xl md:text-lg font-black uppercase italic leading-tight text-white tracking-tight">
                                 {title}
                             </h1>
+                            {workTranslation && (
+                                <div className="mt-1 flex items-center gap-2">
+                                    <span className="text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold">From</span>
+                                    <span className="text-[10px] text-violet-400 uppercase tracking-[0.2em] font-black italic">{workTranslation.title}</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Media — aspect-video */}
@@ -354,9 +420,24 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                 <div className="absolute top-2 right-2 border-t border-r border-violet-500/40 w-5 h-5" />
                                 <div className="absolute bottom-2 left-2 border-b border-l border-violet-500/30 w-5 h-5" />
                                 <div className="absolute bottom-2 right-2 border-b border-r border-violet-500/30 w-5 h-5" />
-                                <span className="absolute bottom-2 right-8 text-[8px] font-mono text-zinc-700 uppercase tracking-widest hidden md:block">X:1920 Y:1080</span>
+                                
+                                <div className="absolute bottom-2 right-4 flex items-center gap-4 text-[8px] font-mono text-zinc-700 uppercase tracking-widest hidden md:flex">
+                                    {galleryItems.length > 0 && <span>ASSETS:{galleryItems.length + 1}</span>}
+                                    <span>X:1920 Y:1080</span>
+                                </div>
                             </div>
                         </div>
+
+                        {/* Gallery strip (if exists) */}
+                        {galleryItems.length > 0 && (
+                            <div className="shrink-0 flex gap-2 p-2 border-b border-zinc-900 bg-zinc-950/20 overflow-x-auto scrollbar-none">
+                                {[artifact.thumbnail, artifact.poster, ...galleryItems.map((gi: any) => gi.media)].filter(Boolean).map((img: any, i: number) => (
+                                    <div key={i} className="shrink-0 h-12 aspect-[2/3] md:h-16 bg-zinc-900 border border-zinc-800 overflow-hidden group/thumb cursor-pointer">
+                                        <img src={img.url} className="w-full h-full object-cover grayscale opacity-50 group-hover/thumb:grayscale-0 group-hover/thumb:opacity-100 transition-all scale-110 group-hover/thumb:scale-100" />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
                         {/* ── EDITORIAL ANALYSIS — PRIORITIZED ──
                             On desktop: fills remaining height with scroll
@@ -429,26 +510,62 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
 
                         <div className="lg:flex-1 lg:overflow-y-auto px-3 py-4 flex flex-col gap-5 lg:scrollbar-none lg:min-h-0">
 
-                            {/* Spine: left border on a tight inner wrapper — only as tall as real content */}
-
-                            {/* ROOT_AUTHORITY */}
-                            {hasProvenance && (
+                            {/* 1. CANON_WORK (IP Anchor - The core of the tree) */}
+                            {artifact.work && (
                                 <div className="flex flex-col gap-2 relative z-10">
-                                    <div className="hidden lg:block absolute -left-[6px] top-[7px] w-2 h-2 rounded-full bg-rose-950 border border-rose-500 z-10 shadow-[0_0_6px_rgba(225,29,72,0.4)]" />
+                                    <div className="hidden lg:block absolute -left-[6px] top-[7px] w-2.5 h-2.5 rounded-full bg-zinc-950 border border-violet-700 z-10" />
                                     <div className="flex items-center gap-2 lg:pl-3 mb-0.5">
-                                        <Icon icon="lucide:anchor" width={12} className="text-rose-500 shrink-0" />
-                                        <span className="text-xs font-black text-rose-500 uppercase tracking-[0.35em]">Root_Authority</span>
+                                        <Icon icon="lucide:anchor" width={12} className="text-violet-500 shrink-0" />
+                                        <span className="text-xs font-black text-violet-500 uppercase tracking-[0.35em]">Intellectual_Property</span>
+                                    </div>
+                                    <div className="flex flex-col gap-2 lg:pl-2">
+                                        <div className="flex items-center gap-3 p-3 bg-violet-950/20 border border-l-0 border-violet-900/30 relative overflow-hidden">
+                                            <div className="absolute top-0 left-0 w-0.5 h-full bg-violet-600 shadow-[0_0_6px_rgba(124,58,237,0.5)]" />
+                                            <div className="w-10 h-10 shrink-0 bg-zinc-950 border border-zinc-800 overflow-hidden flex items-center justify-center">
+                                                {artifact.work.thumbnail?.url
+                                                    ? <img src={artifact.work.thumbnail.url} alt={workTranslation?.title || "Work"} className="w-full h-full object-cover grayscale opacity-50 transition-all" />
+                                                    : <Icon icon="lucide:cpu" width={14} className="text-violet-700" />
+                                                }
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="text-sm font-black text-violet-100 uppercase italic truncate leading-tight">
+                                                    {workTranslation?.title}
+                                                </div>
+                                                <div className="text-[10px] text-violet-500/50 uppercase tracking-widest mt-0.5">MASTER_IDENTITY</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 2. STATION_AUTHORITY (Manifestation) */}
+                            {stationAuthorCredits.length > 0 && (
+                                <TreeGroup label="Station_Authority" icon="lucide:star" color="violet" credits={stationAuthorCredits} locale={locale} />
+                            )}
+
+                            {/* 3. ANCILLARY_AUTHORITY (Manifestation Support) */}
+                            {(stationCollaboratorCredits.length > 0 || stationStaffCredits.length > 0) && (
+                                <TreeGroup 
+                                    label="Support_Grid" 
+                                    icon="lucide:users" 
+                                    color="zinc" 
+                                    credits={[...stationCollaboratorCredits, ...stationStaffCredits]} 
+                                    locale={locale} 
+                                />
+                            )}
+
+                            {/* Citation Ancestry / External Roots */}
+                            {(artifact.sourceArtifact || artifact.externalOriginal) && (
+                                <div className="flex flex-col gap-2 relative z-10 opacity-60">
+                                    <div className="hidden lg:block absolute -left-[6px] top-[7px] w-2 h-2 rounded-full bg-zinc-950 border border-rose-900 z-10" />
+                                    <div className="flex items-center gap-2 lg:pl-3 mb-0.5">
+                                        <Icon icon="lucide:history" width={12} className="text-rose-900 shrink-0" />
+                                        <span className="text-xs font-black text-rose-900 uppercase tracking-[0.35em]">Citational_Ancestry</span>
                                     </div>
                                     <div className="flex flex-col gap-2 lg:pl-2">
                                         {artifact.sourceArtifact && (
                                             <Link href={`/artifacts/${artifact.sourceArtifact.id}`} className="flex items-center gap-3 p-3 bg-rose-950/20 border border-l-0 border-rose-900/30 hover:bg-rose-900/10 transition-all group/root relative overflow-hidden">
-                                                <div className="absolute top-0 left-0 w-0.5 h-full bg-rose-600 shadow-[0_0_6px_rgba(225,29,72,0.5)]" />
-                                                <div className="w-10 h-10 shrink-0 bg-zinc-950 border border-zinc-800 overflow-hidden flex items-center justify-center">
-                                                    {artifact.sourceArtifact.thumbnail?.url
-                                                        ? <img src={artifact.sourceArtifact.thumbnail.url} alt={resolveTranslation(artifact.sourceArtifact.translations, locale)?.title || "Source Artifact"} className="w-full h-full object-cover grayscale opacity-50 group-hover/root:grayscale-0 group-hover/root:opacity-100 transition-all" />
-                                                        : <Icon icon="lucide:database" width={14} className="text-zinc-700" />
-                                                    }
-                                                </div>
+                                                <div className="absolute top-0 left-0 w-0.5 h-full bg-rose-600/50" />
                                                 <div className="min-w-0 flex-1">
                                                     <div className="text-sm font-black text-rose-100 uppercase italic truncate leading-tight">
                                                         {resolveTranslation(artifact.sourceArtifact.translations, locale)?.title}
@@ -460,47 +577,14 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                         {artifact.externalOriginal && (
                                             <div className="flex items-center gap-3 p-3 bg-rose-950/10 border border-l-0 border-rose-900/20 relative overflow-hidden">
                                                 <div className="absolute top-0 left-0 w-0.5 h-full bg-rose-900/50" />
-                                                <div className="w-10 h-10 shrink-0 bg-zinc-950 border border-zinc-800 flex items-center justify-center">
-                                                    <Icon icon="lucide:external-link" width={14} className="text-rose-900" />
-                                                </div>
                                                 <div className="min-w-0 flex-1">
                                                     <div className="text-sm font-black text-rose-200 uppercase italic truncate leading-tight">{artifact.externalOriginal.title}</div>
                                                     <div className="text-[10px] text-rose-800 uppercase tracking-widest mt-0.5">EXTERNAL_ORIGIN</div>
                                                 </div>
                                             </div>
                                         )}
-                                        {originalArtistCredits.length > 0 && !artifact.sourceArtifact && !artifact.externalOriginal &&
-                                            originalArtistCredits.map((credit: any, i: number) => {
-                                                const name = resolveTranslation(credit.entity?.translations, locale)?.name || "ANON";
-                                                return (
-                                                    <Link key={i} href={credit.entity ? getEntityUrl(credit.entity) : '#'} className="flex items-center gap-3 p-3 bg-rose-950/20 border border-l-0 border-rose-900/30 hover:bg-rose-900/10 transition-all group/root relative overflow-hidden">
-                                                        <div className="absolute top-0 left-0 w-0.5 h-full bg-rose-600 shadow-[0_0_6px_rgba(225,29,72,0.5)]" />
-                                                        <div className="w-10 h-10 shrink-0 bg-zinc-950 border border-zinc-800 overflow-hidden flex items-center justify-center">
-                                                            {credit.entity?.avatar?.url
-                                                                ? <img src={credit.entity.avatar.url} alt={name} className="w-full h-full object-cover grayscale opacity-50 group-hover/root:grayscale-0 group-hover/root:opacity-100 transition-all" />
-                                                                : <Icon icon="lucide:feather" width={14} className="text-rose-900" />
-                                                            }
-                                                        </div>
-                                                        <div className="min-w-0 flex-1">
-                                                            <div className="text-sm font-black text-rose-100 uppercase italic truncate leading-tight">{name}</div>
-                                                            <div className="text-[10px] text-rose-500/50 uppercase tracking-widest mt-0.5">CITATIONAL_ANCESTRY</div>
-                                                        </div>
-                                                    </Link>
-                                                );
-                                            })
-                                        }
                                     </div>
                                 </div>
-                            )}
-
-                            {authorCredits.length > 0 && (
-                                <TreeGroup label="Core_Authority" icon="lucide:pen-tool" color="violet" credits={authorCredits} locale={locale} />
-                            )}
-                            {collaboratorCredits.length > 0 && (
-                                <TreeGroup label="Collaborative_Flux" icon="lucide:users" color="zinc" credits={collaboratorCredits} locale={locale} />
-                            )}
-                            {staffCredits.length > 0 && (
-                                <TreeGroup label="Support_Grid" icon="lucide:user-cog" color="zinc" credits={staffCredits} locale={locale} />
                             )}
                         </div>
                     </div>
@@ -555,6 +639,17 @@ function TreeGroup({ label, icon, color, credits, locale }: {
     );
 }
 
+// ── LabelVal ──────────────────────────────────────────────────────────────────
+function LabelVal({ label, val }: { label: string, val: any }) {
+    if (!val) return null;
+    return (
+        <div className="px-4 py-4 flex flex-col gap-1.5 shrink-0">
+            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.35em] font-black">{label}</span>
+            <span className="text-sm font-black italic text-zinc-100 uppercase leading-tight">{String(val)}</span>
+        </div>
+    );
+}
+
 // ── CreditRow ─────────────────────────────────────────────────────────────────
 function CreditRow({ credit, locale, isPrimary }: { credit: any; locale: string; isPrimary: boolean }) {
     const name = resolveTranslation(credit.entity?.translations, locale)?.name || "Anon";
@@ -597,7 +692,7 @@ function CreditRow({ credit, locale, isPrimary }: { credit: any; locale: string;
                     )}
                 </div>
                 <div className="text-[10px] text-zinc-600 uppercase tracking-widest mt-0.5 truncate">
-                    {credit.displayRole || credit.role.replace(/_/g, ' ')}
+                    {resolveTranslation(credit.translations, locale)?.role || credit.displayRole || credit.role.replace(/_/g, ' ')}
                     {isPrimary && " // PRIMARY"}
                 </div>
             </div>

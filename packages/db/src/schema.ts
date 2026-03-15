@@ -204,12 +204,54 @@ export const works = pgTable("works", {
     id: text("id").primaryKey(),
     slug: text("slug").notNull().unique(),
     category: artifactCategoryEnum("category").notNull(),
+    nature: artifactNatureEnum("nature").default("original").notNull(),
+    status: artifactStatusEnum("status").default("back_alley"),
+
+    resonance: integer("resonance").default(0),
+    isVerified: boolean("is_verified").default(false),
+
+    // Canonical Visuals
+    posterId: text("poster_id").references(() => media.id, { onDelete: "set null" }),
     thumbnailId: text("thumbnail_id").references(() => media.id, { onDelete: "set null" }),
+
+    // Canon Identity Specs (BPM, Key, Release Date, Studio, Director)
+    specs: jsonb("specs").default({}),
+
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
 }, (t) => ({
     categoryIdx: index("idx_works_category").on(t.category),
+    natureIdx: index("idx_works_nature").on(t.nature),
+    statusIdx: index("idx_works_status").on(t.status),
+}));
+
+export const workTags = pgTable("work_tags", {
+    workId: text("work_id").references(() => works.id, { onDelete: "cascade" }).notNull(),
+    tagId: text("tag_id").references(() => tags.id, { onDelete: "cascade" }).notNull(),
+}, (t) => ({
+    pk: primaryKey({ columns: [t.workId, t.tagId] }),
+}));
+
+export const workCredits = pgTable("work_credits", {
+    id: text("id").primaryKey(),
+    workId: text("work_id").references(() => works.id, { onDelete: "cascade" }).notNull(),
+    entityId: text("entity_id").references(() => entities.id, { onDelete: "cascade" }).notNull(),
+    role: text("role").notNull(),
+    contributorClass: contributorClassEnum("contributor_class").default("staff").notNull(),
+    isPrimary: boolean("is_primary").default(false).notNull(),
+    position: integer("position").default(0).notNull(),
+}, (t) => ({
+    workIdx: index("idx_work_credits_work").on(t.workId),
+    entityIdx: index("idx_work_credits_entity").on(t.entityId),
+}));
+
+export const workCreditsI18n = pgTable("work_credits_i18n", {
+    creditId: text("credit_id").references(() => workCredits.id, { onDelete: "cascade" }).notNull(),
+    locale: localeEnum("locale").notNull(),
+    role: text("role"),
+}, (t) => ({
+    pk: primaryKey({ columns: [t.creditId, t.locale] }),
 }));
 
 export const worksI18n = pgTable("works_i18n", {
@@ -639,10 +681,31 @@ export const artifactsRelations = relations(artifacts, ({ one, many }) => ({
 export const worksRelations = relations(works, ({ one, many }) => ({
     translations: many(worksI18n),
     artifacts: many(artifacts),
+    credits: many(workCredits),
+    tags: many(workTags),
+    poster: one(media, {
+        fields: [works.posterId],
+        references: [media.id],
+    }),
     thumbnail: one(media, {
         fields: [works.thumbnailId],
         references: [media.id],
     }),
+}));
+
+export const workTagsRelations = relations(workTags, ({ one }) => ({
+    work: one(works, { fields: [workTags.workId], references: [works.id] }),
+    tag: one(tags, { fields: [workTags.tagId], references: [tags.id] }),
+}));
+
+export const workCreditsRelations = relations(workCredits, ({ one, many }) => ({
+    work: one(works, { fields: [workCredits.workId], references: [works.id] }),
+    entity: one(entities, { fields: [workCredits.entityId], references: [entities.id] }),
+    translations: many(workCreditsI18n),
+}));
+
+export const workCreditsI18nRelations = relations(workCreditsI18n, ({ one }) => ({
+    credit: one(workCredits, { fields: [workCreditsI18n.creditId], references: [workCredits.id] }),
 }));
 
 export const worksI18nRelations = relations(worksI18n, ({ one }) => ({

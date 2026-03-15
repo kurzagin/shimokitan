@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 type Artifact = {
     id: string;
-    slug: string; // added for handle-based navigation
+    slug: string;
     title: string;
     category: string;
     coverImage: string | null;
@@ -16,6 +16,8 @@ type Artifact = {
     isMajor: boolean;
     isVerified: boolean;
     artist?: string;
+    type: 'work' | 'artifact';
+    aspectRatio: 'vertical' | 'video' | 'square';
 };
 
 const categories = [
@@ -81,15 +83,19 @@ export default function ArtifactsBrowser({ initialArtifacts }: { initialArtifact
                 {filteredArtifacts.map((artifact) => (
                     <Link
                         key={artifact.id}
-                        href={`/artifacts/${artifact.id}`}
+                        href={artifact.type === 'work' ? `/works/${artifact.id}` : `/artifacts/${artifact.id}`}
                         className={cn(
                             "group/item transition-all duration-700 bg-zinc-950/20 border border-zinc-900 flex flex-col relative overflow-hidden hover:border-violet-900/50",
-                            artifact.isMajor && "border-rose-900/30 hover:border-rose-500/50"
+                            artifact.isMajor && "border-rose-900/30 hover:border-rose-500/50",
+                            artifact.aspectRatio === 'vertical' && "col-span-1 row-span-2 md:row-span-1"
                         )}
                     >
                             <div className="flex flex-col h-full">
                                 {/* Visual Entry Focus */}
-                                <div className="relative aspect-video overflow-hidden bg-zinc-900">
+                                <div className={cn(
+                                    "relative overflow-hidden bg-zinc-900",
+                                    artifact.aspectRatio === 'vertical' ? "aspect-[2/3]" : "aspect-video"
+                                )}>
                                     <img
                                         src={artifact.coverImage || '/placeholder.png'}
                                         alt={artifact.title}

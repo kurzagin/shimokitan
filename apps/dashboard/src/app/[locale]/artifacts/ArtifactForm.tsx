@@ -138,12 +138,10 @@ export default function ArtifactForm({
 
 
     const [category, setCategory] = useState(initialData?.category || (anilistId ? 'anime' : 'music'));
-    const [nature, setNature] = useState(initialData?.nature || 'original');
     const [sourceArtifactId, setSourceArtifactId] = useState<string | null>(initialData?.sourceArtifactId || null);
     const [animeType, setAnimeType] = useState(initialData?.animeType || null);
     const [isHosted, setIsHosted] = useState<boolean>(!!initialData?.isHosted);
 
-    const [status, setStatus] = useState(initialData?.status || 'the_pit');
     const [workId, setWorkId] = useState<string | null>(initialData?.workId || null);
     const [workTitle, setWorkTitle] = useState<string | null>(initialData?.work?.translations?.[0]?.title || null);
 
@@ -410,6 +408,7 @@ export default function ArtifactForm({
                 const formData = new FormData();
                 formData.append('file', pendingThumbnailFile);
                 formData.append('context', 'artifact_asset');
+                formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalThumbnailId = res.mediaId;
                 finalThumbnailUrl = res.url;
@@ -418,6 +417,7 @@ export default function ArtifactForm({
                 const formData = new FormData();
                 formData.append('url', pendingThumbnailUrl);
                 formData.append('context', 'artifact_asset');
+                formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalThumbnailId = res.mediaId;
                 finalThumbnailUrl = res.url;
@@ -431,6 +431,7 @@ export default function ArtifactForm({
                 const formData = new FormData();
                 formData.append('file', pendingPosterFile);
                 formData.append('context', 'artifact_asset');
+                formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalPosterId = res.mediaId;
                 finalPosterUrl = res.url;
@@ -439,6 +440,7 @@ export default function ArtifactForm({
                 const formData = new FormData();
                 formData.append('url', pendingPosterUrl);
                 formData.append('context', 'artifact_asset');
+                formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalPosterId = res.mediaId;
                 finalPosterUrl = res.url;
@@ -452,6 +454,7 @@ export default function ArtifactForm({
                 const formData = new FormData();
                 formData.append('file', pendingVinylFile);
                 formData.append('context', 'artifact_asset');
+                formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalVinylId = res.mediaId;
                 finalVinylUrl = res.url;
@@ -460,6 +463,7 @@ export default function ArtifactForm({
                 const formData = new FormData();
                 formData.append('url', pendingVinylUrl);
                 formData.append('context', 'artifact_asset');
+                formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalVinylId = res.mediaId;
                 finalVinylUrl = res.url;
@@ -486,14 +490,12 @@ export default function ArtifactForm({
             const payload = {
                 id: artifactId,
                 category,
-                nature,
                 sourceArtifactId,
                 animeType,
                 isHosted,
                 thumbnailId: finalThumbnailId,
                 posterId: finalPosterId,
                 vinylId: finalVinylId,
-                status,
                 resources: cleanResources,
                 credits: cleanCredits,
                 specs: cleanSpecs,
@@ -594,8 +596,6 @@ export default function ArtifactForm({
                     onVinylUrlSelect={handleVinylUrlSelect}
                     category={category}
                     setCategory={setCategory}
-                    nature={nature}
-                    setNature={setNature}
                     animeType={animeType}
                     setAnimeType={setAnimeType}
                     artifactId={artifactId}
@@ -620,12 +620,11 @@ export default function ArtifactForm({
                     sourceArtifactTitle={initialData?.sourceArtifact?.translations?.find((t: any) => t.locale === 'en')?.title || initialData?.sourceArtifact?.translations?.[0]?.title}
                     entities={entities}
                     userRole={userRole}
-                    status={status}
-                    setStatus={setStatus}
                     lockFlags={!!verificationId}
                     workId={workId}
                     setWorkId={setWorkId}
                     workTitle={workTitle}
+                    setWorkTitle={setWorkTitle}
                 />
 
                 <ResourcesSection
@@ -636,19 +635,58 @@ export default function ArtifactForm({
                     removeResource={removeResource}
                 />
 
-                <MetadataSection
-                    category={category}
-                    isHosted={isHosted}
-                    specs={specs}
-                    updateSpec={updateSpec}
-                    upsertSpec={upsertSpec}
-                    addSpec={addSpec}
-                    removeSpec={removeSpec}
-                    tags={tags}
-                    updateTag={updateTag}
-                    addTag={addTag}
-                    removeTag={removeTag}
-                />
+                {/* 03. ARTIFACT_METADATA / INHERITANCE */}
+                {!workId ? (
+                    <MetadataSection
+                        category={category}
+                        isHosted={isHosted}
+                        specs={specs}
+                        updateSpec={updateSpec}
+                        upsertSpec={upsertSpec}
+                        addSpec={addSpec}
+                        removeSpec={removeSpec}
+                        tags={tags}
+                        updateTag={updateTag}
+                        addTag={addTag}
+                        removeTag={removeTag}
+                    />
+                ) : (
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-6">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">03 // METADATA_INHERITANCE</span>
+                        </div>
+                        <div className="bg-zinc-950/40 border border-zinc-900 border-dashed p-12 rounded-xl flex flex-col items-center justify-center text-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center">
+                                <Icon icon="lucide:link-2" className="text-zinc-500" width={20} />
+                            </div>
+                            <div className="space-y-1">
+                                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-300">IP_Anchor_Linked</h3>
+                                <p className="text-[10px] text-zinc-500 font-mono uppercase">This artifact is inheriting core attributes from:</p>
+                                <p className="text-sm font-black text-rose-500 italic mt-2 uppercase tracking-tighter">
+                                    {workTitle || 'SYSTEM_ANCHOR_RECORD'}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-4 mt-4">
+                                <button 
+                                    type="button"
+                                    onClick={() => { setWorkId(null); setWorkTitle(null); }}
+                                    className="text-[9px] font-black uppercase text-zinc-600 hover:text-white transition-all border-b border-transparent hover:border-white"
+                                >
+                                    UNLINK_ANCHOR
+                                </button>
+                                {workId && (
+                                    <a 
+                                        href={`/works/${workId}`} 
+                                        target="_blank"
+                                        className="text-[9px] font-black uppercase text-zinc-500 hover:text-sky-500 flex items-center gap-1 transition-all"
+                                    >
+                                        VIEW_CANONICAL_SOURCE <Icon icon="lucide:external-link" width={10} />
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <CreditsSection
                     locale={activeTab}

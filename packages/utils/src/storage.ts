@@ -8,7 +8,7 @@
  */
 
 export type MediaType = 'images' | 'audio' | 'video' | 'raw';
-export type StorageContext = 'artifacts' | 'zines' | 'profiles' | 'echos' | 'soundchecks' | 'metadata' | 'collections';
+export type StorageContext = 'artifacts' | 'works' | 'zines' | 'profiles' | 'echos' | 'soundchecks' | 'metadata' | 'collections';
 
 interface PathOptions {
     mediaType: MediaType;
@@ -50,14 +50,20 @@ export const storagePaths = {
      * Path for an Artifact's cover image.
      * Note: filename should be a NanoID generated at upload time.
      */
-    artifactImage: (artifactId: string, filename: string) =>
-        generateStoragePath({ mediaType: 'images', context: 'artifacts', identifier: artifactId, filename }),
+    artifactImage: (artifactId: string, filename: string, role?: string) =>
+        generateStoragePath({ mediaType: 'images', context: 'artifacts', identifier: artifactId, role, filename }),
+
+    /**
+     * Path for a Work's thumbnail or poster image.
+     */
+    workImage: (workId: string, filename: string, role?: string) =>
+        generateStoragePath({ mediaType: 'images', context: 'works', identifier: workId, role, filename }),
 
     /**
      * Path for an Artifact's canonical audio file.
      */
-    artifactAudio: (artifactId: string, filename: string) =>
-        generateStoragePath({ mediaType: 'audio', context: 'artifacts', identifier: artifactId, filename }),
+    artifactAudio: (artifactId: string, filename: string, role?: string) =>
+        generateStoragePath({ mediaType: 'audio', context: 'artifacts', identifier: artifactId, role, filename }),
 
     /**
      * Path for an Echo audio fragment.

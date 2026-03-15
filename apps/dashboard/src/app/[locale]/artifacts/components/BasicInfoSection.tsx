@@ -42,8 +42,6 @@ interface BasicInfoSectionProps {
     category: string;
     setCategory: (val: string) => void;
 
-    nature: string;
-    setNature: (val: string) => void;
     sourceArtifactId: string | null;
     setSourceArtifactId: (val: string | null) => void;
     animeType: string | null;
@@ -54,14 +52,13 @@ interface BasicInfoSectionProps {
 
     entities: any[];
     userRole?: string;
-    status: string;
-    setStatus: (val: string) => void;
     lockFlags?: boolean;
     artifactId: string;
     onHostedAudioUploaded?: (url: string) => void;
     workId: string | null;
     setWorkId: (val: string | null) => void;
     workTitle?: string | null;
+    setWorkTitle?: (val: string | null) => void;
 }
 
 export default function BasicInfoSection({
@@ -90,8 +87,6 @@ export default function BasicInfoSection({
     category,
     setCategory,
 
-    nature,
-    setNature,
     sourceArtifactId,
     setSourceArtifactId,
     animeType,
@@ -102,14 +97,13 @@ export default function BasicInfoSection({
 
     entities,
     userRole,
-    status,
-    setStatus,
     lockFlags = false,
     artifactId,
     onHostedAudioUploaded,
     workId,
     setWorkId,
-    workTitle
+    workTitle,
+    setWorkTitle
 }: BasicInfoSectionProps) {
 
     return (
@@ -141,39 +135,29 @@ export default function BasicInfoSection({
                                     <option value="other">OTHER_SIGNAL</option>
                                 </select>
                             </div>
-                            <div className="space-y-1">
-                                <WorkSearchPicker
-                                    label="IP_Anchor (Parent Work)"
-                                    value={workId}
-                                    initialTitle={workTitle}
-                                    onSelect={(w) => setWorkId(w?.id || null)}
-                                />
+                            <div className="flex flex-col bg-violet-950/20 overflow-hidden relative group/anchor transition-all hover:bg-violet-950/30">
+                                {/* Semantic strip */}
+                                <div className="absolute top-0 left-0 w-1 h-full bg-violet-600" />
+                                
+                                <div className="bg-violet-600 px-3 py-1.5 flex items-center gap-2">
+                                    <Icon icon="lucide:anchor" width={12} className="text-violet-950" />
+                                    <span className="text-[9px] text-violet-950 font-black uppercase tracking-[0.2em]">Master_IP_Link</span>
+                                </div>
+                                <div className="p-4 pt-4">
+                                    <p className="text-[8px] text-violet-400 font-black uppercase tracking-widest mb-3 opacity-80">Parent_Work_Identity</p>
+                                    <WorkSearchPicker
+                                        label=""
+                                        value={workId}
+                                        initialTitle={workTitle}
+                                        onSelect={(w) => {
+                                            setWorkId(w?.id || null);
+                                            if (setWorkTitle) setWorkTitle(w?.title || null);
+                                        }}
+                                    />
+                                    <p className="text-[8px] text-zinc-500 font-mono italic mt-3 uppercase tracking-tighter">Establishing the canonical ancestry of this manifestation.</p>
+                                </div>
                             </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-mono uppercase text-zinc-500">Artifact_Nature</label>
-                                <select
-                                    value={nature}
-                                    onChange={(e) => setNature(e.target.value)}
-                                    className="w-full bg-black border border-zinc-900 p-3 text-xs text-white focus:border-rose-600 outline-none rounded-lg"
-                                >
-                                    <option value="original">ORIGINAL_SOURCE</option>
-                                    <option value="cover">COVER_VERSION</option>
-                                    <option value="remix">REMIX_VARIANT</option>
-                                    <option value="live">LIVE_CAPTURE</option>
-                                </select>
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-mono uppercase text-zinc-500">Visibility_State</label>
-                                <select
-                                    value={status}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                    className="w-full bg-black border border-zinc-900 p-3 text-xs text-white focus:border-rose-600 outline-none rounded-lg"
-                                >
-                                    <option value="the_pit">PIT (HIDDEN)</option>
-                                    <option value="back_alley">LIVE (PUBLIC)</option>
-                                    <option value="archived">VOID_SPACE</option>
-                                </select>
-                            </div>
+
 
                             {category === 'music' && (
                                 <div className="space-y-4 animate-in fade-in slide-in-from-top-1">
@@ -334,19 +318,16 @@ export default function BasicInfoSection({
                 </div>
             </div>
 
-            {/* derivation picker if not original */}
-            {nature !== 'original' && (
-                <div className="bg-rose-950/5 border border-rose-900/20 p-6 rounded-xl animate-in fade-in slide-in-from-top-2">
-                    <ArtifactSearchPicker
-                        label="DERIVATION_SOURCE"
-                        value={sourceArtifactId}
-                        initialTitle={sourceArtifactTitle}
-                        onSelect={(art) => setSourceArtifactId(art?.id || null)}
-                        placeholder="Link this entry to its original source record..."
-                    />
-
-                </div>
-            )}
+            {/* derivation picker if present or if we want to allow it */}
+            <div className="bg-rose-950/5 border border-rose-900/20 p-6 rounded-xl animate-in fade-in slide-in-from-top-2">
+                <ArtifactSearchPicker
+                    label="DERIVATION_SOURCE"
+                    value={sourceArtifactId}
+                    initialTitle={sourceArtifactTitle}
+                    onSelect={(art) => setSourceArtifactId(art?.id || null)}
+                    placeholder="Link this entry to its original source record..."
+                />
+            </div>
         </div>
     );
 }

@@ -189,8 +189,14 @@ export const workSchema = z.object({
     id: z.string().optional(),
     slug: z.string().optional().nullable(),
     category: z.enum(ARTIFACT_CATEGORIES),
+    nature: z.enum(ARTIFACT_NATURES).default('original'),
+    status: z.enum(ARTIFACT_STATUSES).default('back_alley'),
     thumbnailId: z.string().optional().nullable(),
+    posterId: z.string().optional().nullable(),
+    specs: z.any().optional(), // JSON
     translations: z.array(translationSchema).optional(),
+    credits: z.array(creditSchema).optional(),
+    tags: z.array(tagRefSchema).optional(),
 });
 
 // --- Types ---

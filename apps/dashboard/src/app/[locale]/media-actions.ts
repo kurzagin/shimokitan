@@ -26,7 +26,8 @@ export async function uploadMediaAction(formData: FormData) {
 
     const file = formData.get('file') as File | null;
     const url = formData.get('url') as string | null;
-    const contextType = formData.get('context') as 'entity_avatar' | 'artifact_asset' | 'general' || 'general';
+    const contextType = formData.get('context') as 'entity_avatar' | 'artifact_asset' | 'work_asset' | 'general' || 'general';
+    const contextId = formData.get('contextId') as string | null;
 
     if (!file && !url) throw new Error('No_File_Or_Url_Provided');
 
@@ -85,12 +86,14 @@ export async function uploadMediaAction(formData: FormData) {
         blurhashStr = await encodeImageToBlurhash(processedBuffer);
     }
 
-    const key = generateStoragePath({
-        mediaType: isImage ? 'images' : 'raw',
-        context: contextType === 'entity_avatar' ? 'profiles' : 'artifacts',
-        identifier: mediaId, // Default to mediaId for isolation
-        filename: `${nanoid(8)}.${extension}`
-    });
+    let key = '';
+    if (contextType === 'entity_avatar') {
+        key = storagePaths.userAvatar(contextId || mediaId, `${nanoid(8)}.${extension}`);
+    } else if (contextType === 'work_asset') {
+        key = storagePaths.workImage(contextId || mediaId, `${nanoid(8)}.${extension}`, contextId ? mediaId : undefined);
+    } else {
+        key = storagePaths.artifactImage(contextId || mediaId, `${nanoid(8)}.${extension}`, contextId ? mediaId : undefined);
+    }
 
     // Upload optimized buffer to R2
     const publicUrl = await uploadFileToR2(processedBuffer, key, mimeType);

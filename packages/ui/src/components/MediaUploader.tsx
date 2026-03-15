@@ -9,7 +9,7 @@ interface MediaUploaderProps {
     blurhash?: string | null;
     onChange?: (mediaId: string, url: string, blurhash: string | null) => void;
     uploadAction?: (formData: FormData) => Promise<{ mediaId: string, url: string, blurhash: string | null }>;
-    contextType?: "entity_avatar" | "entity_header" | "entity_thumbnail" | "artifact_cover" | "artifact_poster" | "artifact_asset" | "general";
+    contextType?: "entity_avatar" | "entity_header" | "entity_thumbnail" | "artifact_cover" | "artifact_poster" | "artifact_asset" | "work_asset" | "work_poster" | "general";
     onFileSelect?: (file: File, objectUrl: string) => void;
     onUrlSelect?: (url: string) => void;
     className?: string;
