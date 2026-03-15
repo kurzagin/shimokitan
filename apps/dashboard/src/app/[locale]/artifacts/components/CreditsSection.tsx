@@ -42,14 +42,17 @@ export default function CreditsSection({
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">04 // Contribution_Ledger</span>
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-6">
+                <div className="flex items-center gap-2">
+                    <Icon icon="lucide:users" className="text-zinc-500" width={14} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 font-mono">05 // CONTRIBUTION_LEDGER</span>
+                </div>
                 <button
                     type="button"
                     onClick={addCredit}
-                    className="text-[10px] uppercase font-bold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
+                    className="text-[9px] uppercase font-black text-zinc-500 hover:text-rose-500 flex items-center gap-2 transition-all px-3 py-1 bg-zinc-950 border border-zinc-900 rounded-md"
                 >
-                    <Icon icon="lucide:plus" width={12} /> Add_Contributor
+                    <Icon icon="lucide:plus" width={10} /> ADD_CONTRIBUTOR
                 </button>
             </div>
 

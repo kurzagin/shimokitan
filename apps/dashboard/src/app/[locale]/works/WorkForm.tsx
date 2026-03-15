@@ -247,16 +247,16 @@ export default function WorkForm({
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">01 // CORE_SYSTEM_IDENTIFIER</span>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-                        {/* Identity & Authority Column */}
-                        <div className="lg:col-span-1 space-y-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+                        {/* 01.A IDENTITY_AUTHORITY_STACK */}
+                        <div className="lg:col-span-4 space-y-10">
                             {/* Identity Module */}
                             <div className="space-y-4">
-                                <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-4">
                                     <Icon icon="lucide:fingerprint" className="text-zinc-500" width={14} />
                                     <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic font-mono">Identity_Module</h3>
                                 </div>
-                                <div className="space-y-6">
+                                <div className="space-y-5">
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-mono uppercase text-zinc-500 pl-1">Category_Sector</label>
                                         <select
@@ -283,43 +283,44 @@ export default function WorkForm({
                                                 placeholder="work-slug-here..."
                                             />
                                         </div>
-                                        <p className="text-[8px] text-zinc-600 font-mono italic pl-2">System current: {initialData?.slug || 'PENDING'}</p>
+                                        <p className="text-[8px] text-zinc-600 font-mono italic pl-2">System: {initialData?.slug || 'PENDING'}</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Authority Module */}
                             <div className="space-y-4">
-                                <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-4">
                                     <Icon icon="lucide:shield-check" className="text-emerald-500" width={14} />
                                     <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic font-mono">Authority_Module</h3>
                                 </div>
-                                <div className="space-y-6">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-mono uppercase text-zinc-500 pl-1">Creative_Nature</label>
-                                        <select
-                                            value={nature}
-                                            onChange={(e) => setNature(e.target.value as any)}
-                                            className="w-full bg-black border border-zinc-900 p-3 text-xs text-white focus:border-violet-600 outline-none transition-all rounded-lg appearance-none cursor-pointer font-bold"
-                                        >
-                                            <option value="original">ORIGINAL_WORK</option>
-                                            <option value="cover">REINTERPRETATION</option>
-                                            <option value="live">LIVE_PRODUCTION</option>
-                                            <option value="compilation">CURATED_SET</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-mono uppercase text-zinc-500 pl-1">Registry_Status</label>
-                                        <select
-                                            value={status}
-                                            onChange={(e) => setStatus(e.target.value as any)}
-                                            className="w-full bg-black border border-zinc-900 p-3 text-xs text-white focus:border-emerald-600 outline-none transition-all rounded-lg appearance-none cursor-pointer font-bold"
-                                        >
-                                            <option value="back_alley">ACTIVE_BACK_ALLEY</option>
-                                            <option value="the_pit">FEATURED_THE_PIT</option>
-                                            <option value="archived">LEGACY_ARCHIVE</option>
-                                        </select>
+                                <div className="space-y-5">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-mono uppercase text-zinc-500 pl-1">Nature</label>
+                                            <select
+                                                value={nature}
+                                                onChange={(e) => setNature(e.target.value as any)}
+                                                className="w-full bg-black border border-zinc-900 p-3 text-xs text-white focus:border-violet-600 outline-none transition-all rounded-lg appearance-none cursor-pointer font-bold"
+                                            >
+                                                <option value="original">ORIGINAL</option>
+                                                <option value="cover">COVER</option>
+                                                <option value="live">LIVE</option>
+                                                <option value="compilation">EP/OST</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-mono uppercase text-zinc-500 pl-1">Status</label>
+                                            <select
+                                                value={status}
+                                                onChange={(e) => setStatus(e.target.value as any)}
+                                                className="w-full bg-black border border-zinc-900 p-3 text-xs text-white focus:border-emerald-600 outline-none transition-all rounded-lg appearance-none cursor-pointer font-bold"
+                                            >
+                                                <option value="back_alley">ACTIVE</option>
+                                                <option value="the_pit">PIT</option>
+                                                <option value="archived">ARCHIVE</option>
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <div className="space-y-1">
@@ -335,21 +336,21 @@ export default function WorkForm({
                             </div>
                         </div>
 
-                        {/* Branding Module */}
-                        <div className="lg:col-span-3 space-y-4">
-                            <div className="flex items-center gap-2 mb-2">
+                        {/* 01.B BRANDING_ORCHESTRATOR */}
+                        <div className="lg:col-span-8 space-y-4">
+                            <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-4">
                                 <Icon icon="lucide:layout-template" className="text-zinc-500" width={14} />
                                 <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic font-mono">Branding_Module</h3>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between pl-1">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-mono uppercase text-zinc-400">Portrait_Identity</span>
-                                            <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 2:3 / 3:4</span>
-                                        </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                                {/* Portrait Identity */}
+                                <div className="md:col-span-2 space-y-3">
+                                    <div className="flex flex-col pl-1">
+                                        <span className="text-[10px] font-mono uppercase text-zinc-400">Portrait_Identity</span>
+                                        <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 3:4 / 2:3</span>
                                     </div>
-                                    <div className="aspect-[3/4] bg-zinc-950/50 border border-zinc-900 rounded-xl relative overflow-hidden group">
+                                    <div className="aspect-[3/4] bg-zinc-950/50 border border-zinc-900 rounded-xl relative overflow-hidden group hover:border-zinc-700 transition-colors">
                                         <MediaUploader
                                             value={posterUrl || ''}
                                             uploadAction={uploadMediaAction}
@@ -360,14 +361,13 @@ export default function WorkForm({
                                     </div>
                                 </div>
 
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between pl-1">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-mono uppercase text-zinc-400">Landscape_Hero</span>
-                                            <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 16:9 (1920x1080)</span>
-                                        </div>
+                                {/* Landscape Hero */}
+                                <div className="md:col-span-3 space-y-3">
+                                    <div className="flex flex-col pl-1">
+                                        <span className="text-[10px] font-mono uppercase text-zinc-400">Landscape_Hero</span>
+                                        <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 16:9 / 21:9</span>
                                     </div>
-                                    <div className="aspect-video bg-zinc-950/50 border border-zinc-900 rounded-xl relative overflow-hidden group">
+                                    <div className="aspect-video bg-zinc-950/50 border border-zinc-900 rounded-xl relative overflow-hidden group hover:border-zinc-700 transition-colors">
                                         <MediaUploader
                                             value={thumbnailUrl || ''}
                                             uploadAction={uploadMediaAction}
@@ -376,6 +376,18 @@ export default function WorkForm({
                                             contextType="work_asset"
                                             className="w-full h-full"
                                         />
+                                    </div>
+                                    
+                                    {/* Asset Legend / Info */}
+                                    <div className="grid grid-cols-2 gap-4 mt-6 p-4 bg-zinc-950/30 border border-zinc-900/50 rounded-lg">
+                                        <div className="space-y-1">
+                                            <span className="text-[8px] font-mono text-zinc-500 uppercase block">Poster_Resolution</span>
+                                            <span className="text-[10px] font-bold text-zinc-400">AUTO_SCALE</span>
+                                        </div>
+                                        <div className="space-y-1 text-right">
+                                            <span className="text-[8px] font-mono text-zinc-500 uppercase block">Storage_Protocol</span>
+                                            <span className="text-[10px] font-bold text-zinc-400 italic">R2_SECURE</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

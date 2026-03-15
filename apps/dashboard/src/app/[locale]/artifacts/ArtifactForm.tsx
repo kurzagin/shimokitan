@@ -635,7 +635,7 @@ export default function ArtifactForm({
                     removeResource={removeResource}
                 />
 
-                {/* 03. ARTIFACT_METADATA / INHERITANCE */}
+                {/* 04. ARTIFACT_METADATA / INHERITANCE */}
                 {!workId ? (
                     <MetadataSection
                         category={category}
@@ -653,7 +653,8 @@ export default function ArtifactForm({
                 ) : (
                     <div className="space-y-6">
                         <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-6">
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">03 // METADATA_INHERITANCE</span>
+                             <Icon icon="lucide:link-2" className="text-zinc-500" width={14} />
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 font-mono">04 // METADATA_INHERITANCE</span>
                         </div>
                         <div className="bg-zinc-950/40 border border-zinc-900 border-dashed p-12 rounded-xl flex flex-col items-center justify-center text-center gap-4">
                             <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center">
