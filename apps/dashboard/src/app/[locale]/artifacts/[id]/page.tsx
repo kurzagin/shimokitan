@@ -34,6 +34,12 @@ export default async function EditArtifactPage(props: { params: Promise<{ locale
                         }
                     }
                 }
+            },
+            exhibits: {
+                with: {
+                    translations: true,
+                    media: true
+                }
             }
         }
     }) : null;

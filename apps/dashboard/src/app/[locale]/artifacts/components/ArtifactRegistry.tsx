@@ -26,6 +26,7 @@ export default function ArtifactRegistry({ data, isTrash = false }: { data: any[
                         </span>
                     )
                 },
+                { key: 'exhibitCount', label: 'EXHIBITS', render: (val) => <span className="text-zinc-500 font-mono">[{val}]</span> },
                 { key: 'resonance', label: 'RESONANCE_HEAT', render: (val) => <span className="text-zinc-500 font-mono">[{val}]</span> }
             ]}
         />

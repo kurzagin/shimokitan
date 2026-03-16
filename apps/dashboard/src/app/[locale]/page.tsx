@@ -36,9 +36,9 @@ export default async function ConsolePage({ params }: PageProps) {
     }
 
     // Fetch All Data for Metrics
-    const [allArtifacts, allWorks, entities, verifications] = await Promise.all([
+    const [allArtifacts, allWorks, entities, verifications, exhibits] = await Promise.all([
         db.query.artifacts.findMany({
-            columns: { id: true, status: true, deletedAt: true }
+            columns: { id: true, status: true, category: true, deletedAt: true }
         }),
         db.query.works.findMany({
              columns: { id: true, deletedAt: true }
@@ -48,15 +48,18 @@ export default async function ConsolePage({ params }: PageProps) {
             where: (v, { eq }) => eq(v.status, 'pending'),
             columns: { id: true }
         }),
+        db.query.exhibits.findMany({
+            columns: { id: true }
+        }),
     ]);
 
     // Process Metrics
     const activeArtifacts = allArtifacts.filter(a => !a.deletedAt);
     const activeWorks = allWorks.filter(w => !w.deletedAt);
     
-    const statusCounts = activeArtifacts.reduce((acc, curr) => {
-        const s = curr.status || 'unknown';
-        acc[s] = (acc[s] || 0) + 1;
+    const categoryCounts = activeArtifacts.reduce((acc, curr) => {
+        const c = curr.category || 'other';
+        acc[c] = (acc[c] || 0) + 1;
         return acc;
     }, {} as Record<string, number>);
 
@@ -91,7 +94,7 @@ export default async function ConsolePage({ params }: PageProps) {
             </header>
 
             {/* Metrics Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                 <div className="relative group overflow-hidden bg-zinc-950 border border-zinc-900 p-6 rounded-2xl hover:border-rose-900/50 transition-all">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
                         <Icon icon="lucide:library" width={64} />
@@ -113,8 +116,9 @@ export default async function ConsolePage({ params }: PageProps) {
                         <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-1">Artifacts_Registry</div>
                         <div className="text-4xl font-black text-white italic">{totalActive}</div>
                         <div className="mt-4 flex items-center gap-4 text-[9px] font-mono uppercase text-zinc-600">
-                             <span>Music: {statusCounts.music || 0}</span>
-                             <span>Anime: {statusCounts.anime || 0}</span>
+                             <span>Music: {categoryCounts.music || 0}</span>
+                             <span>Anime: {categoryCounts.anime || 0}</span>
+                             <span>Game: {categoryCounts.game || 0}</span>
                         </div>
                     </div>
                 </div>
@@ -142,6 +146,19 @@ export default async function ConsolePage({ params }: PageProps) {
                         <div className="text-4xl font-black text-white italic">{verifications.length}</div>
                         <div className="mt-4">
                              <Link href="/verifications" className="text-[9px] font-black uppercase text-violet-500 hover:text-white transition-colors underline underline-offset-4">Process_Queue_Entry &gt;</Link>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="relative group overflow-hidden bg-zinc-950 border border-zinc-900 p-6 rounded-2xl hover:border-amber-900/50 transition-all">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                        <Icon icon="lucide:archive" width={64} />
+                    </div>
+                    <div className="relative z-10">
+                        <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-1">Archival_Exhibits</div>
+                        <div className="text-4xl font-black text-white italic">{exhibits?.length || 0}</div>
+                        <div className="mt-4 flex items-center gap-2">
+                             <span className="text-[9px] px-1.5 py-0.5 bg-amber-600/10 text-amber-500 rounded font-black tracking-widest uppercase">The_Context</span>
                         </div>
                     </div>
                 </div>

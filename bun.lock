@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "shimokitan",
+      "dependencies": {
+        "next": "^16.1.6",
+      },
       "devDependencies": {
         "@types/node": "^20",
         "prettier": "^3.4.2",

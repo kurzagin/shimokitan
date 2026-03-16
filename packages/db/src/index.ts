@@ -148,6 +148,12 @@ const artifactRelations = {
         with: {
             media: true
         }
+    },
+    exhibits: {
+        with: {
+            translations: true,
+            media: true
+        }
     }
 } as const;
 

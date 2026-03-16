@@ -196,7 +196,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                             <div className="flex-1 h-2 bg-zinc-900 border border-zinc-800 overflow-hidden">
                                 <div
                                     className="h-full bg-gradient-to-r from-rose-900 to-rose-500 shadow-[0_0_6px_rgba(225,29,72,0.4)]"
-                                    style={{ width: `${Math.min(100, (artifact.resonance || 0) * 1.33)}%` }}
+                                    style={{ width: `${Math.min(100, Number(artifact.resonance || 0) * 1.33)}%` }}
                                 />
                             </div>
                         </div>
@@ -458,6 +458,84 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                 </span>
                             )}
                         </div>
+
+                        {/* ── EXHIBIT_ROOT — Supplementary Materials ── */}
+                        {(artifact.exhibits && artifact.exhibits.length > 0) && (
+                            <div className="flex flex-col border-t border-zinc-900 pb-12">
+                                <PanelHeader
+                                    label="Exhibit_Root"
+                                    icon="lucide:archive"
+                                    right={
+                                        <Badge variant="clean" className="text-[10px] bg-amber-500/10 text-amber-500 border-amber-500/20 uppercase tracking-widest">
+                                            Archived:{artifact.exhibits.length}
+                                        </Badge>
+                                    }
+                                />
+                                
+                                <div className="flex flex-col divide-y divide-zinc-900/60 transition-all">
+                                    {artifact.exhibits.sort((a, b) => ((a.position || 0) - (b.position || 0))).map((exhibit: any) => {
+                                        const exTrans = resolveTranslation(exhibit.translations, locale);
+                                        return (
+                                            <div key={exhibit.id} className="p-6 md:p-8 flex flex-col md:flex-row gap-6 hover:bg-zinc-950/40 transition-colors group/exhibit">
+                                                {/* Exhibit Visual/Media */}
+                                                <div className="w-full md:w-1/3 aspect-video md:aspect-[4/3] bg-zinc-900 border border-zinc-800 overflow-hidden relative shadow-lg">
+                                                    {exhibit.media?.url ? (
+                                                        <img src={exhibit.media.url} alt={exTrans?.title} className="w-full h-full object-cover group-hover/exhibit:scale-105 transition-transform duration-500" />
+                                                    ) : exhibit.type === 'trailer' && exhibit.url ? (
+                                                        <div className="w-full h-full flex items-center justify-center bg-zinc-950">
+                                                            <Icon icon="lucide:play-circle" width={48} className="text-zinc-800 group-hover/exhibit:text-rose-600 transition-colors" />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                                                                <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest leading-none">External_Trailer_Source</span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center">
+                                                            <Icon icon="lucide:file-text" width={32} className="text-zinc-800" />
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Exhibit Type Badge */}
+                                                    <div className="absolute top-2 left-2 px-2 py-1 bg-black/80 border border-zinc-800 backdrop-blur-md text-[8px] font-black uppercase tracking-widest text-zinc-400">
+                                                        {exhibit.type}
+                                                    </div>
+                                                </div>
+
+                                                {/* Exhibit Context */}
+                                                <div className="flex-1 space-y-4">
+                                                    <div className="space-y-1">
+                                                        <h4 className="text-xl font-black italic uppercase tracking-tighter text-white leading-tight">
+                                                            {exTrans?.title || "Untitled_Exhibit"}
+                                                        </h4>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-1 h-3 bg-amber-600" />
+                                                            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Archival_Supplementary // DATA_STREAMS</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {exTrans?.description && (
+                                                        <p className="text-sm md:text-base text-zinc-400 font-serif italic leading-relaxed">
+                                                            {exTrans.description}
+                                                        </p>
+                                                    )}
+
+                                                    {exhibit.url && (
+                                                        <a 
+                                                            href={exhibit.url} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-3 px-4 py-2 bg-zinc-900 border border-zinc-800 hover:border-violet-600/50 hover:bg-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-300 transition-all group-hover/exhibit:text-white"
+                                                        >
+                                                            Access_External_Vault
+                                                            <Icon icon="lucide:external-link" width={14} className="text-zinc-600 group-hover/exhibit:text-violet-500" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
 
                         {/* ── ECHO FLUX — HIDDEN on mobile/tablet, visible on desktop ── */}
                         <div className="flex flex-col border-t border-zinc-900 pb-12">

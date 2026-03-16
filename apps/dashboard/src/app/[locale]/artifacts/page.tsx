@@ -41,13 +41,17 @@ export default async function ArtifactsPage(props: { params: Promise<{ locale: s
         where: isTrash ? isNotNull(schema.artifacts.deletedAt) : isNull(schema.artifacts.deletedAt),
         orderBy: [desc(schema.artifacts.createdAt)],
         with: {
-            translations: true
+            translations: true,
+            exhibits: {
+                columns: { id: true }
+            }
         }
     }) : [];
 
     const allArtifacts = rawArtifacts.map(a => ({
         ...a,
-        title: a.translations?.[0]?.title || "Untitled"
+        title: a.translations?.[0]?.title || "Untitled",
+        exhibitCount: a.exhibits?.length || 0
     }));
 
     return (

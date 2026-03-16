@@ -32,7 +32,7 @@ export async function createFullArtifact(data: z.infer<typeof artifactSchema>) {
             isHosted: validated.isHosted,
             slug,
             status: validated.status,
-            resonance: 0, // Initial resonance is always 0 until Zines are written
+            resonance: "0", // Initial resonance is always 0 until Zines are written
             specs: validated.specs || {},
             isVerified: false, // Verification is a separate administrative event
             thumbnailId: validated.thumbnailId || null,
@@ -125,6 +125,29 @@ export async function createFullArtifact(data: z.infer<typeof artifactSchema>) {
                 }
 
                 await tx.insert(schema.artifactTags).values({ artifactId, tagId: tag!.id });
+            }
+        }
+
+        if (validated.exhibits?.length) {
+            for (const ex of validated.exhibits) {
+                const exhibitId = nanoid();
+                await tx.insert(schema.exhibits).values({
+                    id: exhibitId,
+                    artifactId,
+                    type: ex.type,
+                    url: ex.url,
+                    mediaId: ex.mediaId,
+                });
+                if (ex.translations?.length) {
+                    await tx.insert(schema.exhibitsI18n).values(
+                        ex.translations.map(t => ({
+                            exhibitId,
+                            locale: t.locale,
+                            title: t.title || '',
+                            description: t.description,
+                        }))
+                    );
+                }
             }
         }
     });
@@ -261,6 +284,31 @@ export async function updateFullArtifact(id: string, data: z.infer<typeof artifa
 
                 if (tagId) {
                     await tx.insert(schema.artifactTags).values({ artifactId: id, tagId });
+                }
+            }
+        }
+
+        // Re-sync Exhibits
+        await tx.delete(schema.exhibits).where(eq(schema.exhibits.artifactId, id));
+        if (validated.exhibits?.length) {
+            for (const ex of validated.exhibits) {
+                const exhibitId = nanoid();
+                await tx.insert(schema.exhibits).values({
+                    id: exhibitId,
+                    artifactId: id,
+                    type: ex.type,
+                    url: ex.url,
+                    mediaId: ex.mediaId,
+                });
+                if (ex.translations?.length) {
+                    await tx.insert(schema.exhibitsI18n).values(
+                        ex.translations.map(t => ({
+                            exhibitId,
+                            locale: t.locale,
+                            title: t.title || '',
+                            description: t.description,
+                        }))
+                    );
                 }
             }
         }

@@ -16,6 +16,7 @@ import { Icon } from '@iconify/react';
 import AnilistSync from './components/AnilistSync';
 import BasicInfoSection from './components/BasicInfoSection';
 import ResourcesSection, { Resource } from './components/ResourcesSection';
+import ExhibitsSection, { Exhibit } from './components/ExhibitsSection';
 import MetadataSection from './components/MetadataSection';
 import CreditsSection from './components/CreditsSection';
 import EntitySearchPicker from './components/EntitySearchPicker';
@@ -103,6 +104,21 @@ export default function ArtifactForm({
                 isPrimary: !!c.isPrimary,
                 isOriginalArtist: !!c.isOriginalArtist,
                 position: c.position || 0,
+            }))
+            : []
+    );
+    const [exhibits, setExhibits] = useState<Exhibit[]>(
+        initialData?.exhibits
+            ? initialData.exhibits.map((ex: any) => ({
+                id: ex.id,
+                type: ex.type,
+                url: ex.url,
+                mediaId: ex.mediaId,
+                mediaUrl: ex.media?.url,
+                translations: ['en', 'id', 'ja'].map(lang => {
+                    const t = ex.translations?.find((t: any) => t.locale === lang);
+                    return { locale: lang as any, title: t?.title || '', description: t?.description || '' };
+                })
             }))
             : []
     );
@@ -380,6 +396,12 @@ export default function ArtifactForm({
         setCredits(newCredits);
     };
 
+    const handleExhibitMediaUploaded = (idx: number, mediaId: string, url: string) => {
+        const next = [...exhibits];
+        next[idx] = { ...next[idx], mediaId, mediaUrl: url };
+        setExhibits(next);
+    };
+
     const addSpec = () => setSpecs([...specs, { key: '', value: '' }]);
     const removeSpec = (idx: number) => setSpecs(specs.filter((_, i) => i !== idx));
     const updateSpec = (idx: number, field: keyof Spec, value: string) => {
@@ -498,6 +520,10 @@ export default function ArtifactForm({
                 vinylId: finalVinylId,
                 resources: cleanResources,
                 credits: cleanCredits,
+                exhibits: exhibits.map(ex => ({
+                    ...ex,
+                    translations: ex.translations.filter(t => t.title.trim() !== '')
+                })),
                 specs: cleanSpecs,
                 tags: cleanTags,
                 translations: cleanTranslations,
@@ -633,6 +659,13 @@ export default function ArtifactForm({
                     updateResource={updateResource}
                     addResource={addResource}
                     removeResource={removeResource}
+                />
+
+                <ExhibitsSection
+                    exhibits={exhibits}
+                    setExhibits={setExhibits}
+                    artifactId={artifactId}
+                    onMediaUploaded={handleExhibitMediaUploaded}
                 />
 
                 {/* 04. ARTIFACT_METADATA / INHERITANCE */}

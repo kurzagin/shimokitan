@@ -9,32 +9,33 @@ export const ARTIFACT_CATEGORIES = ['anime', 'music', 'game'] as const;
 export const ARTIFACT_STATUSES = ['the_pit', 'back_alley', 'archived'] as const;
 export const ARTIFACT_NATURES = ['original', 'cover', 'live', 'compilation'] as const;
 export const ANIME_TYPES = ['pv', 'mv', 'trailer', 'op', 'ed', 'special'] as const;
+export const EXHIBIT_TYPES = ['trailer', 'opening', 'ending', 'promotion', 'gallery', 'other'] as const;
 
 export const TAG_CATEGORIES = ['genre', 'mood', 'style', 'theme', 'other', 'identity'] as const;
 export const VERIFICATION_TARGET_TYPES = ['artifact', 'entity', 'role_upgrade'] as const;
 export const VERIFICATION_STATUSES = ['pending', 'approved', 'rejected'] as const;
- 
- /**
-  * Managed Credit Roles (Departments)
-  * Centralized registry for consistent data and i18n.
-  */
- export const CREDIT_ROLES = [
-     { slug: 'vocal', labels: { en: 'Vocals', ja: 'ボーカル' } },
-     { slug: 'illust', labels: { en: 'Art / Illustration', ja: 'イラスト' } },
-     { slug: 'video', labels: { en: 'Video / Animation', ja: '映像' } },
-     { slug: 'lyrics', labels: { en: 'Lyrics', ja: '作詞' } },
-     { slug: 'compose', labels: { en: 'Composition', ja: '作曲' } },
-     { slug: 'arrange', labels: { en: 'Arrangement', ja: '編曲' } },
-     { slug: 'mix', labels: { en: 'Mixing / Mastering', ja: 'ミキシング' } },
-     { slug: 'storyboard', labels: { en: 'Storyboard', ja: '絵コンテ' } },
-     { slug: 'direction', labels: { en: 'Direction', ja: '演出 / 監督' } },
-     { slug: 'label', labels: { en: 'Record Label', ja: 'レーベル' } },
-     { slug: 'studio', labels: { en: 'Production Studio', ja: '制作スタジオ' } },
-     { slug: 'original', labels: { en: 'Original / Source', ja: '原作者 / 本家' } },
-     { slug: 'other', labels: { en: 'Other / Custom', ja: 'その他' } },
- ] as const;
- 
- export type CreditRoleSlug = (typeof CREDIT_ROLES)[number]['slug'];
+
+/**
+ * Managed Credit Roles (Departments)
+ * Centralized registry for consistent data and i18n.
+ */
+export const CREDIT_ROLES = [
+    { slug: 'vocal', labels: { en: 'Vocals', ja: 'ボーカル' } },
+    { slug: 'illust', labels: { en: 'Art / Illustration', ja: 'イラスト' } },
+    { slug: 'video', labels: { en: 'Video / Animation', ja: '映像' } },
+    { slug: 'lyrics', labels: { en: 'Lyrics', ja: '作詞' } },
+    { slug: 'compose', labels: { en: 'Composition', ja: '作曲' } },
+    { slug: 'arrange', labels: { en: 'Arrangement', ja: '編曲' } },
+    { slug: 'mix', labels: { en: 'Mixing / Mastering', ja: 'ミキシング' } },
+    { slug: 'storyboard', labels: { en: 'Storyboard', ja: '絵コンテ' } },
+    { slug: 'direction', labels: { en: 'Direction', ja: '演出 / 監督' } },
+    { slug: 'label', labels: { en: 'Record Label', ja: 'レーベル' } },
+    { slug: 'studio', labels: { en: 'Production Studio', ja: '制作スタジオ' } },
+    { slug: 'original', labels: { en: 'Original / Source', ja: '原作者 / 本家' } },
+    { slug: 'other', labels: { en: 'Other / Custom', ja: 'その他' } },
+] as const;
+
+export type CreditRoleSlug = (typeof CREDIT_ROLES)[number]['slug'];
 
 
 // --- Shared Helpers ---
@@ -90,6 +91,15 @@ export const creditSchema = z.object({
     position: z.number().default(0),
 });
 
+export const exhibitSchema = z.object({
+    id: z.string().optional(),
+    type: z.enum(EXHIBIT_TYPES).default('other'),
+    url: z.string().url().optional().nullable(),
+    isExternal: z.boolean().default(true),
+    mediaId: z.string().optional().nullable(),
+    translations: z.array(translationSchema).optional(),
+});
+
 const tagRefSchema = z.object({
     name: z.string().min(1),
 });
@@ -133,12 +143,13 @@ export const artifactSchema = z.object({
 
     resources: z.array(resourceSchema).optional(),
     credits: z.array(creditSchema).optional(),
+    exhibits: z.array(exhibitSchema).optional(),
     tags: z.array(tagRefSchema).optional(),
     workId: z.string().optional().nullable(),
 });
 
 export const collectionSchema = z.object({
-    resonance: z.number().optional(),
+    resonance: z.union([z.number(), z.string()]).optional().transform(v => v?.toString()),
     coverId: z.string().optional().nullable(),
     translations: z.array(translationSchema).optional(),
 });
@@ -146,7 +157,7 @@ export const collectionSchema = z.object({
 export const zineSchema = z.object({
     artifactId: z.string().min(1),
     authorId: z.string().min(1),
-    resonance: z.number().optional(),
+    resonance: z.union([z.number(), z.string()]).optional().transform(v => v?.toString()),
     translations: z.array(translationSchema).optional(),
 });
 
