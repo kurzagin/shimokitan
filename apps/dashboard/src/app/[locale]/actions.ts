@@ -767,7 +767,7 @@ export async function uploadToR2Action(formData: FormData) {
     const extension = file.name.split('.').pop() || 'webp';
 
     const key = generateStoragePath({
-        mediaType: contentType.startsWith('audio/') ? 'audio' : (contentType.startsWith('image/') ? 'images' : 'raw'),
+        mediaType: contentType.startsWith('audio/') ? 'audio' : (contentType.startsWith('image/') ? 'images' : 'dumps'),
         context,
         identifier: user.id,
         filename: `${fileId}.${extension}`

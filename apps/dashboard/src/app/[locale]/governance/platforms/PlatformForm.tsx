@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
-import { createPlatform, updatePlatform } from './actions';
+import { createPlatform, updatePlatform } from '../../actions/platforms';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
 

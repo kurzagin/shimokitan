@@ -3,7 +3,7 @@ import React from 'react';
 import { getDb, schema } from '@shimokitan/db';
 import { Icon } from '@iconify/react';
 import PlatformForm from './PlatformForm';
-import { deletePlatform } from './actions';
+import { deletePlatform } from '../../actions/platforms';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 

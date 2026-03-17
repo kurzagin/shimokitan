@@ -763,21 +763,21 @@ export default function HomeClient({
       </BentoCard>
 
       {/* ── 5. In The Pit (Featured Item) ───────────────────────────────────*/}
-      {featuredArtifact && (
-        <Link
-          href={`/artifacts/${featuredArtifact.id}`}
-          className="
-            col-span-1
-            sm:hidden
-            lg:block lg:col-span-1 lg:row-span-2 lg:col-start-1 lg:row-start-4
-          "
+      <div className="
+        col-span-1
+        sm:hidden
+        lg:block lg:col-span-1 lg:row-span-2 lg:col-start-1 lg:row-start-4
+      ">
+        <BentoCard
+          className="h-full"
+          title={dict.home.in_the_pit}
+          icon="lucide:flame"
         >
-          <BentoCard
-            className="h-full"
-            title={dict.home.in_the_pit}
-            icon="lucide:flame"
-          >
-            <div className="flex flex-col h-full">
+          {featuredArtifact ? (
+            <Link
+              href={`/artifacts/${featuredArtifact.id}`}
+              className="flex flex-col h-full group/pit"
+            >
               <div className="relative flex-1 rounded-lg overflow-hidden mb-2 bg-zinc-950">
                 {((featuredArtifact.category === "anime" ? featuredArtifact.thumbnailImage : featuredArtifact.posterImage) || featuredArtifact.thumbnailImage || featuredArtifact.posterImage) ? (
                   <img
@@ -786,7 +786,7 @@ export default function HomeClient({
                         ? featuredArtifact.thumbnailImage || featuredArtifact.posterImage
                         : featuredArtifact.posterImage || featuredArtifact.thumbnailImage) || ""
                     }
-                    className="object-cover w-full h-full transition-all duration-500"
+                    className="object-cover w-full h-full transition-all duration-500 group-hover/pit:scale-105"
                     alt={featuredArtifact.title}
                   />
                 ) : (
@@ -803,16 +803,22 @@ export default function HomeClient({
                   </div>
                 </div>
               </div>
-              <h3 className="text-xs font-bold uppercase truncate">
+              <h3 className="text-xs font-bold uppercase truncate group-hover/pit:text-rose-500 transition-colors">
                 {featuredArtifact.title}
               </h3>
               <p className="text-[11px] text-zinc-500 line-clamp-1">
                 {featuredArtifact.description}
               </p>
+            </Link>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center py-8 opacity-20">
+              <Icon icon="lucide:flame-off" width={32} className="mb-2" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em]">Cold_Pit</span>
+              <p className="text-[8px] font-mono uppercase mt-1">Zero resonance detected</p>
             </div>
-          </BentoCard>
-        </Link>
-      )}
+          )}
+        </BentoCard>
+      </div>
 
       {/* ── 6. District Residents List ──────────────────────────────────────*/}
       <BentoCard
