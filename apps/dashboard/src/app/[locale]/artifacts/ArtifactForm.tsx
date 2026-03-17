@@ -3,12 +3,10 @@
 
 import React, { useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { extractMediaId, getThumbnailUrl } from '@shimokitan/utils';
+import { extractMediaId, getThumbnailUrl, nanoid, artifactSchema } from '@shimokitan/utils';
 import { createFullArtifact, updateFullArtifact } from '../actions/artifacts';
 import { uploadMediaAction } from '../media-actions';
-import { nanoid } from 'nanoid';
 import { toast } from 'sonner';
-import { artifactSchema } from '@shimokitan/utils';
 import { z, type ZodIssue } from 'zod';
 
 
@@ -99,8 +97,8 @@ export default function ArtifactForm({
 
     const [resources, setResources] = useState<Resource[]>(
         initialData?.resources
-            ? initialData.resources.map((r: any) => ({ type: 'other', platform: r.platform, url: r.value, role: r.role || 'stream', isPrimary: r.isPrimary }))
-            : [{ type: 'mv', platform: 'youtube', url: '', role: 'stream', isPrimary: false }]
+            ? initialData.resources.map((r: any) => ({ type: 'other', platform: r.platform, url: r.value, role: r.role || 'audio', isPrimary: r.isPrimary }))
+            : [{ type: 'video', platform: 'youtube', url: '', role: 'video', isPrimary: false }]
     );
     const [credits, setCredits] = useState<Credit[]>(
         initialData?.credits
@@ -286,7 +284,7 @@ export default function ArtifactForm({
         toast.success(`Synced metadata for: ${data.title.english || data.title.romaji}`);
     }, []);
 
-    const addResource = () => setResources([...resources, { type: 'mv', platform: 'youtube', url: '', role: 'stream', isPrimary: false }]);
+    const addResource = () => setResources([...resources, { type: 'video', platform: 'youtube', url: '', role: 'video', isPrimary: false }]);
     const removeResource = (idx: number) => setResources(resources.filter((_, i) => i !== idx));
     const updateResource = (idx: number, field: keyof Resource, value: any) => {
         const newResources = [...resources];
@@ -303,67 +301,88 @@ export default function ArtifactForm({
                     v = value.toLowerCase();
                 }
                 newResources[idx].platform = 'youtube';
-                newResources[idx].type = 'mv';
+                newResources[idx].type = 'video';
+                newResources[idx].role = 'video';
             } else if (v.includes('spotify.com/')) {
                 newResources[idx].platform = 'spotify';
-                newResources[idx].type = 'stream';
+                newResources[idx].type = 'audio';
+                newResources[idx].role = 'audio';
             } else if (v.includes('soundcloud.com/')) {
                 newResources[idx].platform = 'soundcloud';
-                newResources[idx].type = 'stream';
+                newResources[idx].type = 'audio';
+                newResources[idx].role = 'audio';
             } else if (v.includes('apple.com/')) {
                 newResources[idx].platform = 'apple_music';
-                newResources[idx].type = 'stream';
+                newResources[idx].type = 'audio';
+                newResources[idx].role = 'audio';
             } else if (v.includes('bilibili.com/')) {
                 newResources[idx].platform = 'bilibili';
-                newResources[idx].type = 'mv';
+                newResources[idx].type = 'video';
+                newResources[idx].role = 'video';
             } else if (v.includes('nicovideo.jp/')) {
                 newResources[idx].platform = 'niconico';
-                newResources[idx].type = 'mv';
+                newResources[idx].type = 'video';
+                newResources[idx].role = 'video';
             } else if (v.includes('x.com/')) {
                 newResources[idx].platform = 'x';
                 newResources[idx].type = 'social';
+                newResources[idx].role = 'social';
             } else if (v.includes('ko-fi.com/')) {
                 newResources[idx].platform = 'ko_fi';
                 newResources[idx].type = 'social';
+                newResources[idx].role = 'social';
             } else if (v.includes('booth.pm/')) {
                 newResources[idx].platform = 'booth';
-                newResources[idx].type = 'store';
+                newResources[idx].type = 'commerce';
+                newResources[idx].role = 'social';
             } else if (v.includes('vgen.co/')) {
                 newResources[idx].platform = 'vgen';
                 newResources[idx].type = 'social';
+                newResources[idx].role = 'social';
             } else if (v.includes('skeb.jp/')) {
                 newResources[idx].platform = 'skeb';
                 newResources[idx].type = 'social';
+                newResources[idx].role = 'social';
             } else if (v.includes('patreon.com/')) {
                 newResources[idx].platform = 'patreon';
                 newResources[idx].type = 'social';
+                newResources[idx].role = 'social';
             } else if (v.includes('fanbox.cc/')) {
                 newResources[idx].platform = 'fanbox';
                 newResources[idx].type = 'social';
+                newResources[idx].role = 'social';
             } else if (v.includes('pixiv.net/')) {
                 newResources[idx].platform = 'pixiv';
                 newResources[idx].type = 'social';
+                newResources[idx].role = 'social';
             } else if (v.includes('bandcamp.com/')) {
                 newResources[idx].platform = 'bandcamp';
-                newResources[idx].type = 'stream';
+                newResources[idx].type = 'audio';
+                newResources[idx].role = 'audio';
             } else if (v.includes('instagram.com/')) {
                 newResources[idx].platform = 'instagram';
                 newResources[idx].type = 'social';
+                newResources[idx].role = 'social';
             } else if (v.includes('tiktok.com/')) {
                 newResources[idx].platform = 'tiktok';
                 newResources[idx].type = 'social';
+                newResources[idx].role = 'social';
             } else if (v.includes('crunchyroll.com/')) {
                 newResources[idx].platform = 'crunchyroll';
-                newResources[idx].type = 'stream';
+                newResources[idx].type = 'video';
+                newResources[idx].role = 'video';
             } else if (v.includes('netflix.com/')) {
                 newResources[idx].platform = 'netflix';
-                newResources[idx].type = 'stream';
+                newResources[idx].type = 'video';
+                newResources[idx].role = 'video';
             } else if (v.includes('steampowered.com/') || v.includes('steamcommunity.com/')) {
                 newResources[idx].platform = 'steam';
-                newResources[idx].type = 'store';
+                newResources[idx].type = 'commerce';
+                newResources[idx].role = 'social';
             } else if (v.includes('amazon.com/') && (v.includes('prime') || v.includes('video'))) {
                 newResources[idx].platform = 'amazon_prime';
-                newResources[idx].type = 'stream';
+                newResources[idx].type = 'video';
+                newResources[idx].role = 'video';
             }
         }
 

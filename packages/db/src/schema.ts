@@ -2,7 +2,7 @@ import {
     pgTable, text, timestamp, integer, boolean,
     jsonb, primaryKey, index, uniqueIndex, pgEnum, numeric
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // ==================================================================
 // ENUMS
@@ -44,8 +44,8 @@ export const animeTypeEnum = pgEnum("anime_type", ["pv", "mv", "trailer", "op", 
 
 // Resource role — what this external/internal link IS functionally
 export const resourceRoleEnum = pgEnum("resource_role", [
-    "stream",          // e.g. Spotify, Apple Music
-    "embed_video",     // e.g. YouTube MV / PV
+    "audio",          // e.g. Spotify, Apple Music
+    "video",          // e.g. YouTube MV / PV
     "hosted_audio",    // R2-hosted canonical audio
     "download",        // direct file download
     "social",          // Twitter, Instagram post
@@ -661,7 +661,7 @@ export const hostingRightsLog = pgTable("hosting_rights_log", {
 // ==================================================================
 
 export const externalPlatforms = pgTable("external_platforms", {
-    id: text("id").primaryKey(), // nanoid(12) or similar unique identifier
+    id: text("id").primaryKey().default(sql`nanoid()`), // nanoid(12) or similar unique identifier
     name: text("name").notNull(),
     category: text("category").notNull(), // 'social' | 'commerce' | 'platform'
     iconUrl: text("icon_url"),           // Optional override, default is cdn.shimokitan.live/platforms/{id}.webp

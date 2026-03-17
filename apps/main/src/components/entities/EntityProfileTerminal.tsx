@@ -8,46 +8,35 @@ import Link from 'next/link';
 import { Dictionary } from '@shimokitan/utils';
 
 // ─── Link Category Detection ─────────────────────────────────────────────────
-// TODO: Migrate these hardcoded lists to fetch from the externalPlatforms table
-type LinkCategory = 'social_media' | 'commerce' | 'platform';
-type LinkPriority = 'hero' | 'shard' | 'archive';
+type LinkCategory = 'social_media' | 'commerce' | 'platform' | 'video' | 'audio';
 
-const COMMERCE_PLATFORMS = [
-    'booth', 'base', 'toranoana', 'melonbooks', 'gumroad', 'etsy', 'society6', 
-    'redbubble', 'bandcamp', 'skeb', 'vgen', 'fiverr', 'dlsite', 'bookwalker',
-    'trakteer', 'ko-fi', 'saweria', 'buymeacoffee', 'fanbox', 'fantia', 'patreon', 'ci-en'
-];
-
-const GENERAL_PLATFORMS = [
-    'pixiv', 'artstation', 'behance', 'crunchyroll', 'github', 
-    'bilibili', 'niconico', 'youtube', 'soundcloud', 'spotify', 'apple_music',
-    'amazon_prime', 'netflix', 'steam'
-];
-
-function getLinkCategory(platform: string): LinkCategory {
-    const p = platform?.toLowerCase().replace(/-/g, '_') || '';
-    if (COMMERCE_PLATFORMS.some(x => p.includes(x.replace(/-/g, '_')))) return 'commerce';
-    if (GENERAL_PLATFORMS.some(x => p.includes(x.replace(/-/g, '_')))) return 'platform';
-    return 'social_media';
-}
-
-function getLinkPriority(platform: string): LinkPriority {
-    const cat = getLinkCategory(platform);
-    if (cat === 'commerce' || cat === 'platform') return 'hero';
-    return 'shard';
+function getLinkCategory(platformId: string, platforms: any[]): string {
+    const platform = platforms.find(p => p.id === platformId);
+    if (!platform) return 'social_media';
+    
+    // Map DB categories to UI categories
+    if (platform.category === 'commerce') return 'commerce';
+    if (platform.category === 'video') return 'video';
+    if (platform.category === 'audio') return 'audio';
+    if (platform.category === 'social') return 'social_media';
+    return 'platform';
 }
 
 // ─── Category accent colors ───────────────────────────────────────────────────
-const CATEGORY_ACCENT: Record<LinkCategory, string> = {
+const CATEGORY_ACCENT: Record<string, string> = {
     social_media: 'border-zinc-700 hover:border-zinc-400',
     commerce: 'border-amber-700/60 hover:border-amber-400',
-    platform: 'border-violet-700/60 hover:border-violet-400',
+    platform: 'border-zinc-700 hover:border-zinc-400',
+    video: 'border-rose-700/60 hover:border-rose-400',
+    audio: 'border-emerald-700/60 hover:border-emerald-400',
 };
 
-const CATEGORY_LABEL_COLOR: Record<LinkCategory, string> = {
+const CATEGORY_LABEL_COLOR: Record<string, string> = {
     social_media: 'text-zinc-500',
     commerce: 'text-amber-500',
-    platform: 'text-violet-500',
+    platform: 'text-zinc-500',
+    video: 'text-rose-500',
+    audio: 'text-emerald-500',
 };
 
 // ─── Collapsible Module ───────────────────────────────────────────────────────
@@ -110,16 +99,18 @@ function Module({
 
 
 // ─── Hero Link Card (commerce / platform / social) ───────────────────────────
-function HeroLinkCard({ link, dict }: { link: any, dict: Dictionary }) {
-    const category = getLinkCategory(link.platform);
+function HeroLinkCard({ link, dict, platforms }: { link: any, dict: Dictionary, platforms: any[] }) {
+    const category = getLinkCategory(link.platform, platforms);
     const accent = CATEGORY_ACCENT[category];
     const labelColor = CATEGORY_LABEL_COLOR[category];
     
     const label = {
         commerce: dict.entities.links.commerce,
         platform: dict.entities.links.platform,
-        social_media: dict.entities.links.social_media
-    }[category];
+        social_media: dict.entities.links.social_media,
+        video: "Video",
+        audio: "Audio"
+    }[category] || labelColor;
 
     return (
         <a
@@ -155,7 +146,7 @@ function VerifiedBadge({ className = "" }: { className?: string }) {
 import { resolveTranslation } from '@shimokitan/utils';
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-export function EntityProfileTerminal({ entity, locale, dict }: { entity: any, locale: string, dict: Dictionary }) {
+export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: { entity: any, locale: string, dict: Dictionary, platforms?: any[] }) {
     const translation = resolveTranslation(entity.translations, locale);
     const name = translation?.name || (entity as any).name || "Anonymous Artist";
 
@@ -210,9 +201,11 @@ export function EntityProfileTerminal({ entity, locale, dict }: { entity: any, l
     const credits = entity.credits || [];
     const sortedCredits = [...credits].sort((a: any, b: any) => (b.artifact?.resonance || 0) - (a.artifact?.resonance || 0));
     const featuredCredit = sortedCredits[0];
-    const commerceLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform) === 'commerce');
-    const platformLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform) === 'platform');
-    const socialLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform) === 'social_media');
+    const commerceLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform, platforms) === 'commerce');
+    const videoLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform, platforms) === 'video');
+    const audioLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform, platforms) === 'audio');
+    const platformLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform, platforms) === 'platform');
+    const socialLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform, platforms) === 'social_media');
     const hasLinks = (entity.socialLinks || []).length > 0;
 
     const commissionStatus = entity.commissionStatus || null;
@@ -454,18 +447,52 @@ export function EntityProfileTerminal({ entity, locale, dict }: { entity: any, l
                             </Module>
                         )}
 
+                        {/* MODULE: VIDEO */}
+                        {videoLinks.length > 0 && (
+                            <Module
+                                id="video"
+                                label="Video_Channels"
+                                count={`${videoLinks.length} CHANNELS`}
+                                statusColor="bg-rose-500"
+                                defaultOpen={true}
+                            >
+                                <div className="flex flex-col gap-px bg-zinc-900">
+                                    {videoLinks.map((link: any, i: number) => (
+                                        <HeroLinkCard key={i} link={link} dict={dict} platforms={platforms} />
+                                    ))}
+                                </div>
+                            </Module>
+                        )}
+
+                        {/* MODULE: AUDIO */}
+                        {audioLinks.length > 0 && (
+                            <Module
+                                id="audio"
+                                label="Audio_Channels"
+                                count={`${audioLinks.length} CHANNELS`}
+                                statusColor="bg-emerald-500"
+                                defaultOpen={true}
+                            >
+                                <div className="flex flex-col gap-px bg-zinc-900">
+                                    {audioLinks.map((link: any, i: number) => (
+                                        <HeroLinkCard key={i} link={link} dict={dict} platforms={platforms} />
+                                    ))}
+                                </div>
+                            </Module>
+                        )}
+
                         {/* MODULE: PLATFORM */}
                         {platformLinks.length > 0 && (
                             <Module
                                 id="platform"
                                 label={dict.entities.links.platform}
                                 count={`${platformLinks.length} CHANNELS`}
-                                statusColor="bg-violet-500"
+                                statusColor="bg-zinc-500"
                                 defaultOpen={true}
                             >
                                 <div className="flex flex-col gap-px bg-zinc-900">
                                     {platformLinks.map((link: any, i: number) => (
-                                        <HeroLinkCard key={i} link={link} dict={dict} />
+                                        <HeroLinkCard key={i} link={link} dict={dict} platforms={platforms} />
                                     ))}
                                 </div>
                             </Module>
@@ -482,7 +509,7 @@ export function EntityProfileTerminal({ entity, locale, dict }: { entity: any, l
                             >
                                 <div className="flex flex-col gap-px bg-zinc-900">
                                     {socialLinks.map((link: any, i: number) => (
-                                        <HeroLinkCard key={i} link={link} dict={dict} />
+                                        <HeroLinkCard key={i} link={link} dict={dict} platforms={platforms} />
                                     ))}
                                 </div>
                             </Module>
@@ -499,7 +526,7 @@ export function EntityProfileTerminal({ entity, locale, dict }: { entity: any, l
                             >
                                 <div className="flex flex-col gap-px bg-zinc-900">
                                     {commerceLinks.map((link: any, i: number) => (
-                                        <HeroLinkCard key={i} link={link} dict={dict} />
+                                        <HeroLinkCard key={i} link={link} dict={dict} platforms={platforms} />
                                     ))}
                                 </div>
                             </Module>

@@ -1,7 +1,7 @@
 'use server';
 
-import { getDb, schema, eq, sql } from '@shimokitan/db';
-import { nanoid } from 'nanoid';
+import { getDb, schema, eq, sql, desc, or, ilike } from '@shimokitan/db';
+import { nanoid } from '@shimokitan/utils';
 import { revalidatePath } from 'next/cache';
 import { slugify, generateStoragePath } from '@shimokitan/utils';
 import {
@@ -86,7 +86,7 @@ export async function approveRoleUpgrade(verificationId: string) {
         await tx.insert(schema.entities).values({
             id: entityId,
             type: 'independent',
-            slug: slugify(creator?.name || `architect-${nanoid(4)}`),
+            slug: slugify(creator?.name || `architect-${nanoid()}`),
         });
 
         if (creator?.name) {
@@ -737,7 +737,7 @@ export async function createIndieVerificationAction(formData: FormData) {
     const extension = file.name.split('.').pop() || 'pdf';
 
     // Upload Proof to R2
-    const key = `verifications/indie/${verificationId}/${nanoid(5)}.${extension}`;
+    const key = `verifications/indie/${verificationId}/${nanoid()}.${extension}`;
     const buffer = await file.arrayBuffer();
     const publicUrl = await uploadFileToR2(buffer, key, file.type);
 
@@ -761,7 +761,7 @@ export async function uploadToR2Action(formData: FormData) {
 
     if (!file) throw new Error('No_File_Targeted');
 
-    const fileId = nanoid(12);
+    const fileId = nanoid();
     const buffer = Buffer.from(await file.arrayBuffer() as any);
     const contentType = file.type;
     const extension = file.name.split('.').pop() || 'webp';

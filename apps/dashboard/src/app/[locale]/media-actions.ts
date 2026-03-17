@@ -3,11 +3,10 @@
 import { getDb, schema, eq } from '@shimokitan/db';
 import { requireUser } from './auth-helpers';
 import { uploadFileToR2 } from '@/lib/r2';
-import { nanoid } from 'nanoid';
 import sharp from 'sharp';
 import { encode } from 'blurhash';
 import { revalidatePath } from 'next/cache';
-import { storagePaths, generateStoragePath } from '@shimokitan/utils';
+import { nanoid, storagePaths, generateStoragePath } from '@shimokitan/utils';
 
 const encodeImageToBlurhash = async (buffer: Buffer): Promise<string> => {
     const { data, info } = await sharp(buffer)
@@ -88,11 +87,11 @@ export async function uploadMediaAction(formData: FormData) {
 
     let key = '';
     if (contextType === 'entity_avatar') {
-        key = storagePaths.userAvatar(contextId || mediaId, `${nanoid(8)}.${extension}`);
+        key = storagePaths.userAvatar(contextId || mediaId, `${nanoid()}.${extension}`);
     } else if (contextType === 'work_asset') {
-        key = storagePaths.workImage(contextId || mediaId, `${nanoid(8)}.${extension}`, contextId ? mediaId : undefined);
+        key = storagePaths.workImage(contextId || mediaId, `${nanoid()}.${extension}`, contextId ? mediaId : undefined);
     } else {
-        key = storagePaths.artifactImage(contextId || mediaId, `${nanoid(8)}.${extension}`, contextId ? mediaId : undefined);
+        key = storagePaths.artifactImage(contextId || mediaId, `${nanoid()}.${extension}`, contextId ? mediaId : undefined);
     }
 
     // Upload optimized buffer to R2

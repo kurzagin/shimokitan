@@ -125,6 +125,21 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
     const workTranslation = artifact.work ? resolveTranslation(artifact.work.translations, locale) : null;
     const galleryItems = artifact.media?.filter((m: any) => m.role === 'gallery') || [];
 
+    const groupedResources = (artifact.resources || []).reduce((acc: Record<string, any[]>, res: any) => {
+        const platform = platforms.find(p => p.id === res.platform);
+        const category = platform?.category || (res.role === 'social' ? 'social' : 'other');
+        if (!acc[category]) acc[category] = [];
+        acc[category].push({ ...res, platformData: platform });
+        return acc;
+    }, {});
+
+    const categoryOrder = ['video', 'audio', 'social', 'commerce', 'other'];
+    const sortedCategories = Object.keys(groupedResources).sort((a, b) => {
+        const idxA = categoryOrder.indexOf(a);
+        const idxB = categoryOrder.indexOf(b);
+        return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+    });
+
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": artifact.category === 'music' ? 'MusicRecording' : 'CreativeWork',
@@ -318,46 +333,60 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                 </div>
                             )}
 
-                            {/* Gateway links */}
-                            {artifact.resources && artifact.resources.length > 0 && (
-                                <div className="px-4 py-4 flex flex-col gap-3 shrink-0">
+                            {/* Gateway links grouped by category */}
+                            {sortedCategories.length > 0 && (
+                                <div className="px-4 py-4 flex flex-col gap-6 shrink-0">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-1.5">
                                             <Icon icon="lucide:link" width={12} className="text-zinc-600 shrink-0" />
-                                            <span className="text-[10px] text-zinc-500 uppercase tracking-[0.35em] font-black">Gateway_Links</span>
+                                            <span className="text-[10px] text-zinc-500 uppercase tracking-[0.35em] font-black">Gateway_Uplinks</span>
                                         </div>
-                                        <span className="text-[9px] text-zinc-700 animate-pulse hidden md:block">UPLINK_STABLE</span>
+                                        <span className="text-[9px] text-zinc-700 animate-pulse hidden md:block">SIGNAL_LOCK // {(artifact as any).isHosted ? 'STABLE' : 'LEGACY'}</span>
                                     </div>
-                                    <div className="flex flex-col gap-2">
-                                        {artifact.resources.map((res: any, i: number) => {
-                                            const platform = platforms.find(p => p.id === res.platform);
-                                            const platformName = platform?.name || res.platform.replace(/_/g, ' ');
 
-                                            return (
-                                                <a
-                                                    key={i}
-                                                    href={res.value}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center justify-between px-3 py-2.5 bg-zinc-900/40 border border-zinc-800 hover:border-violet-500/40 hover:bg-zinc-900 transition-all group/gate"
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <BrandIcon
-                                                            platform={res.platform}
-                                                            className="text-zinc-600 group-hover/gate:text-violet-400 shrink-0"
-                                                            width={14}
-                                                            height={14}
-                                                            fallbackIcon={res.platform === 'r2_hosted' ? 'lucide:box' : undefined}
-                                                        />
-                                                        <span className="text-xs font-black text-zinc-400 group-hover/gate:text-white uppercase tracking-tight transition-colors truncate">
-                                                            {platformName}
-                                                        </span>
-                                                    </div>
-                                                    <Icon icon="lucide:external-link" width={12} className="text-zinc-800 group-hover/gate:text-violet-500 shrink-0" />
-                                                </a>
-                                            );
-                                        })}
-                                    </div>
+                                    {sortedCategories.map(category => (
+                                        <div key={category} className="space-y-3">
+                                            <h3 className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] flex items-center gap-2">
+                                                <div className={cn(
+                                                    "w-1 h-3",
+                                                    category === 'video' ? "bg-rose-500" :
+                                                    category === 'audio' ? "bg-sky-500" :
+                                                    category === 'social' ? "bg-emerald-500" :
+                                                    category === 'commerce' ? "bg-amber-500" : "bg-zinc-700"
+                                                )} />
+                                                {category}_Portals
+                                            </h3>
+                                            <div className="flex flex-col gap-1.5">
+                                                {groupedResources[category].map((res: any, i: number) => {
+                                                    const platformName = res.platformData?.name || res.platform.replace(/_/g, ' ');
+
+                                                    return (
+                                                        <a
+                                                            key={i}
+                                                            href={res.value}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="flex items-center justify-between px-3 py-2 bg-zinc-900/40 border border-zinc-800/60 hover:border-violet-500/40 hover:bg-zinc-900/60 transition-all group/gate"
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <BrandIcon
+                                                                    platform={res.platform}
+                                                                    className="text-zinc-600 group-hover/gate:text-violet-400 shrink-0"
+                                                                    width={13}
+                                                                    height={13}
+                                                                    fallbackIcon={res.platform === 'r2_hosted' ? 'lucide:box' : undefined}
+                                                                />
+                                                                <span className="text-[11px] font-bold text-zinc-400 group-hover/gate:text-white uppercase tracking-tight transition-colors truncate">
+                                                                    {platformName}
+                                                                </span>
+                                                            </div>
+                                                            <Icon icon="lucide:external-link" width={11} className="text-zinc-800 group-hover/gate:text-violet-500 shrink-0" />
+                                                        </a>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>

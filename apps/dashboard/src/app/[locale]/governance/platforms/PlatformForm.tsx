@@ -7,14 +7,10 @@ import { createPlatform, updatePlatform } from '../../actions/platforms';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-interface Platform {
-    id: string;
-    name: string;
-    category: 'social' | 'commerce' | 'platform' | 'other';
-    iconUrl?: string | null;
-    accentColor?: string | null;
-    isActive: boolean;
-}
+import { externalPlatformSchema } from '@shimokitan/utils';
+import { z } from 'zod';
+
+type Platform = z.infer<typeof externalPlatformSchema>;
 
 export default function PlatformForm({ 
     initialData, 
@@ -70,8 +66,8 @@ export default function PlatformForm({
                     id: '',
                     name: '',
                     category: 'platform',
-                    iconUrl: '',
-                    accentColor: '#666666',
+                iconUrl: '',
+                accentColor: '#666666',
                     isActive: true
                 });
             }

@@ -2,16 +2,16 @@
 -- Hardening: Integrity Constraints, Search Optimization, and Resource Validation.
 -- Decision: NanoID-only (No Slug Column) for collision safety.
 
--- 1. NANOID GENERATOR (12 chars: [0-9a-zA-Z_-])
+-- 1. NANOID GENERATOR (12 chars: [0-9a-zA-Z])
 CREATE OR REPLACE FUNCTION nanoid(size integer DEFAULT 12)
 RETURNS text AS $$
 DECLARE
-  alphabet text := '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
+  alphabet text := '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   id text := '';
   i integer := 0;
 BEGIN
   WHILE i < size LOOP
-    id := id || substr(alphabet, get_byte(gen_random_bytes(1), 0) % 64 + 1, 1);
+    id := id || substr(alphabet, get_byte(gen_random_bytes(1), 0) % 62 + 1, 1);
     i := i + 1;
   END LOOP;
   RETURN id;

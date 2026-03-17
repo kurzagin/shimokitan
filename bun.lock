@@ -22,6 +22,7 @@
         "@neondatabase/auth": "^0.2.0-beta.1",
         "@shimokitan/auth": "workspace:*",
         "@shimokitan/db": "workspace:*",
+        "@shimokitan/storage": "workspace:*",
         "@shimokitan/ui": "workspace:*",
         "@shimokitan/utils": "workspace:*",
         "@tanstack/react-query": "^5.66.0",
@@ -61,12 +62,11 @@
       "name": "main",
       "version": "0.1.0",
       "dependencies": {
-        "@aws-sdk/client-s3": "^3.637.0",
-        "@aws-sdk/s3-request-presigner": "^3.637.0",
         "@iconify/react": "^6.0.2",
         "@neondatabase/auth": "^0.2.0-beta.1",
         "@shimokitan/auth": "workspace:*",
         "@shimokitan/db": "workspace:*",
+        "@shimokitan/storage": "workspace:*",
         "@shimokitan/ui": "workspace:*",
         "@shimokitan/utils": "workspace:*",
         "@tanstack/react-query": "^5.66.0",
@@ -165,6 +165,18 @@
       "devDependencies": {
         "@types/ws": "^8.18.1",
         "drizzle-kit": "^0.30.4",
+        "typescript": "^5.7.3",
+      },
+    },
+    "packages/storage": {
+      "name": "@shimokitan/storage",
+      "version": "0.1.0",
+      "dependencies": {
+        "@aws-sdk/client-s3": "^3.758.0",
+        "@aws-sdk/s3-request-presigner": "^3.758.0",
+        "@shimokitan/utils": "workspace:*",
+      },
+      "devDependencies": {
         "typescript": "^5.7.3",
       },
     },
@@ -769,6 +781,8 @@
     "@shimokitan/config": ["@shimokitan/config@workspace:packages/config"],
 
     "@shimokitan/db": ["@shimokitan/db@workspace:packages/db"],
+
+    "@shimokitan/storage": ["@shimokitan/storage@workspace:packages/storage"],
 
     "@shimokitan/ui": ["@shimokitan/ui@workspace:packages/ui"],
 

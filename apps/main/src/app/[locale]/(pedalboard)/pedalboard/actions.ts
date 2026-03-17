@@ -1,10 +1,11 @@
 'use server';
 
 import { getDb, schema, eq, sql } from '@shimokitan/db';
-import { nanoid } from 'nanoid';
 import { revalidatePath } from 'next/cache';
 import { 
     slugify, 
+    nanoid,
+    generateStoragePath,
     entitySchema, 
     artifactSchema, 
     collectionSchema, 
@@ -15,7 +16,6 @@ import {
 import { z } from 'zod';
 import { requireUser, requireArchitect, requireFounder } from './auth-helpers';
 import { uploadFileToR2 } from '@/lib/r2';
-import { generateStoragePath } from '@shimokitan/utils';
 
 // --- SYSTEM ---
 
@@ -173,7 +173,7 @@ export async function uploadToR2Action(formData: FormData) {
 
     if (!file) throw new Error('No_File_Targeted');
 
-    const fileId = nanoid(12);
+    const fileId = nanoid();
     const buffer = Buffer.from(await file.arrayBuffer() as any);
     const contentType = file.type;
     const extension = file.name.split('.').pop() || 'webp';

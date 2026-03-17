@@ -10,7 +10,7 @@ export interface Resource {
     type: string;
     platform: string;
     url: string;
-    role: 'stream' | 'embed_video' | 'hosted_audio' | 'download' | 'social' | 'reference';
+    role: 'audio' | 'video' | 'hosted_audio' | 'download' | 'social' | 'reference';
     isPrimary: boolean;
 }
 
@@ -40,8 +40,8 @@ export default function ResourcesSection({
 
     // Minimal fallback platforms if none provided via props
     const fallbackPlatforms: Platform[] = [
-        { id: 'youtube', name: 'YouTube', category: 'platform' },
-        { id: 'spotify', name: 'Spotify', category: 'platform' },
+        { id: 'youtube', name: 'YouTube', category: 'video' },
+        { id: 'spotify', name: 'Spotify', category: 'audio' },
         { id: 'x', name: 'X', category: 'social' },
         { id: 'r2', name: 'Internal Storage', category: 'other' },
     ];
@@ -49,9 +49,10 @@ export default function ResourcesSection({
     const activePlatforms = platforms.length > 0 ? platforms : fallbackPlatforms;
 
     const getFilteredPlatforms = (type: string) => {
-        if (type === 'mv') return activePlatforms.filter(p => ['youtube', 'bilibili', 'niconico'].includes(p.id));
-        if (type === 'stream') return activePlatforms.filter(p => ['stream', 'platform'].includes(p.category) || ['spotify', 'soundcloud', 'apple_music'].includes(p.id));
+        if (type === 'video') return activePlatforms.filter(p => p.category === 'video');
+        if (type === 'audio') return activePlatforms.filter(p => p.category === 'audio');
         if (type === 'social') return activePlatforms.filter(p => p.category === 'social');
+        if (type === 'commerce') return activePlatforms.filter(p => p.category === 'commerce');
         return activePlatforms;
     };
 
@@ -92,11 +93,10 @@ export default function ResourcesSection({
                                     }}
                                     className="w-full bg-black border border-zinc-900 p-2 text-[10px] font-bold uppercase text-zinc-400 outline-none rounded focus:border-rose-900 appearance-none cursor-pointer"
                                 >
-                                    <option value="mv">VIDEO</option>
-                                    <option value="stream">STREAM</option>
+                                    <option value="video">VIDEO</option>
+                                    <option value="audio">AUDIO</option>
                                     <option value="social">SOCIAL</option>
-                                    <option value="gallery">GALLERY</option>
-                                    <option value="store">STORE</option>
+                                    <option value="commerce">COMMERCE</option>
                                     <option value="other">OTHER</option>
                                 </select>
                             </div>

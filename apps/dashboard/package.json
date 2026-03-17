@@ -13,6 +13,7 @@
     "@neondatabase/auth": "^0.2.0-beta.1",
     "@shimokitan/auth": "workspace:*",
     "@shimokitan/db": "workspace:*",
+    "@shimokitan/storage": "workspace:*",
     "@shimokitan/ui": "workspace:*",
     "@shimokitan/utils": "workspace:*",
     "@tanstack/react-query": "^5.66.0",

@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound, redirect } from 'next/navigation';
-import { getEntityBySlug, resolveTranslation } from '@shimokitan/db';
+import { getEntityBySlug, resolveTranslation, getDb } from '@shimokitan/db';
 import { getDictionary, Locale } from '@shimokitan/utils';
 import { EntityProfileTerminal } from '@/components/entities/EntityProfileTerminal';
 
@@ -68,9 +68,12 @@ export default async function EntityProfilePage(props: { params: Promise<{ local
     const slug = decodedSlug;
 
     let entity: any = null;
+    let platforms: any[] = [];
 
     try {
         entity = await getEntityBySlug(slug);
+        const db = getDb();
+        platforms = db ? await db.query.externalPlatforms.findMany() : [];
     } catch (error) {
         console.error(`SCANNER_ERROR: Failed to retrieve data for entity ${slug}.`);
     }
@@ -99,7 +102,7 @@ export default async function EntityProfilePage(props: { params: Promise<{ local
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
-            <EntityProfileTerminal entity={entity} locale={locale} dict={dict} />
+            <EntityProfileTerminal entity={entity} locale={locale} dict={dict} platforms={platforms} />
         </>
     );
 }

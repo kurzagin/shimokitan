@@ -1,8 +1,8 @@
 
 import { customAlphabet } from 'nanoid';
 
-// Standard NanoID alphabet used in SQL schema
-const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-';
+// Standard NanoID alphabet used in SQL schema (Clean: alphanumeric only)
+const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const SIZE = 12;
 
 /**

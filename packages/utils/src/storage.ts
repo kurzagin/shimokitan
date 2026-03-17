@@ -35,7 +35,7 @@ interface PathOptions {
  * // Returns: "images/artifacts/shard_8z2k/cover/b1x9k2.webp"
  */
 export const generateStoragePath = ({ mediaType, context, identifier, role, filename }: PathOptions): string => {
-    const parts = [mediaType, context, identifier];
+    const parts = ['media', mediaType, context, identifier];
     if (role) parts.push(role);
     parts.push(filename);
     return parts.join('/');

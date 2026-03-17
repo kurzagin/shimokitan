@@ -3,11 +3,10 @@
 import { getDb, schema, eq } from '@shimokitan/db';
 import { requireUser } from './auth-helpers';
 import { uploadFileToR2 } from '@/lib/r2';
-import { nanoid } from 'nanoid';
 import sharp from 'sharp';
 import { encode } from 'blurhash';
 import { revalidatePath } from 'next/cache';
-import { generateStoragePath } from '@shimokitan/utils';
+import { nanoid, generateStoragePath } from '@shimokitan/utils';
 
 const encodeImageToBlurhash = async (buffer: Buffer): Promise<string> => {
     const { data, info } = await sharp(buffer)
@@ -89,7 +88,7 @@ export async function uploadMediaAction(formData: FormData) {
         mediaType: isImage ? 'images' : 'dumps',
         context: contextType === 'entity_avatar' ? 'profiles' : 'artifacts',
         identifier: mediaId, // Default to mediaId for isolation
-        filename: `${nanoid(8)}.${extension}`
+        filename: `${nanoid()}.${extension}`
     });
 
     // Upload optimized buffer to R2

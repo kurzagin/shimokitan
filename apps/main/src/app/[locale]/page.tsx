@@ -139,8 +139,8 @@ export default async function AppPage({
       let videoUrl = null;
       const primaryVideo = raw.resources?.find(
         (r: any) =>
-          r.role === "embed_video" ||
-          r.role === "stream" ||
+          r.role === "video" ||
+          r.role === "audio" ||
           r.platform === "youtube",
       );
       if (primaryVideo) {
@@ -174,7 +174,7 @@ export default async function AppPage({
       // Pick a different one for the "Video" card, ideally one with a videoUrl
       const artifactsWithVideo = rawPitArtifacts.filter((a, idx) => {
         if (idx === 0) return false; // Don't pick the same one
-        return a.resources?.some(r => r.role === "embed_video" || r.platform === "youtube");
+        return a.resources?.some(r => r.role === "video" || r.platform === "youtube");
       });
 
       if (artifactsWithVideo.length > 0) {
