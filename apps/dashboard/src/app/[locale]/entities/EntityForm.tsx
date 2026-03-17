@@ -9,7 +9,7 @@ import { MediaUploader } from '@shimokitan/ui';
  import { uploadMediaAction } from '../media-actions';
 import { CREDIT_ROLES } from '@shimokitan/utils';
   import { toast } from 'sonner';
- import { extractMediaId, getThumbnailUrl } from '@shimokitan/utils';
+ import { extractMediaId, getThumbnailUrl, nanoid } from '@shimokitan/utils';
 
 type SocialLink = {
     platform: string;
@@ -245,6 +245,14 @@ export default function EntityForm({
                                                 className="w-full bg-transparent border-none p-3 pl-0 text-xs text-white outline-none font-mono"
                                                 placeholder="custom-alias-here..."
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => setSlug(nanoid())}
+                                                className="p-1 px-2 hover:bg-zinc-900 rounded-md transition-all group/gen"
+                                                title="Generate Random Handle"
+                                            >
+                                                <Icon icon="lucide:refresh-cw" className="text-zinc-600 group-hover/gen:text-violet-500 transition-colors" width={14} />
+                                            </button>
                                         </div>
                                         <p className="text-[8px] text-zinc-600 font-mono italic pl-2">System current: {initialData?.slug || 'PENDING'}</p>
                                     </div>

@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { MediaUploader } from '@shimokitan/ui';
 import { uploadMediaAction } from '../media-actions';
 import { toast } from 'sonner';
-import { extractMediaId, getThumbnailUrl } from '@shimokitan/utils';
+import { extractMediaId, getThumbnailUrl, nanoid } from '@shimokitan/utils';
 import WorkMetadataSection from './components/WorkMetadataSection';
 import WorkCreditsSection from './components/WorkCreditsSection';
 import AnilistSync from '../artifacts/components/AnilistSync';
@@ -282,6 +282,14 @@ export default function WorkForm({
                                                 className="w-full bg-transparent border-none p-3 pl-0 text-xs text-white outline-none font-mono"
                                                 placeholder="work-slug-here..."
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => setSlug(nanoid())}
+                                                className="p-1 px-2 hover:bg-zinc-900 rounded-md transition-all group/gen"
+                                                title="Generate Random Handle"
+                                            >
+                                                <Icon icon="lucide:refresh-cw" className="text-zinc-600 group-hover/gen:text-rose-500 transition-colors" width={14} />
+                                            </button>
                                         </div>
                                         <p className="text-[8px] text-zinc-600 font-mono italic pl-2">System: {initialData?.slug || 'PENDING'}</p>
                                     </div>

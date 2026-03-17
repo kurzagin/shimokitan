@@ -13,9 +13,10 @@ interface MediaUploaderProps {
     onFileSelect?: (file: File, objectUrl: string) => void;
     onUrlSelect?: (url: string) => void;
     className?: string;
+    label?: string;
 }
 
-export function MediaUploader({ value, onChange, uploadAction, contextType = "general", onFileSelect, onUrlSelect, className }: MediaUploaderProps) {
+export function MediaUploader({ value, onChange, uploadAction, contextType = "general", onFileSelect, onUrlSelect, className, label = "UPLOAD_AVATAR" }: MediaUploaderProps) {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [preview, setPreview] = useState<string | null>(value || null);
@@ -100,7 +101,7 @@ export function MediaUploader({ value, onChange, uploadAction, contextType = "ge
     };
 
     return (
-        <div className="flex flex-col gap-3 w-full">
+        <div className="flex flex-col gap-2 w-full">
             <div
                 className={cn(
                     "group relative bg-zinc-950 border border-zinc-900 rounded-sm overflow-hidden flex flex-col items-center justify-center cursor-pointer hover:border-violet-600 transition-colors shrink-0",
@@ -121,7 +122,7 @@ export function MediaUploader({ value, onChange, uploadAction, contextType = "ge
                 ) : (
                     <div className="flex flex-col items-center justify-center text-zinc-600 group-hover:text-violet-500 transition-colors p-4 text-center">
                         <Icon icon="lucide:upload-cloud" width={24} />
-                        <span className="text-[10px] font-mono mt-2 tracking-widest uppercase">UPLOAD_AVATAR</span>
+                        <span className="text-[10px] font-mono mt-2 tracking-widest uppercase">{label}</span>
                     </div>
                 )}
 
@@ -145,22 +146,22 @@ export function MediaUploader({ value, onChange, uploadAction, contextType = "ge
                 )}
             </div>
 
-            <div className="flex gap-2 w-full max-w-sm">
+            <div className="flex gap-1 w-full">
                 <input
                     type="url"
-                    placeholder="Or paste image URL..."
+                    placeholder="Or paste URL..."
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleUrlUpload())}
-                    className="flex-1 bg-black border border-zinc-800 p-2 text-xs text-white focus:border-violet-600 outline-none transition-colors"
+                    className="flex-1 bg-black border border-zinc-900 p-2 text-[10px] text-zinc-400 focus:border-violet-600 outline-none transition-colors rounded-sm"
                 />
                 <button
                     type="button"
                     onClick={handleUrlUpload}
                     disabled={!urlInput || uploading}
-                    className="bg-zinc-900 text-white border border-zinc-800 px-3 text-[10px] font-black uppercase hover:bg-violet-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-zinc-900 text-zinc-500 border border-zinc-800 px-2 text-[9px] font-black uppercase hover:bg-violet-600 hover:text-white transition-all disabled:opacity-50"
                 >
-                    Fetch
+                    FETCH
                 </button>
             </div>
         </div>

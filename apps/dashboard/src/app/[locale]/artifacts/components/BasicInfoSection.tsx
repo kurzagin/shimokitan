@@ -201,7 +201,7 @@ export default function BasicInfoSection({
                             <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic font-mono">Linkage_Module</h3>
                         </div>
                         <div className="space-y-4">
-                            <div className="flex flex-col bg-zinc-950/50 border border-zinc-900 rounded-lg overflow-hidden transition-all hover:bg-zinc-950">
+                            <div className="flex flex-col bg-zinc-950/50 border border-zinc-900 rounded-lg transition-all hover:bg-zinc-950">
                                 <div className="bg-zinc-900/50 px-3 py-1.5 flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Icon icon="lucide:anchor" width={10} className="text-zinc-500" />
@@ -222,7 +222,7 @@ export default function BasicInfoSection({
                                 </div>
                             </div>
 
-                            <div className="flex flex-col bg-zinc-950/50 border border-zinc-900 rounded-lg overflow-hidden transition-all hover:bg-zinc-950">
+                            <div className="flex flex-col bg-zinc-950/50 border border-zinc-900 rounded-lg transition-all hover:bg-zinc-950">
                                 <div className="bg-zinc-900/50 px-3 py-1.5 flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Icon icon="lucide:git-branch" width={10} className="text-zinc-500" />
@@ -258,15 +258,14 @@ export default function BasicInfoSection({
                                 <span className="text-[10px] font-mono uppercase text-zinc-400">Portrait_KV</span>
                                 <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 2:3 / 3:4</span>
                             </div>
-                            <div className="aspect-[2/3] bg-zinc-950/50 border border-zinc-900 rounded-xl relative overflow-hidden group hover:border-zinc-700 transition-colors">
-                                <MediaUploader
-                                    value={posterUrl}
-                                    contextType="artifact_asset"
-                                    onFileSelect={onPosterFileSelect}
-                                    onUrlSelect={onPosterUrlSelect}
-                                    className="w-full h-full"
-                                />
-                            </div>
+                            <MediaUploader
+                                value={posterUrl}
+                                contextType="artifact_asset"
+                                onFileSelect={onPosterFileSelect}
+                                onUrlSelect={onPosterUrlSelect}
+                                className="aspect-[2/3] w-full rounded-xl border-zinc-900 group-hover:border-zinc-700"
+                                label="Upload_Poster"
+                            />
                         </div>
 
                         {/* Vinyl Square Asset */}
@@ -275,15 +274,14 @@ export default function BasicInfoSection({
                                 <span className="text-[10px] font-mono uppercase text-zinc-400">Vinyl_Aesthetic</span>
                                 <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 1:1</span>
                             </div>
-                            <div className="aspect-square bg-zinc-950/50 border border-zinc-900 rounded-xl relative overflow-hidden group hover:border-zinc-700 transition-colors">
-                                <MediaUploader
-                                    value={vinylUrl}
-                                    contextType="artifact_asset"
-                                    onFileSelect={onVinylFileSelect}
-                                    onUrlSelect={onVinylUrlSelect}
-                                    className="w-full h-full"
-                                />
-                            </div>
+                            <MediaUploader
+                                value={vinylUrl}
+                                contextType="artifact_asset"
+                                onFileSelect={onVinylFileSelect}
+                                onUrlSelect={onVinylUrlSelect}
+                                className="aspect-square w-full rounded-xl border-zinc-900 group-hover:border-zinc-700"
+                                label="Upload_Vinyl"
+                            />
                             <p className="text-[7px] text-zinc-600 font-mono italic uppercase text-center mt-2 px-2">Primary Audio Identity Signature.</p>
                         </div>
 
@@ -293,25 +291,14 @@ export default function BasicInfoSection({
                                 <span className="text-[10px] font-mono uppercase text-zinc-400">Landscape_Hero</span>
                                 <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 16:9 / 21:9</span>
                             </div>
-                            <div className="aspect-video bg-zinc-950/50 border border-zinc-900 rounded-xl relative overflow-hidden group hover:border-zinc-700 transition-colors">
-                                <MediaUploader
-                                    value={thumbnailUrl}
-                                    contextType="artifact_asset"
-                                    onFileSelect={onThumbnailFileSelect}
-                                    onUrlSelect={onThumbnailUrlSelect}
-                                    className="w-full h-full"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4 mt-8 p-4 bg-zinc-950/30 border border-zinc-900/50 rounded-lg">
-                                <div className="space-y-1">
-                                    <span className="text-[8px] font-mono text-zinc-500 uppercase block">Asset_Lifecycle</span>
-                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">VERIFIED_REGISTRY</span>
-                                </div>
-                                <div className="space-y-1 text-right">
-                                    <span className="text-[8px] font-mono text-zinc-500 uppercase block">Protocol</span>
-                                    <span className="text-[10px] font-bold text-zinc-400 italic">SHIMOKITAN_SECURE</span>
-                                </div>
-                            </div>
+                            <MediaUploader
+                                value={thumbnailUrl}
+                                contextType="artifact_asset"
+                                onFileSelect={onThumbnailFileSelect}
+                                onUrlSelect={onThumbnailUrlSelect}
+                                className="aspect-video w-full rounded-xl border-zinc-900 group-hover:border-zinc-700"
+                                label="Upload_Hero_Cover"
+                            />
                         </div>
                     </div>
                 </div>
