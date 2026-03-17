@@ -51,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const entities = await getAllEntities();
     for (const entity of entities) {
-      if (entity.isEncrypted) continue;
+      if (entity.civilStatus !== 'resident') continue;
       for (const locale of locales) {
         sitemapEntries.push({
           url: `${baseUrl}/${locale}/${entity.slug}`,

@@ -15,6 +15,7 @@ export const tagCategoryEnum = pgEnum("tag_category", ["genre", "mood", "style",
 export const entityTypeEnum = pgEnum("entity_type", ["independent", "organization", "agency", "circle"]);
 export const userRoleEnum = pgEnum("user_role", ["founder", "architect", "resident", "ghost"]);
 export const managerRoleEnum = pgEnum("manager_role", ["owner", "admin", "editor"]);
+export const entityCivilStatusEnum = pgEnum("civil_status", ["sealed", "resident"]);
 
 // Signal / Transmission Enums
 export const signalSeverityEnum = pgEnum("signal_severity", ["critical", "high", "monitoring", "resolved"]);
@@ -119,9 +120,8 @@ export const entities = pgTable("entities", {
     slug: text("slug").notNull().unique(),
     uid: text("uid").unique(),
     socialLinks: jsonb("social_links").default([]),
-    isVerified: boolean("is_verified").default(false),
+    civilStatus: entityCivilStatusEnum("civil_status").default("sealed").notNull(),
     isActive: boolean("is_active").default(true),   // soft-disable without deletion
-    isEncrypted: boolean("is_encrypted").default(false), // consent-first: sealed entity, name-only reference for cover attribution
     avatarId: text("avatar_id").references(() => media.id, { onDelete: "set null" }),
     thumbnailId: text("thumbnail_id").references(() => media.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

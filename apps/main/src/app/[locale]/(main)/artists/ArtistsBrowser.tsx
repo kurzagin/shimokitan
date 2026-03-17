@@ -13,7 +13,7 @@ type Entity = {
     name: string;
     type: string;
     avatarUrl: string | null;
-    isVerified: boolean | null;
+    civilStatus: string;
     artifactCount: number;
 };
 
@@ -105,8 +105,11 @@ export default function ArtistsBrowser({ initialEntities }: { initialEntities: E
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-1 h-1 bg-violet-600/50 group-hover:bg-violet-500 transition-colors" />
                                         <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest">{entity.type}</span>
+                                        <div className="w-1 h-3 bg-zinc-800 mx-1" />
+                                        <span className="text-[7px] font-black uppercase text-violet-500 tracking-widest px-1.5 py-0.5 bg-violet-500/10 border border-violet-500/20 rounded-sm">
+                                            RESIDENT
+                                        </span>
                                     </div>
-                                    {entity.isVerified && <Icon icon="lucide:check" width={12} className="text-violet-500" aria-hidden="true" />}
                                 </div>
                                 <h3 className="text-2xl md:text-3xl font-black italic tracking-tighter uppercase text-zinc-300 group-hover:text-white transition-colors truncate">
                                     {entity.name}

@@ -18,10 +18,9 @@ export default async function ArtistsBrowsePage(props: { params: Promise<{ local
     const { locale } = await props.params;
     const entities = await getAllEntities();
 
-    // Map DB entities to the format expected by the browser component
-    // Encrypted entities are excluded — they have no public surface area
+    // Filter for active residents only. Sealed signal fragments have no public surface area.
     const formattedEntities = entities
-        .filter((e: any) => !e.isEncrypted)
+        .filter((e: any) => e.civilStatus === 'resident')
         .map((e: any) => {
         const translation = resolveTranslation(e.translations, locale);
         return {
@@ -30,7 +29,7 @@ export default async function ArtistsBrowsePage(props: { params: Promise<{ local
             name: translation?.name || (e as any).name || "Anonymous Artist",
             type: e.type,
             avatarUrl: e.avatar?.url,
-            isVerified: e.isVerified,
+            civilStatus: e.civilStatus,
             artifactCount: e.credits?.length || 0
         };
     });

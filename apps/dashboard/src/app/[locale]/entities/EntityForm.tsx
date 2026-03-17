@@ -53,8 +53,7 @@ export default function EntityForm({
         })
     );
 
-    const [isVerified, setIsVerified] = useState(initialData?.isVerified || false);
-    const [isEncrypted, setIsEncrypted] = useState(initialData?.isEncrypted || false);
+    const [civilStatus, setCivilStatus] = useState<'sealed' | 'resident'>(initialData?.civilStatus || 'sealed');
     const [type, setType] = useState(initialData?.type || 'independent');
     const [members, setMembers] = useState<Member[]>(
         initialData?.members?.map((m: any) => ({ memberId: m.memberId, memberRole: m.memberRole })) || []
@@ -115,8 +114,7 @@ export default function EntityForm({
             const payload = {
                 type,
                 uid: uid || null,
-                isVerified,
-                isEncrypted,
+                civilStatus,
                 slug: slug || null,
                 socialLinks: cleanSocials,
                 translations: translations.filter(t => t.name.trim() !== ''),
@@ -142,7 +140,7 @@ export default function EntityForm({
         } finally {
             setIsSubmitting(false);
         }
-    }, [isSubmitting, initialData?.id, socials, type, uid, slug, isVerified, isEncrypted, translations, members, avatarId, thumbnailId, pendingAvatarUrl, pendingThumbnailUrl, router, tags]);
+    }, [isSubmitting, initialData?.id, socials, type, uid, slug, civilStatus, translations, members, avatarId, thumbnailId, pendingAvatarUrl, pendingThumbnailUrl, router, tags]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -262,28 +260,32 @@ export default function EntityForm({
                                     </div>
 
                                     <div className="pt-2">
-                                        <div
-                                            className={`flex items-center justify-center gap-2 border cursor-pointer transition-all h-[46px] rounded-lg ${isVerified ? 'bg-violet-600 border-violet-500 text-black shadow-[0_0_20px_rgba(139,92,246,0.3)]' : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-violet-900'}`}
-                                            onClick={() => setIsVerified(!isVerified)}
-                                        >
-                                            <Icon icon={isVerified ? "lucide:shield-check" : "lucide:shield"} width={16} />
-                                            <span className="text-[10px] font-black uppercase">Verified_Link</span>
+                                        <div className="space-y-1 mb-2">
+                                             <label className="text-[10px] font-mono uppercase text-zinc-400 pl-1">Civil_Status</label>
+                                             <div className="grid grid-cols-2 gap-2">
+                                                 <button
+                                                     type="button"
+                                                     onClick={() => setCivilStatus('sealed')}
+                                                     className={`flex items-center justify-center gap-2 border p-3 rounded-lg transition-all ${civilStatus === 'sealed' ? 'bg-rose-600 border-rose-500 text-black shadow-[0_0_20px_rgba(244,63,94,0.3)]' : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:border-rose-900'}`}
+                                                 >
+                                                     <Icon icon="lucide:lock" width={14} />
+                                                     <span className="text-[10px] font-black uppercase">Sealed</span>
+                                                 </button>
+                                                 <button
+                                                     type="button"
+                                                     onClick={() => setCivilStatus('resident')}
+                                                     className={`flex items-center justify-center gap-2 border p-3 rounded-lg transition-all ${civilStatus === 'resident' ? 'bg-violet-600 border-violet-500 text-black shadow-[0_0_20px_rgba(139,92,246,0.3)]' : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:border-violet-900'}`}
+                                                 >
+                                                     <Icon icon="lucide:shield-check" width={14} />
+                                                     <span className="text-[10px] font-black uppercase">Resident</span>
+                                                 </button>
+                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div className="pt-1">
-                                        <div
-                                            className={`flex items-center justify-center gap-2 border cursor-pointer transition-all h-[46px] rounded-lg ${isEncrypted ? 'bg-rose-600 border-rose-500 text-black shadow-[0_0_20px_rgba(244,63,94,0.3)]' : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-rose-900'}`}
-                                            onClick={() => setIsEncrypted(!isEncrypted)}
-                                        >
-                                            <Icon icon={isEncrypted ? "lucide:lock" : "lucide:lock-open"} width={16} />
-                                            <span className="text-[10px] font-black uppercase">Encrypted_Signal</span>
-                                        </div>
-                                        {isEncrypted && (
-                                            <p className="text-[8px] text-rose-500/60 font-mono italic mt-2 text-center leading-relaxed">
-                                                CONSENT_FIRST: Profile will be sealed. Name-only reference for cover attribution.
-                                            </p>
-                                        )}
+                                        <p className="text-[8px] font-mono italic text-center leading-relaxed transition-colors duration-500">
+                                            {civilStatus === 'resident' 
+                                                ? <span className="text-violet-500/60">RESIDENT: Identity verified and deciphered in the public registry.</span>
+                                                : <span className="text-rose-500/60">SEALED: Provenance fragment. No public residency or surface area.</span>}
+                                        </p>
                                     </div>
                                 </div>
                             </div>

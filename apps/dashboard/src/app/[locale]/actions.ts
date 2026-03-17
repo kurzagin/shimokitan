@@ -129,8 +129,7 @@ export async function createFullEntity(data: z.infer<typeof entitySchema>) {
             type: validated.type,
             slug,
             uid: validated.uid,
-            isVerified: validated.isVerified,
-            isEncrypted: validated.isEncrypted,
+            civilStatus: validated.civilStatus,
             socialLinks: validated.socialLinks ? JSON.stringify(validated.socialLinks) : '[]',
             avatarId: validated.avatarId || null,
             thumbnailId: validated.thumbnailId || null,
@@ -241,8 +240,7 @@ export async function quickCreateEntity(name: string, type: string) {
             id: entityId,
             type: type as any,
             slug,
-            isVerified: false,
-            isEncrypted: true, // Consent-first: Seal on-the-fly registrations. Must be manually unsealed.
+            civilStatus: 'sealed', // Consent-first: All quick registrations start as Sealed fragments
         });
 
         await tx.insert(schema.entitiesI18n).values({
@@ -266,8 +264,7 @@ export async function updateFullEntity(id: string, data: z.infer<typeof entitySc
         const updateData: any = {
             type: validated.type,
             uid: validated.uid,
-            isVerified: validated.isVerified,
-            isEncrypted: validated.isEncrypted,
+            civilStatus: validated.civilStatus,
             socialLinks: validated.socialLinks ? JSON.stringify(validated.socialLinks) : '[]',
             avatarId: validated.avatarId || null,
             thumbnailId: validated.thumbnailId || null,

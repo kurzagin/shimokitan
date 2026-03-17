@@ -768,7 +768,7 @@ function LabelVal({ label, val }: { label: string, val: any }) {
 // ── CreditRow ─────────────────────────────────────────────────────────────────
 function CreditRow({ credit, locale, isPrimary }: { credit: any; locale: string; isPrimary: boolean }) {
     const name = resolveTranslation(credit.entity?.translations, locale)?.name || "Anon";
-    const isEncrypted = credit.entity?.isEncrypted;
+    const isSealed = credit.entity?.civilStatus === 'sealed';
     const isOriginal = credit.isOriginalArtist;
 
     return (
@@ -790,7 +790,7 @@ function CreditRow({ credit, locale, isPrimary }: { credit: any; locale: string;
                     <img src={credit.entity.avatar.url} alt={name} className="w-full h-full object-cover grayscale group-hover/item:grayscale-0 transition-all" />
                 ) : (
                     <Icon
-                        icon={isEncrypted ? "lucide:lock" : isPrimary ? "lucide:star" : "lucide:user"}
+                        icon={isSealed ? "lucide:lock" : isPrimary ? "lucide:star" : "lucide:user"}
                         width={14}
                         className={cn("text-zinc-700", isPrimary && "text-violet-500")}
                     />

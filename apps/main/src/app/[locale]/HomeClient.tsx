@@ -846,9 +846,9 @@ export default function HomeClient({
         }
       >
         <div className="flex flex-col gap-2.5">
-          {entities.filter((entity) => !entity.isEncrypted).length > 0 ? (
+          {entities.filter((entity) => entity.civilStatus === 'resident').length > 0 ? (
             entities
-              .filter((entity) => !entity.isEncrypted)
+              .filter((entity) => entity.civilStatus === 'resident')
               .slice(0, 3)
               .map((entity) => (
                 <Link

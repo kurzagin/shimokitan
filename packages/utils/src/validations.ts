@@ -102,12 +102,13 @@ const unitMemberSchema = z.object({
 
 // --- Main Schemas ---
 
+export const ENTITY_CIVIL_STATUSES = ['sealed', 'resident'] as const;
+
 export const entitySchema = z.object({
     type: z.enum(ENTITY_TYPES),
     slug: z.string().optional().nullable(),
     uid: z.string().optional().nullable(),
-    isVerified: z.boolean().default(false),
-    isEncrypted: z.boolean().default(false),
+    civilStatus: z.enum(ENTITY_CIVIL_STATUSES).default('sealed'),
     avatarId: z.string().optional().nullable(),
     thumbnailId: z.string().optional().nullable(),
     socialLinks: z.any().optional(), // JSON

@@ -15,7 +15,8 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
     const dict = getDictionary(locale as Locale);
     const s = dict.common.seo;
 
-    if (!entity) return { title: s.entity_not_found };
+    // CONSENT FIRST: Only residents have a public profile surface area.
+    if (!entity || entity.civilStatus !== 'resident') return { title: s.entity_not_found };
 
     const translation = resolveTranslation(entity.translations, locale);
     const name = translation?.name || (entity as any).name || s.entity_anonymous;
@@ -80,7 +81,8 @@ export default async function EntityProfilePage(props: { params: Promise<{ local
 
     // Since this is a catch-all at the root level, we only show it if the entity exists.
     // If not found, we let Next.js throw a 404.
-    if (!entity) {
+    // CONSENT FIRST: Only residents have a public surface area.
+    if (!entity || entity.civilStatus !== 'resident') {
         notFound();
     }
 

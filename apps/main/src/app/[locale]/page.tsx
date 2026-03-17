@@ -197,7 +197,7 @@ export default async function AppPage({
     const rawEntities = await db.query.entities.findMany({
       where: and(
         isNull(schema.entities.deletedAt),
-        eq(schema.entities.isEncrypted, false)
+        eq(schema.entities.civilStatus, "resident")
       ),
       orderBy: [desc(schema.entities.createdAt)],
       limit: 10,

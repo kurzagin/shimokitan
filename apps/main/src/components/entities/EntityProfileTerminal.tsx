@@ -150,8 +150,8 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
     const translation = resolveTranslation(entity.translations, locale);
     const name = translation?.name || (entity as any).name || "Anonymous Artist";
 
-    // ── Encrypted Gate ──────────────────────────────────────────────────────
-    if (entity.isEncrypted) {
+    // ── Sealed Gate ──────────────────────────────────────────────────────
+    if (entity.civilStatus === 'sealed') {
         return (
             <MainLayout>
                 <div className="fixed inset-0 pointer-events-none -z-20 overflow-hidden">
@@ -311,7 +311,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                         <h1 className="font-black italic tracking-tighter uppercase text-white leading-none truncate" style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)' }}>
                                             {name}
                                         </h1>
-                                        {entity.isVerified && <VerifiedBadge className="w-4 h-4" />}
+                                        {entity.civilStatus === 'resident' && <VerifiedBadge className="w-4 h-4" />}
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <div className="w-4 h-[1px] bg-zinc-700" />
@@ -343,7 +343,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-3">
                                 <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase text-white leading-none">{name}</h1>
-                                {entity.isVerified && <VerifiedBadge className="w-5 h-5" />}
+                                {entity.civilStatus === 'resident' && <VerifiedBadge className="w-5 h-5" />}
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="w-6 h-[1px] bg-zinc-700" />
