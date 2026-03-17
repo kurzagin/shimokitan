@@ -16,6 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: L
 }
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AppPage({
   params,

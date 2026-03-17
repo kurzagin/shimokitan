@@ -32,6 +32,7 @@ const groups: NavGroup[] = [
         title: "Governance",
         items: [
             { label: "Audit_Queue", href: "/verifications", icon: "lucide:shield-check" },
+            { label: "Platforms", href: "/governance/platforms", icon: "lucide:globe" },
         ]
     }
 ];

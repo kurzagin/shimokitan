@@ -63,6 +63,10 @@ export default async function EditArtifactPage(props: { params: Promise<{ locale
         avatarUrl: e.avatar?.url || null
     }));
 
+    const platforms = db ? await db.query.externalPlatforms.findMany({
+        orderBy: (p, { asc }) => [asc(p.name)]
+    }) : [];
+
     return (
         <div className="max-w-4xl mx-auto py-12">
             <header className="mb-12 flex items-start justify-between">
@@ -97,6 +101,7 @@ export default async function EditArtifactPage(props: { params: Promise<{ locale
                     key={`${artifact.id}-${artifact.updatedAt?.getTime() || 'new'}`}
                     entities={entities}
                     initialData={artifact}
+                    platforms={platforms as any}
                 />
             </Suspense>
         </div>

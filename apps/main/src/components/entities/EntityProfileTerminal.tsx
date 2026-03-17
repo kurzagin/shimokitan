@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Dictionary } from '@shimokitan/utils';
 
 // ─── Link Category Detection ─────────────────────────────────────────────────
+// TODO: Migrate these hardcoded lists to fetch from the externalPlatforms table
 type LinkCategory = 'social_media' | 'commerce' | 'platform';
 type LinkPriority = 'hero' | 'shard' | 'archive';
 
@@ -19,13 +20,14 @@ const COMMERCE_PLATFORMS = [
 
 const GENERAL_PLATFORMS = [
     'pixiv', 'artstation', 'behance', 'crunchyroll', 'github', 
-    'bilibili', 'niconico', 'youtube', 'soundcloud', 'spotify', 'apple_music'
+    'bilibili', 'niconico', 'youtube', 'soundcloud', 'spotify', 'apple_music',
+    'amazon_prime', 'netflix', 'steam'
 ];
 
 function getLinkCategory(platform: string): LinkCategory {
-    const p = platform?.toLowerCase() || '';
-    if (COMMERCE_PLATFORMS.some(x => p.includes(x))) return 'commerce';
-    if (GENERAL_PLATFORMS.some(x => p.includes(x))) return 'platform';
+    const p = platform?.toLowerCase().replace(/-/g, '_') || '';
+    if (COMMERCE_PLATFORMS.some(x => p.includes(x.replace(/-/g, '_')))) return 'commerce';
+    if (GENERAL_PLATFORMS.some(x => p.includes(x.replace(/-/g, '_')))) return 'platform';
     return 'social_media';
 }
 

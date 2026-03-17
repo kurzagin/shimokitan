@@ -51,21 +51,12 @@ const translationSchema = z.object({
     thesis: z.string().optional(),
 }).passthrough();
 
-export const RESOURCE_PLATFORMS = [
-    'youtube', 'spotify', 'soundcloud', 'apple_music', 'bilibili', 'niconico',
-    'x', 'instagram', 'facebook', 'tiktok', 'ko_fi', 'booth', 'vgen', 'patreon', 
-    'buymeacoffee', 'fanbox', 'fiverr', 'gumroad', 
-    'etsy', 'society6', 'redbubble', 'artstation', 'behance', 
-    'bandcamp', 'skeb', 'pixiv', 'crunchyroll', 
-    'steam', 'netflix', 'amazon_prime', 'official_website',
-    'r2', 'other'
-] as const;
 export const RESOURCE_ROLES = ['stream', 'embed_video', 'hosted_audio', 'download', 'social', 'reference'] as const;
 
 const youtubeVideoRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
 
 const resourceSchema = z.object({
-    platform: z.enum(RESOURCE_PLATFORMS),
+    platform: z.string().min(1),
     url: z.string().url(),
     role: z.enum(RESOURCE_ROLES).default('stream'),
     isPrimary: z.boolean().default(false),
@@ -175,6 +166,15 @@ export const verificationSchema = z.object({
     grantedBy: z.string().optional(),
     expiresAt: z.union([z.string(), z.date()]).optional(),
     internalNotes: z.string().optional(),
+});
+
+export const externalPlatformSchema = z.object({
+    id: z.string().min(1).max(20),
+    name: z.string().min(1).max(50),
+    category: z.enum(['social', 'commerce', 'platform', 'other']).default('platform'),
+    iconUrl: z.string().url().optional().nullable(),
+    accentColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).optional().nullable(),
+    isActive: z.boolean().default(true),
 });
 
 export const registryApplicationSchema = z.object({

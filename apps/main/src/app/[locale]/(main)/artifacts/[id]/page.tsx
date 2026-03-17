@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react';
 import { BrandIcon } from '@/components/BrandIcon';
 import { Badge, cn } from '@shimokitan/ui';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { getArtifactById, resolveTranslation } from '@shimokitan/db';
+import { getArtifactById, resolveTranslation, getDb } from '@shimokitan/db';
 import Link from '@/components/Link';
 import { getEntityUrl } from '@shimokitan/utils';
 import { notFound } from 'next/navigation';
@@ -56,6 +56,9 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
 
     const artifact = await getArtifactById(id);
     if (!artifact) notFound();
+
+    const db = getDb();
+    const platforms = db ? await db.query.externalPlatforms.findMany() : [];
 
     const translation = resolveTranslation(artifact.translations, locale);
     const title = translation?.title || "Untitled";
@@ -326,29 +329,34 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                         <span className="text-[9px] text-zinc-700 animate-pulse hidden md:block">UPLINK_STABLE</span>
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                        {artifact.resources.map((res: any, i: number) => (
-                                            <a
-                                                key={i}
-                                                href={res.value}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center justify-between px-3 py-2.5 bg-zinc-900/40 border border-zinc-800 hover:border-violet-500/40 hover:bg-zinc-900 transition-all group/gate"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <BrandIcon
-                                                        platform={res.platform}
-                                                        className="text-zinc-600 group-hover/gate:text-violet-400 shrink-0"
-                                                        width={14}
-                                                        height={14}
-                                                        fallbackIcon={res.platform === 'r2_hosted' ? 'lucide:box' : undefined}
-                                                    />
-                                                    <span className="text-xs font-black text-zinc-400 group-hover/gate:text-white uppercase tracking-tight transition-colors truncate">
-                                                        {res.platform.replace(/_/g, ' ')}
-                                                    </span>
-                                                </div>
-                                                <Icon icon="lucide:external-link" width={12} className="text-zinc-800 group-hover/gate:text-violet-500 shrink-0" />
-                                            </a>
-                                        ))}
+                                        {artifact.resources.map((res: any, i: number) => {
+                                            const platform = platforms.find(p => p.id === res.platform);
+                                            const platformName = platform?.name || res.platform.replace(/_/g, ' ');
+
+                                            return (
+                                                <a
+                                                    key={i}
+                                                    href={res.value}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center justify-between px-3 py-2.5 bg-zinc-900/40 border border-zinc-800 hover:border-violet-500/40 hover:bg-zinc-900 transition-all group/gate"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <BrandIcon
+                                                            platform={res.platform}
+                                                            className="text-zinc-600 group-hover/gate:text-violet-400 shrink-0"
+                                                            width={14}
+                                                            height={14}
+                                                            fallbackIcon={res.platform === 'r2_hosted' ? 'lucide:box' : undefined}
+                                                        />
+                                                        <span className="text-xs font-black text-zinc-400 group-hover/gate:text-white uppercase tracking-tight transition-colors truncate">
+                                                            {platformName}
+                                                        </span>
+                                                    </div>
+                                                    <Icon icon="lucide:external-link" width={12} className="text-zinc-800 group-hover/gate:text-violet-500 shrink-0" />
+                                                </a>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}

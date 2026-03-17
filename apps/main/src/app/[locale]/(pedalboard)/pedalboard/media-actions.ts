@@ -86,7 +86,7 @@ export async function uploadMediaAction(formData: FormData) {
     }
 
     const key = generateStoragePath({
-        mediaType: isImage ? 'images' : 'raw',
+        mediaType: isImage ? 'images' : 'dumps',
         context: contextType === 'entity_avatar' ? 'profiles' : 'artifacts',
         identifier: mediaId, // Default to mediaId for isolation
         filename: `${nanoid(8)}.${extension}`

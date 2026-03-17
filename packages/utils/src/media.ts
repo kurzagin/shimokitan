@@ -95,37 +95,14 @@ export function getOptimizedImageUrl(
 }
 
 /**
- * Returns the CDN URL for a brand icon.
- * Assets are served from cdn.shimokitan.live/images/brand/*.webp
+ * Returns the CDN URL for a platform icon.
+ * Assets are served from cdn.shimokitan.live/images/platforms/{id}.webp
  */
-export function getBrandIconUrl(platform: string): string | null {
-    if (!platform) return null;
+export function getBrandIconUrl(platformId: string | null): string | null {
+    if (!platformId) return null;
 
-    const p = platform.toLowerCase();
+    // Normalize platform ID (e.g. 'ko_fi' -> 'ko-fi') but mostly we expect NanoIDs now.
+    const normalizedId = platformId.toLowerCase().replace(/_/g, '-');
 
-    // Map internal slugs to CDN filenames
-    const mapping: Record<string, string> = {
-        'ko_fi': 'ko-fi',
-        'twitter': 'x',
-        'apple_music': 'apple-music',
-        'buymeacoffee': 'buymeacoffee',
-        'youtube_music': 'youtube',
-        'crunchyroll': 'crunchyroll',
-        'amazon_prime': 'amazon-prime',
-    };
-
-    const fileName = mapping[p] || p.replace(/_/g, '-');
-
-    // List of supported brand icons provided by user
-    const supported = [
-        'niconico', 'youtube', 'x', 'ko-fi', 'booth', 'vgen', 'patreon',
-        'buymeacoffee', 'fanbox', 'fiverr',
-        'gumroad', 'etsy', 'society6', 'redbubble', 'artstation',
-        'behance', 'bandcamp', 'soundcloud',
-        'skeb', 'pixiv', 'crunchyroll', 'steam', 'netflix', 'amazon-prime'
-    ];
-
-    if (!supported.includes(fileName)) return null;
-
-    return `https://cdn.shimokitan.live/images/brand/${fileName}.webp`;
+    return `https://cdn.shimokitan.live/images/platforms/${normalizedId}.webp`;
 }

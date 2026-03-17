@@ -33,6 +33,10 @@ export default async function NewArtifactPage(props: { params: Promise<{ locale:
         avatarUrl: e.avatar?.url || null
     }));
 
+    const platforms = db ? await db.query.externalPlatforms.findMany({
+        orderBy: (p, { asc }) => [asc(p.name)]
+    }) : [];
+
     return (
         <div className="space-y-6">
             <header className="flex items-end justify-between border-b border-zinc-900 pb-4">
@@ -62,6 +66,7 @@ export default async function NewArtifactPage(props: { params: Promise<{ locale:
                     <ArtifactForm
                         entities={entities as any}
                         userRole={user?.role}
+                        platforms={platforms as any}
                     />
                 </Suspense>
             </section>

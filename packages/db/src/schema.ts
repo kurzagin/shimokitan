@@ -52,18 +52,6 @@ export const resourceRoleEnum = pgEnum("resource_role", [
     "reference",       // original song reference for covers
 ]);
 
-export const resourcePlatformEnum = pgEnum("resource_platform", [
-    "youtube", "spotify", "soundcloud", "apple_music",
-    "bilibili", "niconico", "x", "instagram", "tiktok",
-    "ko_fi", "booth", "vgen", "patreon", "buymeacoffee", "fanbox",
-    "fiverr", "gumroad", "etsy", "society6",
-    "redbubble", "artstation", "behance",
-    "bandcamp", "skeb", "pixiv", "crunchyroll",
-    "steam", "netflix", "amazon_prime", "official_website",
-    "r2",      // internal hosted
-    "other",
-]);
-
 export const contributorClassEnum = pgEnum("contributor_class", ["author", "collaborator", "staff"]);
 export const verificationTargetEnum = pgEnum("verification_target", ["artifact", "entity", "role_upgrade"]);
 export const verificationStatusEnum = pgEnum("verification_status", ["pending", "approved", "rejected"]);
@@ -358,7 +346,7 @@ export const artifactResources = pgTable("artifact_resources", {
     artifactId: text("artifact_id").references(() => artifacts.id, { onDelete: "cascade" }).notNull(),
 
     role: resourceRoleEnum("role").notNull(),
-    platform: resourcePlatformEnum("platform").notNull(),
+    platform: text("platform").notNull(),
 
     // Flexible value field:
     // - For external: the full URL or platform-specific ID (e.g. YouTube video ID)
@@ -445,7 +433,7 @@ export const externalOriginals = pgTable("external_originals", {
     // The original work's identity
     title: text("title"),                  // Deprecated: move to i18n table
     originalArtistName: text("original_artist_name"), // Deprecated: move to i18n table
-    platform: resourcePlatformEnum("platform"),
+    platform: text("platform"),
     platformUrl: text("platform_url"),           // link to original on NND, YouTube, etc.
 
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -667,6 +655,21 @@ export const hostingRightsLog = pgTable("hosting_rights_log", {
 }, (t) => ({
     artifactIdx: index("idx_hosting_rights_artifact").on(t.artifactId),
 }));
+
+// ==================================================================
+// 11. EXTERNAL PLATFORMS (Global Registry)
+// ==================================================================
+
+export const externalPlatforms = pgTable("external_platforms", {
+    id: text("id").primaryKey(), // nanoid(12) or similar unique identifier
+    name: text("name").notNull(),
+    category: text("category").notNull(), // 'social' | 'commerce' | 'platform'
+    iconUrl: text("icon_url"),           // Optional override, default is cdn.shimokitan.live/platforms/{id}.webp
+    accentColor: text("accent_color"),   // e.g. '#0096fa'
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
 
 // ==================================================================
 // RELATIONS

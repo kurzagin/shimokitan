@@ -44,20 +44,28 @@ type Spec = {
     value: string;
 };
 
+export interface Platform {
+    id: string;
+    name: string;
+    category: string;
+}
+
 export default function ArtifactForm({
     entities,
     initialData,
     onComplete,
     userRole,
     verificationId,
-    initialArchival
+    initialArchival,
+    platforms = []
 }: {
     entities: Entity[],
     initialData?: any,
     onComplete?: () => void,
     userRole?: string,
     verificationId?: string,
-    initialArchival?: boolean
+    initialArchival?: boolean,
+    platforms?: Platform[]
 }) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -659,6 +667,7 @@ export default function ArtifactForm({
                     updateResource={updateResource}
                     addResource={addResource}
                     removeResource={removeResource}
+                    platforms={platforms}
                 />
 
                 <ExhibitsSection

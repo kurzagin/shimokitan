@@ -1,5 +1,6 @@
+"use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import { getBrandIconUrl } from '@shimokitan/utils';
 import { cn } from '@shimokitan/ui';
@@ -14,7 +15,7 @@ interface BrandIconProps {
 
 /**
  * Renders a brand icon from the Shimokitan CDN.
- * Falls back to Iconify (Simple Icons) if the brand is not on the CDN.
+ * Falls back to Iconify (Simple Icons) if the brand is not on the CDN or fails to load.
  */
 export function BrandIcon({ 
   platform, 
@@ -23,9 +24,10 @@ export function BrandIcon({
   height, 
   fallbackIcon 
 }: BrandIconProps) {
+  const [error, setError] = useState(false);
   const cdnUrl = getBrandIconUrl(platform);
 
-  if (cdnUrl) {
+  if (cdnUrl && !error) {
     return (
       <img 
         src={cdnUrl} 
@@ -33,6 +35,7 @@ export function BrandIcon({
         className={cn("object-contain transition-all", className)}
         style={{ width, height }}
         loading="lazy"
+        onError={() => setError(true)}
       />
     );
   }
@@ -43,6 +46,8 @@ export function BrandIcon({
     if (platform === 'official_website') {
       iconName = 'lucide:globe';
     } else {
+      // Normalize for simple-icons (e.g. 'youtube_music' -> 'youtubemusic' or 'youtube-music')
+      // Simple Icons usually uses hyphens
       iconName = `simple-icons:${platform.toLowerCase().replace(/_/g, '-')}`;
     }
   }

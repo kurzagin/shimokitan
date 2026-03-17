@@ -34,7 +34,7 @@ export async function POST(req: Request) {
                     // For HLS/Audio, path them into the audio folder.
                     key = storagePaths.artifactAudio(contextId, finalFilename, role || mediaId);
                 } else {
-                    key = `raw/artifacts/${contextId}/${role || mediaId}/${finalFilename}`;
+                    key = storagePaths.artifactDump(contextId, finalFilename, role || mediaId);
                 }
                 break;
             case 'profiles':
@@ -45,6 +45,9 @@ export async function POST(req: Request) {
                 break;
             case 'collections':
                 key = storagePaths.collectionImage(contextId, finalFilename);
+                break;
+            case 'platforms':
+                key = storagePaths.platformLogo(contextId);
                 break;
             default:
                 return NextResponse.json({ error: 'INVALID_CONTEXT' }, { status: 400 });

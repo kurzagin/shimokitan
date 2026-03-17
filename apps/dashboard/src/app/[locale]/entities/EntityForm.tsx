@@ -21,12 +21,20 @@ type Member = {
     memberRole: string;
 };
 
+export interface Platform {
+    id: string;
+    name: string;
+    category: string;
+}
+
 export default function EntityForm({
     initialData,
-    entities = []
+    entities = [],
+    platforms = []
 }: {
     initialData?: any,
-    entities?: { id: string, name: string, type: string }[]
+    entities?: { id: string, name: string, type: string }[],
+    platforms?: Platform[]
 }) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,7 +66,7 @@ export default function EntityForm({
             ? (Array.isArray(initialData.socialLinks)
                 ? initialData.socialLinks
                 : Object.entries(initialData.socialLinks).map(([platform, url]) => ({ platform, url: url as string })))
-            : [{ platform: 'twitter', url: '' }]
+            : [{ platform: 'x', url: '' }]
     );
 
     const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData?.avatar?.url || initialData?.avatarUrl || null);
@@ -151,7 +159,7 @@ export default function EntityForm({
         setTranslations(translations.map(t => t.locale === locale ? { ...t, [field]: value } : t));
     };
 
-    const addSocial = () => setSocials([...socials, { platform: 'twitter', url: '' }]);
+    const addSocial = () => setSocials([...socials, { platform: platforms[0]?.id || 'x', url: '' }]);
     const removeSocial = (idx: number) => setSocials(socials.filter((_, i) => i !== idx));
     const updateSocial = (idx: number, field: keyof SocialLink, value: string) => {
         const newSocials = [...socials];
@@ -508,30 +516,15 @@ export default function EntityForm({
                                     <select
                                         value={link.platform}
                                         onChange={(e) => updateSocial(i, 'platform', e.target.value)}
-                                        className="w-full bg-zinc-950 border border-zinc-800 p-2.5 text-[10px] text-white rounded-lg focus:border-violet-600 outline-none cursor-pointer"
+                                        className="w-full bg-zinc-950 border border-zinc-800 p-2.5 text-[10px] text-white rounded-lg focus:border-violet-600 outline-none cursor-pointer uppercase font-bold"
                                     >
-                                        <option value="x">X</option>
-                                        <option value="youtube">YOUTUBE</option>
-                                        <option value="niconico">NICONICO</option>
-                                        <option value="ko_fi">KO-FI</option>
-                                        <option value="booth">BOOTH</option>
-                                        <option value="vgen">VGEN</option>
-                                        <option value="skeb">SKEB</option>
-                                        <option value="pixiv">PIXIV</option>
-                                        <option value="fanbox">FANBOX</option>
-                                        <option value="patreon">PATREON</option>
-                                        <option value="buymeacoffee">BUY_ME_A_COFFEE</option>
-                                        <option value="artstation">ARTSTATION</option>
-                                        <option value="behance">BEHANCE</option>
-                                        <option value="instagram">INSTAGRAM</option>
-                                        <option value="tiktok">TIKTOK</option>
-                                        <option value="bandcamp">BANDCAMP</option>
-                                        <option value="soundcloud">SOUNDCLOUD</option>
-                                        <option value="landr">LANDR</option>
-                                        <option value="gumroad">GUMROAD</option>
-                                        <option value="etsy">ETSY</option>
-                                        <option value="fiverr">FIVERR</option>
-                                        <option value="github">GITHUB</option>
+                                        {(platforms.length > 0 ? platforms : [
+                                            { id: 'x', name: 'X' },
+                                            { id: 'youtube', name: 'YouTube' },
+                                            { id: 'instagram', name: 'Instagram' },
+                                        ]).map(p => (
+                                            <option key={p.id} value={p.id}>{p.name.toUpperCase()}</option>
+                                        ))}
                                         <option value="other">OTHER_NODE</option>
                                     </select>
                                 </div>

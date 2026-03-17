@@ -7,8 +7,8 @@
  * Schema: {media_type}/{context}/{identifier}/{filename}
  */
 
-export type MediaType = 'images' | 'audio' | 'video' | 'raw';
-export type StorageContext = 'artifacts' | 'works' | 'zines' | 'profiles' | 'echos' | 'soundchecks' | 'metadata' | 'collections';
+export type MediaType = 'images' | 'audio' | 'video' | 'dumps';
+export type StorageContext = 'artifacts' | 'works' | 'zines' | 'profiles' | 'echos' | 'soundchecks' | 'metadata' | 'collections' | 'platforms';
 
 interface PathOptions {
     mediaType: MediaType;
@@ -96,8 +96,14 @@ export const storagePaths = {
         generateStoragePath({ mediaType: 'images', context: 'zines', identifier: zineId, filename }),
 
     /**
-     * Path for a Zine raw PDF/Print export.
+     * Path for a platform logo.
      */
-    zineRaw: (zineId: string, filename: string) =>
-        generateStoragePath({ mediaType: 'raw', context: 'zines', identifier: zineId, filename }),
+    platformLogo: (platformId: string) =>
+        generateStoragePath({ mediaType: 'images', context: 'platforms', identifier: platformId, filename: `${platformId}.webp` }),
+
+    /**
+     * Path for unsupported files or failed uploads (Dumps).
+     */
+    artifactDump: (artifactId: string, filename: string, role?: string) =>
+        generateStoragePath({ mediaType: 'dumps', context: 'artifacts', identifier: artifactId, role, filename }),
 };

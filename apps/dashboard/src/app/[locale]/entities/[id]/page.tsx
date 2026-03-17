@@ -34,6 +34,10 @@ export default async function EditEntityPage(props: { params: Promise<{ locale: 
         with: { translations: true, avatar: true }
     }) : [];
 
+    const platforms = db ? await db.query.externalPlatforms.findMany({
+        orderBy: (p, { asc }) => [asc(p.name)]
+    }) : [];
+
     const entitySelectData = allEntities.map(e => ({
         id: e.id,
         name: e.translations?.[0]?.name || "Untitled",
@@ -66,7 +70,11 @@ export default async function EditEntityPage(props: { params: Promise<{ locale: 
                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                     <Icon icon="lucide:fingerprint" width={160} />
                 </div>
-                <EntityForm initialData={entity} entities={entitySelectData} />
+                <EntityForm 
+                    initialData={entity} 
+                    entities={entitySelectData} 
+                    platforms={platforms as any}
+                />
             </section>
         </div>
     );

@@ -122,17 +122,24 @@ export default function HomeClient({
   }, []);
 
   const heroArtifact = spotlightArtifacts[0];
+  // Determine if the database is effectively empty/wiped
+  const isDataEmpty = spotlightArtifacts.length === 0 && entities.length === 0;
+  
+  // Audio-specific wipe: If no artifacts exist at all, any local audio state is likely stale seeder data
+  const shouldResetAudio = !currentTrack && spotlightArtifacts.length === 0;
 
-  const trackToDisplay = station.currentTrack ||
-    currentTrack || {
-    title: "Station_Offline",
-    artist: "Awaiting Input...",
-    format: "null",
-    bitrate: "0_kbps",
-    cover: "",
-  };
-  const hasTrack = !!station.currentTrack?.src || !!currentTrack?.src;
-  const isDockedActive = hasTrack;
+  // Sync Store with DB State: If the system is wiped or has no music, reset the local audio cache
+  useEffect(() => {
+    if (shouldResetAudio && station.currentTrack && !station.isClosed) {
+      console.log("SHIM_SYSTEM: No hosted audio found on server. Clearing local cache.");
+      station.reset();
+    }
+  }, [shouldResetAudio, station.currentTrack, station.isClosed]);
+
+  // If server reports no music and no artifacts, we ignore the local store to prevent "ghost" records
+  const trackToDisplay = shouldResetAudio ? null : (station.currentTrack || currentTrack);
+  const hasTrack = !!(trackToDisplay?.src);
+  const isDockedActive = hasTrack && !station.isClosed;
 
   return (
     <div className="
@@ -356,25 +363,29 @@ export default function HomeClient({
                   />
                 ))}
                 <div className="relative w-[42%] h-[42%] rounded-full overflow-hidden border-[3px] border-zinc-950 z-10 shadow-lg">
-                  {trackToDisplay.cover ? (
+                  {trackToDisplay?.cover ? (
                     <img
-                      src={trackToDisplay.cover}
+                      src={trackToDisplay?.cover}
                       className={cn(
                         "w-full h-full object-cover transition-opacity duration-700",
                         !isDockedActive && "opacity-40"
                       )}
                       alt="current signal"
+                      onError={(e) => {
+                        // Fallback for broken images (like deleted seeder assets)
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                      }}
                     />
-                  ) : (
-                    <div className="w-full h-full bg-zinc-900 flex items-center justify-center">
-                      <Icon
-                        icon="lucide:radio"
-                        width={24}
-                        height={24}
-                        className="text-zinc-800"
-                      />
-                    </div>
-                  )}
+                  ) : null}
+                  <div className={cn("w-full h-full bg-zinc-900 flex items-center justify-center", trackToDisplay?.cover ? "hidden" : "")}>
+                    <Icon
+                      icon="lucide:radio"
+                      width={24}
+                      height={24}
+                      className="text-zinc-800"
+                    />
+                  </div>
                   <div className="absolute inset-0 bg-black/10" />
                 </div>
                 <div className="absolute w-2 h-2 bg-zinc-400 rounded-full border border-zinc-950 z-20" />
@@ -412,28 +423,44 @@ export default function HomeClient({
 
             {/* Track Info */}
             <div className="mt-3 flex flex-col items-center">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="zinc">{trackToDisplay.format || "null"}</Badge>
-                <span className="text-[8px] font-mono text-zinc-600 uppercase">
-                  {trackToDisplay.bitrate || "0_kbps"}
-                </span>
-              </div>
-              <h3
-                className={cn(
-                  "text-sm font-black tracking-tighter uppercase italic leading-none transition-colors",
-                  isDockedActive ? "text-white" : "text-zinc-700"
-                )}
-              >
-                {trackToDisplay.title || "Station_Offline"}
-              </h3>
-              <p
-                className={cn(
-                  "text-[9px] font-mono font-bold uppercase tracking-widest mt-1",
-                  isDockedActive ? "text-violet-500" : "text-zinc-800"
-                )}
-              >
-                {trackToDisplay.artist || "Awaiting Input..."}
-              </p>
+              {!hasTrack ? (
+                <div className="flex flex-col items-center animate-pulse">
+                  <div className="flex items-center gap-2 mb-1 opacity-50">
+                    <span className="text-[8px] font-mono text-zinc-600 uppercase">SEARCHING...</span>
+                  </div>
+                  <h3 className="text-sm font-black tracking-tighter uppercase italic leading-none text-zinc-800">
+                    SIGNAL_NOT_FOUND
+                  </h3>
+                  <p className="text-[9px] font-mono font-bold uppercase tracking-widest mt-1 text-zinc-900">
+                    Waiting for Resonance
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="zinc">{trackToDisplay?.format || "null"}</Badge>
+                    <span className="text-[8px] font-mono text-zinc-600 uppercase">
+                      {trackToDisplay?.bitrate || "0_kbps"}
+                    </span>
+                  </div>
+                  <h3
+                    className={cn(
+                      "text-sm font-black tracking-tighter uppercase italic leading-none transition-colors",
+                      isDockedActive ? "text-white" : "text-zinc-700"
+                    )}
+                  >
+                    {trackToDisplay?.title || "Station_Offline"}
+                  </h3>
+                  <p
+                    className={cn(
+                      "text-[9px] font-mono font-bold uppercase tracking-widest mt-1",
+                      isDockedActive ? "text-violet-500" : "text-zinc-800"
+                    )}
+                  >
+                    {trackToDisplay?.artist || "Awaiting Input..."}
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
@@ -579,48 +606,56 @@ export default function HomeClient({
       >
         <div className="flex flex-col items-center justify-start h-full relative pt-2">
           <div className="relative w-full h-64 flex items-center justify-center">
-            {spotlightArtifacts.map((item, i) => (
-              <div
-                key={item.id}
-                onClick={() => setActiveSpotlight(i)}
-                className={`absolute cursor-pointer transition-all duration-500 hover:z-40 ${activeSpotlight === i
-                  ? "z-30 scale-110 shadow-2xl"
-                  : "z-10 opacity-80"
-                  }`}
-                style={{
-                  transform:
-                    activeSpotlight === i
-                      ? "rotate(0deg) translateX(0) translateY(0)"
-                      : `rotate(${i === 0 ? -12 : i === 1 ? 5 : -6
-                      }deg) translateX(${(i - 1) * 20}px) translateY(${i * 10
-                      }px)`,
-                }}
-              >
-                <div className="bg-white p-2 md:p-2.5 rounded-lg shadow-2xl border-2 border-zinc-800 w-40 lg:w-48 text-black">
-                  {item.thumbnailImage ? (
-                    <img
-                      src={item.thumbnailImage}
-                      alt={item.title}
-                      className="w-full h-32 lg:h-40 object-cover rounded"
-                    />
-                  ) : (
-                    <div className="w-full h-32 lg:h-40 bg-zinc-200 rounded flex items-center justify-center border border-dashed border-zinc-400">
-                      <Icon
-                        icon="lucide:image-off"
-                        width={24}
-                        className="text-zinc-400"
+            {spotlightArtifacts.length > 0 ? (
+              spotlightArtifacts.map((item, i) => (
+                <div
+                  key={item.id}
+                  onClick={() => setActiveSpotlight(i)}
+                  className={`absolute cursor-pointer transition-all duration-500 hover:z-40 ${activeSpotlight === i
+                    ? "z-30 scale-110 shadow-2xl"
+                    : "z-10 opacity-80"
+                    }`}
+                  style={{
+                    transform:
+                      activeSpotlight === i
+                        ? "rotate(0deg) translateX(0) translateY(0)"
+                        : `rotate(${i === 0 ? -12 : i === 1 ? 5 : -10
+                        }deg) translateX(${(i - 1) * 20}px) translateY(${i * 10
+                        }px)`,
+                  }}
+                >
+                  <div className="bg-white p-2 md:p-2.5 rounded-lg shadow-2xl border-2 border-zinc-800 w-40 lg:w-48 text-black">
+                    {item.thumbnailImage ? (
+                      <img
+                        src={item.thumbnailImage}
+                        alt={item.title}
+                        className="w-full h-32 lg:h-40 object-cover rounded"
                       />
+                    ) : (
+                      <div className="w-full h-32 lg:h-40 bg-zinc-200 rounded flex items-center justify-center border border-dashed border-zinc-400">
+                        <Icon
+                          icon="lucide:image-off"
+                          width={24}
+                          className="text-zinc-400"
+                        />
+                      </div>
+                    )}
+                    <div className="mt-1.5 text-[11px] font-bold truncate">
+                      {item.title}
                     </div>
-                  )}
-                  <div className="mt-1.5 text-[11px] font-bold truncate">
-                    {item.title}
+                    <Badge variant="distortion" className="text-[10px] mt-1">
+                      {item.category}
+                    </Badge>
                   </div>
-                  <Badge variant="distortion" className="text-[10px] mt-1">
-                    {item.category}
-                  </Badge>
                 </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center p-6 bg-zinc-900/10 border border-dashed border-zinc-800 rounded-xl">
+                <Icon icon="lucide:layers" width={32} className="text-zinc-800 mb-2" />
+                <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest font-black">NO_SHARDS_INDEXED</span>
+                <p className="text-[8px] font-mono text-zinc-700 uppercase mt-1">Fragmented district memory</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </BentoCard>
@@ -805,37 +840,44 @@ export default function HomeClient({
         }
       >
         <div className="flex flex-col gap-2.5">
-          {entities
-            .filter((entity) => !entity.isEncrypted)
-            .slice(0, 3)
-            .map((entity) => (
-              <Link
-                key={entity.id}
-                href={getEntityUrl({ type: entity._rawType, slug: entity.slug })}
-                className="flex items-center gap-3 p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800 hover:border-violet-500/50 hover:bg-violet-500/10 transition-all group/item shadow-sm"
-              >
-                <div className="w-14 h-14 shrink-0 relative bg-zinc-950 rounded border border-zinc-700 shadow-inner overflow-hidden flex items-center justify-center text-zinc-600">
-                  {entity.avatar ? (
-                    <img
-                      src={entity.avatar}
-                      className="w-full h-full object-cover"
-                      alt={entity.name}
-                    />
-                  ) : (
-                    <Icon icon="lucide:user" width={24} />
-                  )}
-                  <div className="absolute top-0 right-0 bg-emerald-500 w-1.5 h-1.5 rounded-bl border-b border-l border-zinc-800 z-10 animate-pulse" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[13px] font-black text-white uppercase italic tracking-tight group-hover/item:text-violet-400 truncate leading-none mb-1">
-                    {entity.name}
+          {entities.filter((entity) => !entity.isEncrypted).length > 0 ? (
+            entities
+              .filter((entity) => !entity.isEncrypted)
+              .slice(0, 3)
+              .map((entity) => (
+                <Link
+                  key={entity.id}
+                  href={getEntityUrl({ type: entity._rawType, slug: entity.slug })}
+                  className="flex items-center gap-3 p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800 hover:border-violet-500/50 hover:bg-violet-500/10 transition-all group/item shadow-sm"
+                >
+                  <div className="w-14 h-14 shrink-0 relative bg-zinc-950 rounded border border-zinc-700 shadow-inner overflow-hidden flex items-center justify-center text-zinc-600">
+                    {entity.avatar ? (
+                      <img
+                        src={entity.avatar}
+                        className="w-full h-full object-cover"
+                        alt={entity.name}
+                      />
+                    ) : (
+                      <Icon icon="lucide:user" width={24} />
+                    )}
+                    <div className="absolute top-0 right-0 bg-emerald-500 w-1.5 h-1.5 rounded-bl border-b border-l border-zinc-800 z-10 animate-pulse" />
                   </div>
-                  <div className="text-[10px] font-mono text-violet-500/80 font-bold uppercase truncate leading-none">
-                    {entity.type.split("_").join(" ")}
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[13px] font-black text-white uppercase italic tracking-tight group-hover/item:text-violet-400 truncate leading-none mb-1">
+                      {entity.name}
+                    </div>
+                    <div className="text-[10px] font-mono text-violet-500/80 font-bold uppercase truncate leading-none">
+                      {entity.type.split("_").join(" ")}
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 opacity-20">
+              <Icon icon="lucide:users" width={32} className="mb-2" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em]">Ghost_District</span>
+            </div>
+          )}
         </div>
       </BentoCard>
 
@@ -850,73 +892,79 @@ export default function HomeClient({
         icon="lucide:disc"
       >
         <div className="grid grid-cols-[0.8fr_1.2fr] grid-rows-2 gap-2 h-[160px] sm:h-full">
-          {(() => {
-            const animeArtifact = spotlightArtifacts.find(
-              (a) => a.category === "anime"
-            );
-            const otherArtifacts = spotlightArtifacts
-              .filter((a) => a.id !== animeArtifact?.id)
-              .slice(0, 2);
-            return (
-              <>
-                {animeArtifact && (
-                  <Link
-                    href={`/artifacts/${animeArtifact.id}`}
-                    className="relative group/item rounded-lg overflow-hidden border border-zinc-900 bg-zinc-950 row-span-2"
-                  >
-                    {animeArtifact.posterImage || animeArtifact.thumbnailImage ? (
-                      <img
-                        src={
-                          animeArtifact.posterImage ||
-                          animeArtifact.thumbnailImage ||
-                          ""
-                        }
-                        className="w-full h-full object-cover transition-all duration-500"
-                        alt={animeArtifact.title}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-zinc-950 text-zinc-800">
-                        <Icon icon="lucide:music" width={32} />
+          {spotlightArtifacts.length > 0 ? (
+            (() => {
+              const animeArtifact = spotlightArtifacts.find(
+                (a) => a.category === "anime"
+              );
+              const otherArtifacts = spotlightArtifacts
+                .filter((a) => a.id !== animeArtifact?.id)
+                .slice(0, 2);
+              return (
+                <>
+                  {animeArtifact && (
+                    <Link
+                      href={`/artifacts/${animeArtifact.id}`}
+                      className="relative group/item rounded-lg overflow-hidden border border-zinc-900 bg-zinc-950 row-span-2"
+                    >
+                      {animeArtifact.posterImage || animeArtifact.thumbnailImage ? (
+                        <img
+                          src={
+                            animeArtifact.posterImage ||
+                            animeArtifact.thumbnailImage ||
+                            ""
+                          }
+                          className="w-full h-full object-cover transition-all duration-500"
+                          alt={animeArtifact.title}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-zinc-950 text-zinc-800">
+                          <Icon icon="lucide:music" width={32} />
+                        </div>
+                      )}
+                      <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-zinc-950/80 backdrop-blur-md sm:translate-y-full sm:group-hover/item:translate-y-0 transition-transform">
+                        <div className="text-[9px] font-black text-white uppercase truncate">
+                          {animeArtifact.title}
+                        </div>
+                        <div className="text-[8px] font-mono text-violet-400 uppercase mt-0.5 tracking-widest">
+                          {animeArtifact.category}
+                        </div>
                       </div>
-                    )}
-                    <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-zinc-950/80 backdrop-blur-md sm:translate-y-full sm:group-hover/item:translate-y-0 transition-transform">
-                      <div className="text-[9px] font-black text-white uppercase truncate">
-                        {animeArtifact.title}
+                    </Link>
+                  )}
+                  {otherArtifacts.map((artifact) => (
+                    <Link
+                      key={artifact.id}
+                      href={`/artifacts/${artifact.id}`}
+                      className="relative group/item rounded-lg overflow-hidden border border-zinc-900 bg-zinc-950"
+                    >
+                      {artifact.thumbnailImage ? (
+                        <img
+                          src={artifact.thumbnailImage}
+                          className="w-full h-full object-cover transition-all duration-500"
+                          alt={artifact.title}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-zinc-950 text-zinc-800">
+                          <Icon icon="lucide:music" width={24} />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-violet-600/20 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                      <div className="absolute bottom-0 left-0 right-0 p-1 bg-black/80 backdrop-blur-md sm:translate-y-full sm:group-hover/item:translate-y-0 transition-transform">
+                        <div className="text-[8px] font-black text-white uppercase truncate px-0.5">
+                          {artifact.title}
+                        </div>
                       </div>
-                      <div className="text-[8px] font-mono text-violet-400 uppercase mt-0.5 tracking-widest">
-                        {animeArtifact.category}
-                      </div>
-                    </div>
-                  </Link>
-                )}
-                {otherArtifacts.map((artifact) => (
-                  <Link
-                    key={artifact.id}
-                    href={`/artifacts/${artifact.id}`}
-                    className="relative group/item rounded-lg overflow-hidden border border-zinc-900 bg-zinc-950"
-                  >
-                    {artifact.thumbnailImage ? (
-                      <img
-                        src={artifact.thumbnailImage}
-                        className="w-full h-full object-cover transition-all duration-500"
-                        alt={artifact.title}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-zinc-950 text-zinc-800">
-                        <Icon icon="lucide:music" width={24} />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-violet-600/20 opacity-0 group-hover/item:opacity-100 transition-opacity" />
-                    <div className="absolute bottom-0 left-0 right-0 p-1 bg-black/80 backdrop-blur-md sm:translate-y-full sm:group-hover/item:translate-y-0 transition-transform">
-                      <div className="text-[8px] font-black text-white uppercase truncate px-0.5">
-                        {artifact.title}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </>
-            );
-          })()}
+                    </Link>
+                  ))}
+                </>
+              );
+            })()
+          ) : (
+            <div className="col-span-2 row-span-2 flex items-center justify-center bg-zinc-950 rounded-lg border border-zinc-900 opacity-20">
+              <Icon icon="lucide:archive" width={48} />
+            </div>
+          )}
         </div>
       </BentoCard>
 
@@ -1122,18 +1170,10 @@ export default function HomeClient({
                 </div>
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-zinc-400 font-mono italic p-8">
-                <Icon
-                  icon="lucide:signal-low"
-                  width={32}
-                  className="mb-3 opacity-30 animate-pulse"
-                />
-                <span className="text-[10px] uppercase tracking-[0.4em] font-black">
-                  No_Active_Transmissions
-                </span>
-                <p className="text-[8px] text-zinc-300 mt-2 uppercase tracking-widest text-center max-w-[200px]">
-                  The district air is silent. No signals detected in the range.
-                </p>
+              <div className="h-full flex flex-col items-center justify-center p-6 text-zinc-400">
+                <Icon icon="lucide:radio-off" width={32} className="mb-2 opacity-50" />
+                <span className="text-[10px] font-mono font-black uppercase tracking-[0.3em]">WAITING_FOR_BROADCAST</span>
+                <p className="text-[8px] font-mono text-zinc-400 uppercase mt-1 opacity-60 italic">System is listening for incoming signals...</p>
               </div>
             )}
           </div>
