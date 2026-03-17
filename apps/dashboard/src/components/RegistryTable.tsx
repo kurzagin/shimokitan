@@ -2,13 +2,12 @@
 "use client"
 
 import React from 'react';
-import { Badge } from '@shimokitan/ui';
 import { Icon } from '@iconify/react';
 import Link from '@/components/Link';
 import DeleteButton from './DeleteButton';
 import RestoreButton from './RestoreButton';
 
-export default function RegistryTable({
+export default function RegistryTable<T extends { id: string }>({
     data,
     columns,
     onDelete,
@@ -17,12 +16,12 @@ export default function RegistryTable({
     editUrl,
     actions = true
 }: {
-    data: any[],
-    columns: { key: string, label: string, render?: (val: any, row: any) => React.ReactNode }[],
-    onDelete?: (id: string) => Promise<any>,
+    data: T[],
+    columns: { key: string, label: string, render?: (val: any, row: T) => React.ReactNode }[],
+    onDelete?: (id: string) => Promise<void | any>,
     deleteProps?: { confirmMessage?: string, title?: string },
-    onRestore?: (id: string) => Promise<any>,
-    editUrl?: (row: any) => string,
+    onRestore?: (id: string) => Promise<void | any>,
+    editUrl?: (row: T) => string,
     actions?: boolean
 }) {
     const [selected, setSelected] = React.useState<string[]>([]);
@@ -121,7 +120,7 @@ export default function RegistryTable({
                                 </td>
                                 {columns.map(col => (
                                     <td key={col.key} className="p-4 text-zinc-400 group-hover:text-white transition-colors">
-                                        {col.render ? col.render(row[col.key], row) : row[col.key]}
+                                        {col.render ? col.render((row as any)[col.key], row) : (row as any)[col.key]}
                                     </td>
                                 ))}
                                 {actions && (

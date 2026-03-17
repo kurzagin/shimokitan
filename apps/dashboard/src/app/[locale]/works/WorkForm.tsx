@@ -15,7 +15,7 @@ import AnilistSync from '../artifacts/components/AnilistSync';
 export default function WorkForm({
     initialData
 }: {
-    initialData?: any
+    initialData?: any | null /* eslint-disable-line @typescript-eslint/no-explicit-any */
 }) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,7 +24,7 @@ export default function WorkForm({
     // Multi-Language State
     const [translations, setTranslations] = useState(
         ['en', 'id', 'ja'].map(lang => {
-            const trans = initialData?.translations?.find((t: any) => t.locale === lang);
+            const trans = initialData?.translations?.find((t: { locale: string }) => t.locale === lang);
             return {
                 locale: lang as 'en' | 'id' | 'ja',
                 title: trans?.title || '',
@@ -43,18 +43,18 @@ export default function WorkForm({
         initialData?.specs ? Object.entries(initialData.specs).map(([k, v]) => ({ key: k, value: String(v) })) : []
     );
     const [tags, setTags] = useState<{ id?: string, name: string }[]>(
-        initialData?.tags?.map((t: any) => ({ id: t.tag.id, name: t.tag.translations?.[0]?.name || '' })) || []
+        initialData?.tags?.map((t: { tag: { id: string, translations?: { name: string }[] } }) => ({ id: t.tag.id, name: t.tag.translations?.[0]?.name || '' })) || []
     );
 
     // Credits State
-    const [credits, setCredits] = useState<any[]>(
-        initialData?.credits?.map((c: any) => ({
-            entityId: c.entityId,
+    const [credits, setCredits] = useState<{ entityId: string; entityName?: string; role: string; contributorClass: 'author' | 'collaborator' | 'staff'; isPrimary: boolean; position: number }[]>(
+        initialData?.credits?.map((c: { entityId: string; entity?: { translations?: { name: string }[] }; role: string; contributorClass: string; isPrimary: boolean; position: number }) => ({
+            entityId: c.entityId || '',
             entityName: c.entity?.translations?.[0]?.name,
-            role: c.role,
-            contributorClass: c.contributorClass,
-            isPrimary: c.isPrimary,
-            position: c.position
+            role: c.role || '',
+            contributorClass: (c.contributorClass as 'author' | 'collaborator' | 'staff') || 'staff',
+            isPrimary: !!c.isPrimary,
+            position: c.position || 0
         })) || []
     );
 
@@ -244,7 +244,7 @@ export default function WorkForm({
                 <div className="space-y-12">
                     {/* 01. CORE_SYSTEM_IDENTIFIER */}
                     <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-6">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">01 // CORE_SYSTEM_IDENTIFIER</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">01 {'//'} CORE_SYSTEM_IDENTIFIER</span>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -397,7 +397,7 @@ export default function WorkForm({
                     {/* 02. LOCALIZATION MATRIX */}
                     <div className="w-full pt-8 border-t border-zinc-900">
                         <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-6">
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">02 // LOCALIZATION_MATRIX</span>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">02 {'//'} LOCALIZATION_MATRIX</span>
                         </div>
                         <div className="flex flex-col bg-zinc-950/20 p-8 border border-zinc-900 rounded-xl backdrop-blur-md">
                             <div className="flex items-center justify-between mb-8 border-b border-zinc-900/50 pb-6">

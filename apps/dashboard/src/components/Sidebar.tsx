@@ -5,6 +5,7 @@ import { Icon } from '@iconify/react';
 import Link from './Link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@shimokitan/ui';
+import Image from 'next/image';
 
 interface NavItem {
     label: string;
@@ -37,7 +38,7 @@ const groups: NavGroup[] = [
     }
 ];
 
-export default function Sidebar({ user }: { user: any }) {
+export default function Sidebar({ user }: { user: { name?: string | null; image?: string | null; role?: string | null } | null | undefined }) {
     const pathname = usePathname();
 
     const isLinkActive = (href: string) => {
@@ -106,7 +107,7 @@ export default function Sidebar({ user }: { user: any }) {
                 <div className="flex items-center gap-3 p-2 bg-black/50 border border-zinc-900 rounded-xl">
                     <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden">
                         {user?.image ? (
-                            <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                            <Image src={user.image} alt={user.name || 'User'} width={32} height={32} className="w-full h-full object-cover" />
                         ) : (
                             <Icon icon="lucide:user" className="text-zinc-600" width={16} />
                         )}

@@ -60,7 +60,7 @@ export default function ArtifactForm({
     platforms = []
 }: {
     entities: Entity[],
-    initialData?: any,
+    initialData?: any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
     onComplete?: () => void,
     userRole?: string,
     verificationId?: string,
@@ -88,7 +88,7 @@ export default function ArtifactForm({
     // --- State Management ---
     const [translations, setTranslations] = useState(
         ['en', 'id', 'ja'].map(lang => {
-            const trans = initialData?.translations?.find((t: any) => t.locale === lang);
+            const trans = initialData?.translations?.find((t: { locale: string }) => t.locale === lang);
             return {
                 locale: lang as 'en' | 'id' | 'ja',
                 title: trans?.title || '',
@@ -137,9 +137,9 @@ export default function ArtifactForm({
     );
     const [tags, setTags] = useState<{ id?: string, name: string }[]>(
         initialData?.tags
-            ? initialData.tags.map((t: any) => ({ 
-                id: (t.tag as any)?.id, 
-                name: (t.tag as any)?.translations?.[0]?.name || (t.tag as any)?.name || 'Unknown' 
+            ? initialData.tags.map((t: { tag: { id: string; name?: string; translations?: { name: string }[] } }) => ({ 
+                id: t.tag.id, 
+                name: t.tag.translations?.[0]?.name || t.tag.name || 'Unknown' 
             }))
             : []
     );
@@ -156,7 +156,7 @@ export default function ArtifactForm({
     const [pendingPosterUrl, setPendingPosterUrl] = useState<string | null>(null);
 
     const [vinylId, setVinylId] = useState<string | null>(initialData?.vinylId || null);
-    const [vinylUrl, setVinylUrl] = useState((initialData as any)?.vinyl?.url || '');
+    const [vinylUrl, setVinylUrl] = useState(initialData?.vinyl?.url || '');
     const [pendingVinylFile, setPendingVinylFile] = useState<File | null>(null);
     const [pendingVinylUrl, setPendingVinylUrl] = useState<string | null>(null);
 
@@ -696,7 +696,7 @@ export default function ArtifactForm({
                     <div className="space-y-6">
                         <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-6">
                              <Icon icon="lucide:link-2" className="text-zinc-500" width={14} />
-                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 font-mono">04 // METADATA_INHERITANCE</span>
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 font-mono">04 {'//'} METADATA_INHERITANCE</span>
                         </div>
                         <div className="bg-zinc-950/40 border border-zinc-900 border-dashed p-12 rounded-xl flex flex-col items-center justify-center text-center gap-4">
                             <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center">

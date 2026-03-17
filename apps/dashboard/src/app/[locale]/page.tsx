@@ -83,7 +83,7 @@ export default async function ConsolePage({ params }: PageProps) {
             <header className="flex justify-between items-start mb-12">
                 <div className="space-y-1">
                     <h2 className="text-4xl font-black italic uppercase tracking-tighter text-white">System_Status: <span className="text-rose-600">Operational.</span></h2>
-                    <p className="text-zinc-500 text-xs font-mono tracking-[0.2em] uppercase">District {locale} // Identity: {user.name} // Permissions: {currentRole}</p>
+                    <p className="text-zinc-500 text-xs font-mono tracking-[0.2em] uppercase">District {locale} {'//'} Identity: {user.name} {'//'} Permissions: {currentRole}</p>
                 </div>
                 <div className="flex items-center gap-6">
                     <div className="bg-zinc-950/50 border border-zinc-950 p-4 rounded-xl backdrop-blur-md">

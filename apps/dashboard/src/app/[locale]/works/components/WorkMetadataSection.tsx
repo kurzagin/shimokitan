@@ -44,7 +44,7 @@ export default function WorkMetadataSection({
         <div className="space-y-12">
             {/* 03. IP_SPECIFICATION_MATRIX */}
             <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-6">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">03 // IP_SPECIFICATION_MATRIX</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">03 {'//'} IP_SPECIFICATION_MATRIX</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">

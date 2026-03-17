@@ -50,7 +50,7 @@ interface BasicInfoSectionProps {
     setIsHosted: (val: boolean) => void;
     sourceArtifactTitle?: string | null;
 
-    entities: any[];
+    entities: { id: string; name: string; type: string }[];
     userRole?: string;
     lockFlags?: boolean;
     artifactId: string;
@@ -322,7 +322,7 @@ export default function BasicInfoSection({
             <div className="w-full pt-8 border-t border-zinc-900">
                 <div className="flex items-center gap-2 border-b border-zinc-900 pb-2 mb-8">
                     <Icon icon="lucide:languages" className="text-zinc-500" width={14} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 font-mono">02 // LOCALIZATION_MATRIX</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 font-mono">02 {'//'} LOCALIZATION_MATRIX</span>
                 </div>
                 <div className="flex flex-col bg-zinc-950/20 p-8 border border-zinc-900 rounded-xl backdrop-blur-md">
                     <div className="flex items-center justify-between mb-8 border-b border-zinc-900/50 pb-6">

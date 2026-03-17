@@ -46,7 +46,7 @@ export default function ArtistRegistryReview({ data }: { data: any[] }) {
                 <div>
                   <div className="font-bold text-zinc-100">{val.name}</div>
                   <div className="text-[9px] font-mono text-zinc-500 uppercase">
-                    {val.type} // {row.contactEmail}
+                    {val.type} {'//'} {row.contactEmail}
                   </div>
                 </div>
               </div>

@@ -97,7 +97,11 @@ export async function uploadFileToR2(
 ): Promise<string> {
     const client = getS3Client();
     const bucketName = process.env.R2_BUCKET_NAME || 'shimokitan';
-    const body = Buffer.isBuffer(file) ? file : Buffer.from(file as any);
+    const body = Buffer.isBuffer(file) 
+        ? file 
+        : typeof file === 'string' 
+            ? Buffer.from(file) 
+            : Buffer.from(file);
 
     const command = new PutObjectCommand({
         Bucket: bucketName,

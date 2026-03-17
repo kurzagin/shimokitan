@@ -17,7 +17,7 @@ export default function VerificationRegistry({ data }: { data: any[] }) {
                     key: 'targetName', label: 'Target', render: (val, row) => (
                         <div>
                             <div className="font-bold text-white">{val}</div>
-                            <div className="text-[9px] font-mono text-zinc-500 uppercase">{row.targetType} // {row.status}</div>
+                            <div className="text-[9px] font-mono text-zinc-500 uppercase">{row.targetType} {'//'} {row.status}</div>
                         </div>
                     )
                 },

@@ -2,7 +2,6 @@
 "use client"
 
 import React, { useState } from 'react';
-import { Icon } from '@iconify/react';
 import { createVerification, updateVerification } from '../actions';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@shimokitan/auth';
@@ -16,7 +15,7 @@ export default function VerificationForm({
 }: {
     artifacts: Option[],
     entities: Option[],
-    initialData?: any
+    initialData?: any /* eslint-disable-line @typescript-eslint/no-explicit-any */
 }) {
     const router = useRouter();
     const { data: session } = authClient.useSession();
@@ -39,10 +38,10 @@ export default function VerificationForm({
             };
 
             if (initialData?.id) {
-                await updateVerification(initialData.id, payload as any);
+                await updateVerification(initialData.id, payload as any /* eslint-disable-line @typescript-eslint/no-explicit-any */);
                 alert('Verification Updated!');
             } else {
-                await createVerification(payload as any);
+                await createVerification(payload as any /* eslint-disable-line @typescript-eslint/no-explicit-any */);
                 alert('Verification Issued!');
             }
 

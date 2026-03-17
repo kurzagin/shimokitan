@@ -34,9 +34,9 @@ export default function WorkCreditsSection({ credits, setCredits }: WorkCreditsS
         ]);
     };
 
-    const updateCredit = (idx: number, field: keyof Credit, value: any) => {
+    const updateCredit = (idx: number, field: keyof Credit, value: string | boolean | number | undefined) => {
         const newCredits = [...credits];
-        newCredits[idx] = { ...newCredits[idx], [field]: value };
+        newCredits[idx] = { ...newCredits[idx], [field]: value } as Credit;
         setCredits(newCredits);
     };
 
@@ -49,7 +49,7 @@ export default function WorkCreditsSection({ credits, setCredits }: WorkCreditsS
             <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-6">
                 <div className="flex items-center gap-2">
                     <Icon icon="lucide:users" className="text-zinc-500" width={14} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">04 // CANON_CONTRIBUTORS</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">04 {'//'} CANON_CONTRIBUTORS</span>
                 </div>
                 <button
                     type="button"

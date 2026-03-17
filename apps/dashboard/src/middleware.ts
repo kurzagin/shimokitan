@@ -1,10 +1,10 @@
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const locales = ['en', 'id', 'ja'];
 const defaultLocale = 'en';
 
-function getLocale(request: any): string {
+function getLocale(request: NextRequest): string {
     const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
     if (cookieLocale && locales.includes(cookieLocale)) {
         return cookieLocale;
@@ -24,7 +24,7 @@ function getLocale(request: any): string {
     return defaultLocale;
 }
 
-export default function middleware(request: any) {
+export default function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     if (
