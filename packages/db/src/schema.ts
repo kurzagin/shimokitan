@@ -36,9 +36,8 @@ export const artifactNatureEnum = pgEnum("artifact_nature", ["original", "cover"
 export const artifactStatusEnum = pgEnum("artifact_status", ["the_pit", "back_alley", "archived"]);
 
 // true   : audio file is live on R2, player can serve it
-// false  : external links only or rights pending
-// (Advanced rights states like pending/revoked are tracked in hosting_rights_log)
-export const hostingRightsEnum = pgEnum("hosting_rights", ["unhosted", "pending", "granted", "hosted", "revoked"]);
+// false  : external links only
+
 
 // Anime artifact sub-type — describes the visual context
 export const animeTypeEnum = pgEnum("anime_type", ["pv", "mv", "trailer", "op", "ed", "special"]);
@@ -56,7 +55,8 @@ export const resourceRoleEnum = pgEnum("resource_role", [
 export const contributorClassEnum = pgEnum("contributor_class", ["author", "collaborator", "staff"]);
 export const verificationTargetEnum = pgEnum("verification_target", ["artifact", "entity", "role_upgrade"]);
 export const verificationStatusEnum = pgEnum("verification_status", ["pending", "approved", "rejected"]);
-export const artifactMediaRoleEnum = pgEnum("artifact_media_role", ["cover", "poster", "background", "logo", "gallery", "thumbnail", "vinyl"]);
+export const artifactMediaRoleEnum = pgEnum("artifact_media_role", ["cover", "poster", "background", "logo", "gallery", "thumbnail", "vinyl", "audio", "video", "source"]);
+export const workMediaRoleEnum = pgEnum("work_media_role", ["poster", "thumbnail", "background", "logo", "gallery"]);
 export const registryApplicationStatusEnum = pgEnum("registry_application_status", ["pending", "reviewed", "approved", "rejected"]);
 
 // ==================================================================
@@ -200,10 +200,6 @@ export const works = pgTable("works", {
     resonance: numeric("resonance", { precision: 12, scale: 4 }).default("0.0000"),
     isVerified: boolean("is_verified").default(false),
 
-    // Canonical Visuals
-    posterId: text("poster_id").references(() => media.id, { onDelete: "set null" }),
-    thumbnailId: text("thumbnail_id").references(() => media.id, { onDelete: "set null" }),
-
     // Canon Identity Specs (BPM, Key, Release Date, Studio, Director)
     specs: jsonb("specs").default({}),
 
@@ -285,20 +281,11 @@ export const artifacts = pgTable("artifacts", {
 
     slug: text("slug").notNull().unique(),
     status: artifactStatusEnum("status").default("back_alley"),
-    isHosted: boolean("is_hosted").default(false),
+
     resonance: numeric("resonance", { precision: 12, scale: 4 }).default("0.0000"),
-    // Optional creative/technical signatures.
-    // Shape is validated by Zod per (category + nature), not enforced in DB.
-    // Music/Original:  { bpm?, key?, durationMs?, isrc?, releaseDate? }
-    // Music/Cover:     { originalReference?, arrangementStyle?, durationMs? }
-    // Music/Live:      { venue?, eventName?, liveDate?, durationMs? }
-    // Anime:           { studio?, director?, broadcastYear?, episodeCount? }
     specs: jsonb("specs").default({}),
 
     isVerified: boolean("is_verified").default(false),
-    thumbnailId: text("thumbnail_id").references(() => media.id, { onDelete: "set null" }),
-    posterId: text("poster_id").references(() => media.id, { onDelete: "set null" }),
-    vinylId: text("vinyl_id").references(() => media.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
@@ -306,12 +293,13 @@ export const artifacts = pgTable("artifacts", {
     categoryIdx: index("idx_artifacts_category").on(t.category),
     statusIdx: index("idx_artifacts_status").on(t.status),
     natureIdx: index("idx_artifacts_nature").on(t.nature),
-    isHostedIdx: index("idx_artifacts_is_hosted").on(t.isHosted),
-    // Composite — common query: "all hosted music originals"
-    categoryNatureHostedIdx: index("idx_artifacts_cat_nature_hosted").on(
-        t.category, t.nature, t.isHosted
+    // Composite — common query: "all music originals"
+    categoryNatureIdx: index("idx_artifacts_cat_nature").on(
+        t.category, t.nature
     ),
 }));
+
+
 
 export const artifactsI18n = pgTable("artifacts_i18n", {
     artifactId: text("artifact_id").references(() => artifacts.id, { onDelete: "cascade" }).notNull(),
@@ -446,6 +434,18 @@ export const externalOriginalsI18n = pgTable("external_originals_i18n", {
     originalArtistName: text("original_artist_name"),
 }, (t) => ({
     pk: primaryKey({ columns: [t.externalId, t.locale] }),
+}));
+
+export const workMedia = pgTable("work_media", {
+    workId: text("work_id").references(() => works.id, { onDelete: "cascade" }).notNull(),
+    mediaId: text("media_id").references(() => media.id, { onDelete: "cascade" }).notNull(),
+    role: workMediaRoleEnum("role").notNull(),
+    position: integer("position").default(0).notNull(),
+    isPrimary: boolean("is_primary").default(false).notNull(),
+    metadata: jsonb("metadata").default({}),
+}, (t) => ({
+    pk: primaryKey({ columns: [t.workId, t.mediaId, t.role] }),
+    workRoleIdx: index("idx_work_media_role").on(t.workId, t.role),
 }));
 
 // ==================================================================
@@ -634,27 +634,8 @@ export const registryApplications = pgTable("registry_applications", {
 // independently from general content moderation.
 // ==================================================================
 
-export const hostingRightsLog = pgTable("hosting_rights_log", {
-    id: text("id").primaryKey(),
-    artifactId: text("artifact_id").references(() => artifacts.id, { onDelete: "cascade" }).notNull(),
+                                                                        
 
-    // Transition recorded
-    fromStatus: hostingRightsEnum("from_status").notNull(),
-    toStatus: hostingRightsEnum("to_status").notNull(),
-
-    // Who actioned it and any supporting evidence
-    actorId: text("actor_id").references(() => users.id).notNull(),
-    r2Key: text("r2_key"),         // proof document, permission DM screenshot, etc.
-    notes: text("notes"),
-
-    // License window (if time-limited permission granted)
-    validFrom: timestamp("valid_from", { withTimezone: true }),
-    validUntil: timestamp("valid_until", { withTimezone: true }),
-
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-}, (t) => ({
-    artifactIdx: index("idx_hosting_rights_artifact").on(t.artifactId),
-}));
 
 // ==================================================================
 // 11. EXTERNAL PLATFORMS (Global Registry)
@@ -685,7 +666,7 @@ export const artifactsRelations = relations(artifacts, ({ one, many }) => ({
     collections: many(collectionArtifacts),
     tags: many(artifactTags),
     verifications: many(verificationRegistry, { relationName: "artifact_verifications" }),
-    hostingRights: many(hostingRightsLog),
+
     externalOriginal: one(externalOriginals, {
         fields: [artifacts.id],
         references: [externalOriginals.artifactId],
@@ -697,21 +678,20 @@ export const artifactsRelations = relations(artifacts, ({ one, many }) => ({
         relationName: "source_artifact",
     }),
     derivedWorks: many(artifacts, { relationName: "source_artifact" }),
-    thumbnail: one(media, {
-        fields: [artifacts.thumbnailId],
-        references: [media.id],
-    }),
-    poster: one(media, {
-        fields: [artifacts.posterId],
-        references: [media.id],
-    }),
-    vinyl: one(media, {
-        fields: [artifacts.vinylId],
-        references: [media.id],
-    }),
     work: one(works, {
         fields: [artifacts.workId],
         references: [works.id],
+    }),
+}));
+
+export const workMediaRelations = relations(workMedia, ({ one }) => ({
+    work: one(works, {
+        fields: [workMedia.workId],
+        references: [works.id],
+    }),
+    media: one(media, {
+        fields: [workMedia.mediaId],
+        references: [media.id],
     }),
 }));
 
@@ -720,14 +700,7 @@ export const worksRelations = relations(works, ({ one, many }) => ({
     artifacts: many(artifacts),
     credits: many(workCredits),
     tags: many(workTags),
-    poster: one(media, {
-        fields: [works.posterId],
-        references: [media.id],
-    }),
-    thumbnail: one(media, {
-        fields: [works.thumbnailId],
-        references: [media.id],
-    }),
+    media: many(workMedia),
 }));
 
 export const workTagsRelations = relations(workTags, ({ one }) => ({
@@ -825,7 +798,7 @@ export const mediaRelations = relations(media, ({ one }) => ({
 export const usersRelations = relations(users, ({ many }) => ({
     managedEntities: many(entityManagers),
     zines: many(zines),
-    hostingActions: many(hostingRightsLog),
+
 }));
 
 export const collectionsRelations = relations(collections, ({ one, many }) => ({
@@ -886,10 +859,8 @@ export const verificationRegistryRelations = relations(verificationRegistry, ({ 
     }),
 }));
 
-export const hostingRightsLogRelations = relations(hostingRightsLog, ({ one }) => ({
-    artifact: one(artifacts, { fields: [hostingRightsLog.artifactId], references: [artifacts.id] }),
-    actor: one(users, { fields: [hostingRightsLog.actorId], references: [users.id] }),
-}));
+
+
 
 export const transmissionsRelations = relations(transmissions, ({ one, many }) => ({
     translations: many(transmissionsI18n),

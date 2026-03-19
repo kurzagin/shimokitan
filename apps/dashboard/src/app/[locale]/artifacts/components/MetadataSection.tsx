@@ -19,7 +19,9 @@ interface Tag {
 interface MetadataSectionProps {
     category: string;
     isHosted?: boolean;
+
     specs: Spec[];
+
     updateSpec: (idx: number, field: keyof Spec, value: string) => void;
     upsertSpec: (key: string, value: string) => void;
     addSpec: () => void;
@@ -33,7 +35,9 @@ interface MetadataSectionProps {
 export default function MetadataSection({
     category,
     isHosted,
+
     specs,
+
     updateSpec,
     upsertSpec,
     addSpec,
@@ -46,6 +50,8 @@ export default function MetadataSection({
     return (
         <div className="space-y-8">
             {!(category === 'music' && isHosted === false) && (
+
+
                 <CategoryPresets
                     category={category}
                     specs={specs}

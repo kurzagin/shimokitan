@@ -18,9 +18,11 @@ export default async function EditArtifactPage(props: { params: Promise<{ locale
             credits: true,
             resources: true,
             translations: true,
-            thumbnail: true,
-            poster: true,
-            vinyl: true,
+            media: {
+                with: {
+                    media: true
+                }
+            },
             sourceArtifact: {
                 with: {
                     translations: true

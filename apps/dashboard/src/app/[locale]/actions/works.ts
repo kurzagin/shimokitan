@@ -44,10 +44,26 @@ export async function createFullWork(data: z.infer<typeof workSchema>) {
             nature: validated.nature,
             status: validated.status,
             slug,
-            thumbnailId: validated.thumbnailId || null,
-            posterId: validated.posterId || null,
             specs: validated.specs || {},
         });
+
+        // Bridge Table Sync for Assets
+        if (validated.assets?.length) {
+            const mediaLinks = validated.assets.map((asset) => ({
+                workId,
+                mediaId: asset.mediaId,
+                role: asset.role as any,
+                isPrimary: asset.isPrimary,
+                position: asset.position
+            }));
+            await tx.insert(schema.workMedia).values(mediaLinks);
+            
+            for (const asset of validated.assets) {
+                await tx.update(schema.media)
+                    .set({ isOrphan: false })
+                    .where(eq(schema.media.id, asset.mediaId));
+            }
+        }
 
         if (validated.translations?.length) {
             await tx.insert(schema.worksI18n).values(
@@ -98,10 +114,6 @@ export async function createFullWork(data: z.infer<typeof workSchema>) {
                 await tx.insert(schema.workTags).values({ workId, tagId });
             }
         }
-
-        if (validated.thumbnailId) {
-            await tx.update(schema.media).set({ isOrphan: false }).where(eq(schema.media.id, validated.thumbnailId));
-        }
     });
 
     revalidatePath('/[locale]/works', 'page');
@@ -120,8 +132,6 @@ export async function updateFullWork(id: string, data: z.infer<typeof workSchema
             category: validated.category,
             nature: validated.nature,
             status: validated.status,
-            thumbnailId: validated.thumbnailId || null,
-            posterId: validated.posterId || null,
             specs: validated.specs || {},
             updatedAt: new Date(),
         };
@@ -133,6 +143,25 @@ export async function updateFullWork(id: string, data: z.infer<typeof workSchema
         await tx.update(schema.works)
             .set(updateData)
             .where(eq(schema.works.id, id));
+
+        // Re-sync Assets
+        await tx.delete(schema.workMedia).where(eq(schema.workMedia.workId, id));
+        if (validated.assets?.length) {
+            const mediaLinks = validated.assets.map((asset) => ({
+                workId: id,
+                mediaId: asset.mediaId,
+                role: asset.role as any,
+                isPrimary: asset.isPrimary,
+                position: asset.position
+            }));
+            await tx.insert(schema.workMedia).values(mediaLinks);
+            
+            for (const asset of validated.assets) {
+                await tx.update(schema.media)
+                    .set({ isOrphan: false })
+                    .where(eq(schema.media.id, asset.mediaId));
+            }
+        }
 
         // Re-sync Translations
         await tx.delete(schema.worksI18n).where(eq(schema.worksI18n.workId, id));
@@ -188,10 +217,6 @@ export async function updateFullWork(id: string, data: z.infer<typeof workSchema
                 }
                 await tx.insert(schema.workTags).values({ workId: id, tagId });
             }
-        }
-
-        if (validated.thumbnailId) {
-            await tx.update(schema.media).set({ isOrphan: false }).where(eq(schema.media.id, validated.thumbnailId));
         }
     });
 

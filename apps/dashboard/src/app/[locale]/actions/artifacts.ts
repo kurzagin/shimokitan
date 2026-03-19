@@ -5,7 +5,6 @@ import { getDb, schema, eq } from '@shimokitan/db';
 import { revalidatePath } from 'next/cache';
 import { slugify, nanoid, artifactSchema } from '@shimokitan/utils';
 import { z } from 'zod';
-import { uploadImageFromUrl } from '@/lib/r2';
 import { requireArchitect, requireFounder, requireUser } from '../auth-helpers';
 
 
@@ -18,8 +17,6 @@ export async function createFullArtifact(data: z.infer<typeof artifactSchema>) {
     const artifactId = validated.id || nanoid();
     const slug = slugify(validated.translations?.[0]?.title || artifactId);
 
-
-
     await db.transaction(async (tx) => {
         await tx.insert(schema.artifacts).values({
             id: artifactId,
@@ -27,31 +24,32 @@ export async function createFullArtifact(data: z.infer<typeof artifactSchema>) {
             nature: validated.nature,
             sourceArtifactId: validated.sourceArtifactId,
             animeType: validated.animeType,
-            isHosted: validated.isHosted,
             slug,
             status: validated.status,
-            resonance: "0", // Initial resonance is always 0 until Zines are written
+            resonance: "0",
             specs: validated.specs || {},
-            isVerified: false, // Verification is a separate administrative event
-            thumbnailId: validated.thumbnailId || null,
-            posterId: validated.posterId || null,
-            vinylId: validated.vinylId || null,
+            isVerified: false,
             workId: validated.workId || null,
         });
 
-        // Bridge Table Sync
-        const mediaLinks = [];
-        if (validated.thumbnailId) mediaLinks.push({ artifactId, mediaId: validated.thumbnailId, role: 'cover' as any, isPrimary: true });
-        if (validated.posterId) mediaLinks.push({ artifactId, mediaId: validated.posterId, role: 'poster' as any, isPrimary: false });
-        if (validated.vinylId) mediaLinks.push({ artifactId, mediaId: validated.vinylId, role: 'vinyl' as any, isPrimary: false });
-
-        if (mediaLinks.length) {
+        // Unified Assets bridge
+        if (validated.assets?.length) {
+            const mediaLinks = validated.assets.map(asset => ({
+                artifactId,
+                mediaId: asset.mediaId,
+                role: asset.role as any,
+                isPrimary: asset.isPrimary,
+                position: asset.position
+            }));
             await tx.insert(schema.artifactMedia).values(mediaLinks);
-            for (const link of mediaLinks) {
-                await tx.update(schema.media).set({ isOrphan: false }).where(eq(schema.media.id, link.mediaId));
+            
+            // Mark media as not orphan
+            for (const asset of validated.assets) {
+                await tx.update(schema.media)
+                    .set({ isOrphan: false })
+                    .where(eq(schema.media.id, asset.mediaId));
             }
         }
-
 
         if (validated.verificationId) {
             await tx.update(schema.verificationRegistry)
@@ -151,23 +149,15 @@ export async function createFullArtifact(data: z.infer<typeof artifactSchema>) {
     });
 
     revalidatePath('/[locale]/artifacts', 'layout');
-    revalidatePath('/[locale]/artifacts', 'layout');
     revalidatePath('/', 'layout');
     return { id: artifactId };
 }
 
 export async function updateFullArtifact(id: string, data: z.infer<typeof artifactSchema>) {
     await requireArchitect();
-    console.log('[DEBUG] Update Request for ID:', id);
-    console.log('[DEBUG] Raw Data Credits:', data.credits?.length);
-    
     const validated = artifactSchema.parse(data);
-    console.log('[DEBUG] Validated Credits:', JSON.stringify(validated.credits, null, 2));
-    
     const db = getDb();
     if (!db) throw new Error('DB_Terminal_Offline');
-
-
 
     await db.transaction(async (tx) => {
         await tx.update(schema.artifacts)
@@ -176,10 +166,6 @@ export async function updateFullArtifact(id: string, data: z.infer<typeof artifa
                 nature: validated.nature,
                 sourceArtifactId: validated.sourceArtifactId,
                 animeType: validated.animeType,
-                isHosted: validated.isHosted,
-                thumbnailId: validated.thumbnailId,
-                posterId: validated.posterId,
-                vinylId: validated.vinylId,
                 status: validated.status,
                 specs: validated.specs,
                 workId: validated.workId,
@@ -187,25 +173,28 @@ export async function updateFullArtifact(id: string, data: z.infer<typeof artifa
             })
             .where(eq(schema.artifacts.id, id));
 
-        // Check for manual credits metadata updates
         if (validated.nature === 'original' || validated.nature === 'compilation') {
             await tx.delete(schema.externalOriginals).where(eq(schema.externalOriginals.artifactId, id));
         }
 
-        // Bridge Table Sync (Delete and Re-insert for active roles)
+        // Bridge Table Sync for Assets
         await tx.delete(schema.artifactMedia).where(eq(schema.artifactMedia.artifactId, id));
-        const mediaLinks = [];
-        if (validated.thumbnailId) mediaLinks.push({ artifactId: id, mediaId: validated.thumbnailId, role: 'cover' as any, isPrimary: true });
-        if (validated.posterId) mediaLinks.push({ artifactId: id, mediaId: validated.posterId, role: 'poster' as any, isPrimary: false });
-        if (validated.vinylId) mediaLinks.push({ artifactId: id, mediaId: validated.vinylId, role: 'vinyl' as any, isPrimary: false });
-
-        if (mediaLinks.length) {
+        if (validated.assets?.length) {
+            const mediaLinks = validated.assets.map(asset => ({
+                artifactId: id,
+                mediaId: asset.mediaId,
+                role: asset.role as any,
+                isPrimary: asset.isPrimary,
+                position: asset.position
+            }));
             await tx.insert(schema.artifactMedia).values(mediaLinks);
-            for (const link of mediaLinks) {
-                await tx.update(schema.media).set({ isOrphan: false }).where(eq(schema.media.id, link.mediaId));
+            
+            for (const asset of validated.assets) {
+                await tx.update(schema.media)
+                    .set({ isOrphan: false })
+                    .where(eq(schema.media.id, asset.mediaId));
             }
         }
-
 
         // Re-sync Translations
         await tx.delete(schema.artifactsI18n).where(eq(schema.artifactsI18n.artifactId, id));
@@ -258,7 +247,6 @@ export async function updateFullArtifact(id: string, data: z.infer<typeof artifa
         if (validated.tags?.length) {
             for (const t of validated.tags) {
                 let tagId = (t as any).id;
-
                 if (!tagId) {
                     const tagResult = await tx.query.tags.findFirst({
                         where: (tags, { exists, and, eq }) => exists(
@@ -268,18 +256,15 @@ export async function updateFullArtifact(id: string, data: z.infer<typeof artifa
                             ))
                         )
                     });
-                    
                     if (tagResult) {
                         tagId = tagResult.id;
                     } else {
-                        // Create new tag if not found
                         const newTagId = nanoid();
                         await tx.insert(schema.tags).values({ id: newTagId, category: 'other' });
                         await tx.insert(schema.tagsI18n).values({ tagId: newTagId, locale: 'en', name: t.name });
                         tagId = newTagId;
                     }
                 }
-
                 if (tagId) {
                     await tx.insert(schema.artifactTags).values({ artifactId: id, tagId });
                 }
@@ -312,9 +297,6 @@ export async function updateFullArtifact(id: string, data: z.infer<typeof artifa
         }
     });
 
-    console.log('[DEBUG] Update Successful for ID:', id);
-
-    revalidatePath('/[locale]/artifacts', 'layout');
     revalidatePath('/[locale]/artifacts', 'layout');
     revalidatePath(`/[locale]/artifacts/${id}`, 'layout');
     revalidatePath('/', 'layout');
@@ -330,7 +312,6 @@ export async function deleteArtifact(id: string) {
         .set({ deletedAt: new Date() })
         .where(eq(schema.artifacts.id, id));
 
-    revalidatePath('/[locale]/artifacts', 'layout');
     revalidatePath('/[locale]/artifacts', 'layout');
     revalidatePath('/', 'layout');
     return { success: true };
@@ -360,7 +341,6 @@ export async function searchArtifacts(query: string) {
     const results = await db.query.artifacts.findMany({
         where: (a, { and, ilike, exists, isNull }) => {
             const conditions = [isNull(a.deletedAt)];
-            
             conditions.push(exists(
                 db.select().from(schema.artifactsI18n)
                     .where(and(
@@ -368,7 +348,6 @@ export async function searchArtifacts(query: string) {
                         ilike(schema.artifactsI18n.title, `%${query}%`)
                     ))
             ));
-
             return and(...conditions);
         },
         with: {
@@ -383,4 +362,3 @@ export async function searchArtifacts(query: string) {
         category: a.category,
     }));
 }
-

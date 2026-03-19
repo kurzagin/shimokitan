@@ -14,7 +14,11 @@ export default async function EditWorkPage(props: { params: Promise<{ id: string
         where: eq(schema.works.id, id),
         with: {
             translations: true,
-            thumbnail: true
+            media: {
+                with: {
+                    media: true
+                }
+            }
         }
     });
 

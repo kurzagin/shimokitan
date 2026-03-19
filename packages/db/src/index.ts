@@ -35,49 +35,6 @@ export { resolveTranslation } from '@shimokitan/utils';
 
 // --- UTILITIES ---
 
-export async function getAllArtifacts() {
-  const db = getDb();
-  if (!db) return [];
-  return await db.query.artifacts.findMany({
-    where: isNull(schema.artifacts.deletedAt),
-    orderBy: [desc(schema.artifacts.createdAt), desc(schema.artifacts.resonance)],
-    with: {
-      translations: true,
-      thumbnail: true,
-      poster: true,
-      credits: {
-        with: {
-          entity: {
-            with: {
-              translations: true
-            }
-          }
-        }
-      }
-    }
-  });
-}
-
-export async function getArtifactById(id: string) {
-  const db = getDb();
-  if (!db) return null;
-
-  return await db.query.artifacts.findFirst({
-    where: eq(schema.artifacts.id, id),
-    with: artifactRelations
-  });
-}
-
-export async function getArtifactBySlug(slug: string) {
-    const db = getDb();
-    if (!db) return null;
-
-    return await db.query.artifacts.findFirst({
-        where: eq(schema.artifacts.slug, slug),
-        with: artifactRelations
-    });
-}
-
 const artifactRelations = {
     credits: {
         with: {
@@ -92,13 +49,9 @@ const artifactRelations = {
     },
     translations: true,
     resources: true,
-    thumbnail: true,
-    poster: true,
-    vinyl: true,
     sourceArtifact: {
         with: {
-            translations: true,
-            thumbnail: true
+            translations: true
         }
     },
     externalOriginal: true,
@@ -120,8 +73,11 @@ const artifactRelations = {
     work: {
         with: {
             translations: true,
-            thumbnail: true,
-            poster: true,
+            media: {
+                with: {
+                    media: true
+                }
+            },
             tags: {
                 with: {
                     tag: {
@@ -157,6 +113,52 @@ const artifactRelations = {
     }
 } as const;
 
+export async function getAllArtifacts() {
+  const db = getDb();
+  if (!db) return [];
+  return await db.query.artifacts.findMany({
+    where: isNull(schema.artifacts.deletedAt),
+    orderBy: [desc(schema.artifacts.createdAt), desc(schema.artifacts.resonance)],
+    with: {
+      translations: true,
+      media: {
+        with: {
+            media: true
+        }
+      },
+      credits: {
+        with: {
+          entity: {
+            with: {
+              translations: true
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+export async function getArtifactById(id: string) {
+  const db = getDb();
+  if (!db) return null;
+
+  return await db.query.artifacts.findFirst({
+    where: eq(schema.artifacts.id, id),
+    with: artifactRelations
+  });
+}
+
+export async function getArtifactBySlug(slug: string) {
+    const db = getDb();
+    if (!db) return null;
+
+    return await db.query.artifacts.findFirst({
+        where: eq(schema.artifacts.slug, slug),
+        with: artifactRelations
+    });
+}
+
 export async function getZinesByArtifact(artifactId: string) {
   const db = getDb();
   if (!db) return [];
@@ -173,13 +175,16 @@ export async function getAllEntities() {
     with: {
       translations: true,
       avatar: true,
-      thumbnail: true,
       credits: {
         with: {
           artifact: {
             with: {
               translations: true,
-              thumbnail: true
+              media: {
+                  with: {
+                      media: true
+                  }
+              }
             }
           }
         }
@@ -196,8 +201,11 @@ export async function getAllWorks() {
         orderBy: [desc(schema.works.createdAt), desc(schema.works.resonance)],
         with: {
             translations: true,
-            thumbnail: true,
-            poster: true,
+            media: {
+                with: {
+                    media: true
+                }
+            },
             tags: {
                 with: {
                     tag: {
@@ -210,8 +218,12 @@ export async function getAllWorks() {
             artifacts: {
                 with: {
                     translations: true,
-                    thumbnail: true,
-                    resources: true
+                    resources: true,
+                    media: {
+                        with: {
+                            media: true
+                        }
+                    }
                 }
             },
             credits: {
@@ -238,14 +250,17 @@ export async function getEntityById(id: string) {
     with: {
       translations: true,
       avatar: true,
-      thumbnail: true,
       credits: {
         with: {
           artifact: {
             with: {
               translations: true,
               resources: true,
-              thumbnail: true
+              media: {
+                  with: {
+                      media: true
+                  }
+              }
             }
           }
         }
@@ -263,14 +278,17 @@ export async function getEntityBySlug(slug: string) {
     with: {
       translations: true,
       avatar: true,
-      thumbnail: true,
       credits: {
         with: {
           artifact: {
             with: {
               translations: true,
               resources: true,
-              thumbnail: true
+              media: {
+                  with: {
+                      media: true
+                  }
+              }
             }
           }
         }
@@ -278,4 +296,3 @@ export async function getEntityBySlug(slug: string) {
     }
   });
 }
-

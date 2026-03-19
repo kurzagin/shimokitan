@@ -123,14 +123,11 @@ export const artifactSchema = z.object({
     nature: z.enum(ARTIFACT_NATURES).default('original'),
     sourceArtifactId: z.string().optional().nullable(),
     animeType: z.enum(ANIME_TYPES).optional().nullable(),
-    isHosted: z.boolean().default(false),
 
     status: z.enum(ARTIFACT_STATUSES).default('back_alley'),
+
     specs: z.any().optional(), // JSON
     verificationId: z.string().optional(), // Link to pending proof
-    thumbnailId: z.string().optional().nullable(),
-    posterId: z.string().optional().nullable(),
-    vinylId: z.string().optional().nullable(),
     translations: z.array(translationSchema).optional(),
 
     resources: z.array(resourceSchema).optional(),
@@ -138,6 +135,14 @@ export const artifactSchema = z.object({
     exhibits: z.array(exhibitSchema).optional(),
     tags: z.array(tagRefSchema).optional(),
     workId: z.string().optional().nullable(),
+
+    // Unified Assets (Internal Files)
+    assets: z.array(z.object({
+        mediaId: z.string(),
+        role: z.string(),
+        isPrimary: z.boolean().default(false),
+        position: z.number().default(0),
+    })).optional(),
 });
 
 export const collectionSchema = z.object({
@@ -203,12 +208,18 @@ export const workSchema = z.object({
     category: z.enum(ARTIFACT_CATEGORIES),
     nature: z.enum(ARTIFACT_NATURES).default('original'),
     status: z.enum(ARTIFACT_STATUSES).default('back_alley'),
-    thumbnailId: z.string().optional().nullable(),
-    posterId: z.string().optional().nullable(),
     specs: z.any().optional(), // JSON
     translations: z.array(translationSchema).optional(),
     credits: z.array(creditSchema).optional(),
     tags: z.array(tagRefSchema).optional(),
+
+    // Unified Assets (Internal Files)
+    assets: z.array(z.object({
+        mediaId: z.string(),
+        role: z.string(),
+        isPrimary: z.boolean().default(false),
+        position: z.number().default(0),
+    })).optional(),
 });
 
 // --- Types ---

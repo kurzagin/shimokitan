@@ -25,8 +25,6 @@ type Entity = {
     type: string;
 };
 
-// Resource is imported from components/ResourcesSection
-
 type Credit = {
     entityId: string;
     role: string;
@@ -58,7 +56,7 @@ export default function ArtifactForm({
     platforms = []
 }: {
     entities: Entity[],
-    initialData?: any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
+    initialData?: any,
     onComplete?: () => void,
     userRole?: string,
     verificationId?: string,
@@ -82,6 +80,14 @@ export default function ArtifactForm({
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
+
+    // --- Derived helpers for initial assets ---
+    const getInitialMediaId = (role: string) => {
+        return initialData?.media?.find((m: any) => m.role === role)?.media?.id || null;
+    };
+    const getInitialMediaUrl = (role: string) => {
+        return initialData?.media?.find((m: any) => m.role === role)?.media?.url || '';
+    };
 
     // --- State Management ---
     const [translations, setTranslations] = useState(
@@ -143,18 +149,20 @@ export default function ArtifactForm({
     );
 
     const [artifactId] = useState(initialData?.id || nanoid());
-    const [thumbnailId, setThumbnailId] = useState<string | null>(initialData?.thumbnailId || null);
-    const [thumbnailUrl, setThumbnailUrl] = useState(initialData?.thumbnail?.url || '');
+    
+    // Legacy mapping to new unified bridge
+    const [thumbnailId, setThumbnailId] = useState<string | null>(getInitialMediaId('thumbnail'));
+    const [thumbnailUrl, setThumbnailUrl] = useState(getInitialMediaUrl('thumbnail'));
     const [pendingThumbnailFile, setPendingThumbnailFile] = useState<File | null>(null);
     const [pendingThumbnailUrl, setPendingThumbnailUrl] = useState<string | null>(null);
 
-    const [posterId, setPosterId] = useState<string | null>(initialData?.posterId || null);
-    const [posterUrl, setPosterUrl] = useState(initialData?.poster?.url || '');
+    const [posterId, setPosterId] = useState<string | null>(getInitialMediaId('poster'));
+    const [posterUrl, setPosterUrl] = useState(getInitialMediaUrl('poster'));
     const [pendingPosterFile, setPendingPosterFile] = useState<File | null>(null);
     const [pendingPosterUrl, setPendingPosterUrl] = useState<string | null>(null);
 
-    const [vinylId, setVinylId] = useState<string | null>(initialData?.vinylId || null);
-    const [vinylUrl, setVinylUrl] = useState(initialData?.vinyl?.url || '');
+    const [vinylId, setVinylId] = useState<string | null>(getInitialMediaId('vinyl'));
+    const [vinylUrl, setVinylUrl] = useState(getInitialMediaUrl('vinyl'));
     const [pendingVinylFile, setPendingVinylFile] = useState<File | null>(null);
     const [pendingVinylUrl, setPendingVinylUrl] = useState<string | null>(null);
 
@@ -162,14 +170,13 @@ export default function ArtifactForm({
     const [category, setCategory] = useState(initialData?.category || (anilistId ? 'anime' : 'music'));
     const [sourceArtifactId, setSourceArtifactId] = useState<string | null>(initialData?.sourceArtifactId || null);
     const [animeType, setAnimeType] = useState(initialData?.animeType || null);
-    const [isHosted, setIsHosted] = useState<boolean>(!!initialData?.isHosted);
 
     const [workId, setWorkId] = useState<string | null>(initialData?.workId || null);
     const [workTitle, setWorkTitle] = useState<string | null>(initialData?.work?.translations?.[0]?.title || null);
 
     const handleExternalThumbnail = async (url: string) => {
         if (!url) return;
-        setThumbnailUrl(url); // Optimistic UI
+        setThumbnailUrl(url);
         setPendingThumbnailUrl(url);
         setPendingThumbnailFile(null);
     };
@@ -182,13 +189,11 @@ export default function ArtifactForm({
 
     const handleThumbnailUrlSelect = (url: string) => {
         let targetUrl = url;
-        // Support pasting YouTube video links directly into the image selector
         if (url.includes('youtube.com/') || url.includes('youtu.be/')) {
             const id = extractMediaId(url, 'youtube');
             const thumb = getThumbnailUrl(id, 'youtube');
             if (thumb) targetUrl = thumb;
         }
-
         setThumbnailUrl(targetUrl);
         setPendingThumbnailUrl(targetUrl);
         setPendingThumbnailFile(null);
@@ -209,13 +214,11 @@ export default function ArtifactForm({
 
     const handlePosterUrlSelect = (url: string) => {
         let targetUrl = url;
-        // Support pasting YouTube video links directly into the image selector
         if (url.includes('youtube.com/') || url.includes('youtu.be/')) {
             const id = extractMediaId(url, 'youtube');
             const thumb = getThumbnailUrl(id, 'youtube');
             if (thumb) targetUrl = thumb;
         }
-
         setPosterUrl(targetUrl);
         setPendingPosterUrl(targetUrl);
         setPendingPosterFile(null);
@@ -229,37 +232,29 @@ export default function ArtifactForm({
 
     const handleVinylUrlSelect = (url: string) => {
         let targetUrl = url;
-        // Support pasting YouTube video links directly into the image selector
         if (url.includes('youtube.com/') || url.includes('youtu.be/')) {
             const id = extractMediaId(url, 'youtube');
             const thumb = getThumbnailUrl(id, 'youtube');
             if (thumb) targetUrl = thumb;
         }
-
         setVinylUrl(targetUrl);
         setPendingVinylUrl(targetUrl);
         setPendingVinylFile(null);
     };
 
 
-    // --- Handlers ---
     const updateTrans = (locale: string, field: 'title' | 'description', value: string) => {
         setTranslations(translations.map(t => t.locale === locale ? { ...t, [field]: value } : t));
     };
 
     const handleAnilistSync = useCallback((data: any) => {
         if (!data) return;
-
         setCategory('anime');
-
-        // Sync Titles
         setTranslations(prev => prev.map(t => {
             if (t.locale === 'en') return { ...t, title: data.title.english || data.title.romaji };
             if (t.locale === 'ja') return { ...t, title: data.title.native };
             return t;
         }));
-
-        // Sync Metadata (Specs)
         const newSpecs: Spec[] = [
             { key: 'anilist_id', value: String(data.id) },
             { key: 'format', value: data.format },
@@ -268,154 +263,62 @@ export default function ArtifactForm({
             { key: 'status', value: data.status }
         ];
         setSpecs(newSpecs);
-
-        // Sync Tags (Genres)
-        if (data.genres) {
-            setTags(data.genres.map((g: string) => ({ name: g })));
-        }
-
-        // Sync Image (Legacy mapping into Cover, but now we also map to Poster)
+        if (data.genres) setTags(data.genres.map((g: string) => ({ name: g })));
         if (data.coverImage?.extraLarge) {
             handleExternalPoster(data.coverImage.extraLarge);
             if (!thumbnailUrl) handleExternalThumbnail(data.coverImage.extraLarge);
         }
-
-
         toast.success(`Synced metadata for: ${data.title.english || data.title.romaji}`);
-    }, []);
+    }, [thumbnailUrl]);
 
     const addResource = () => setResources([...resources, { type: 'video', platform: 'youtube', url: '', role: 'video', isPrimary: false }]);
     const removeResource = (idx: number) => setResources(resources.filter((_, i) => i !== idx));
     const updateResource = (idx: number, field: keyof Resource, value: any) => {
         const newResources = [...resources];
         if (field === 'isPrimary' && value === true) newResources.forEach(r => r.isPrimary = false);
-
-        // Auto-detect platform and type from URL if it's a URL field
         if (field === 'url' && value) {
             let v = value.toLowerCase();
             if (v.includes('youtube.com/') || v.includes('youtu.be/')) {
-                // Instantly normalize YouTube URLs to the standard format
                 const match = value.match(/(?:v=|\/)([\w-]{11})(?:\?|&|\/|$)/);
-                if (match && match[1]) {
-                    value = `https://www.youtube.com/watch?v=${match[1]}`;
-                    v = value.toLowerCase();
-                }
+                if (match && match[1]) value = `https://www.youtube.com/watch?v=${match[1]}`;
                 newResources[idx].platform = 'youtube';
                 newResources[idx].type = 'video';
                 newResources[idx].role = 'video';
-            } else if (v.includes('spotify.com/')) {
-                newResources[idx].platform = 'spotify';
-                newResources[idx].type = 'audio';
-                newResources[idx].role = 'audio';
-            } else if (v.includes('soundcloud.com/')) {
-                newResources[idx].platform = 'soundcloud';
-                newResources[idx].type = 'audio';
-                newResources[idx].role = 'audio';
-            } else if (v.includes('apple.com/')) {
-                newResources[idx].platform = 'apple_music';
-                newResources[idx].type = 'audio';
-                newResources[idx].role = 'audio';
-            } else if (v.includes('bilibili.com/')) {
-                newResources[idx].platform = 'bilibili';
-                newResources[idx].type = 'video';
-                newResources[idx].role = 'video';
-            } else if (v.includes('nicovideo.jp/')) {
-                newResources[idx].platform = 'niconico';
-                newResources[idx].type = 'video';
-                newResources[idx].role = 'video';
-            } else if (v.includes('x.com/')) {
-                newResources[idx].platform = 'x';
-                newResources[idx].type = 'social';
-                newResources[idx].role = 'social';
-            } else if (v.includes('ko-fi.com/')) {
-                newResources[idx].platform = 'ko_fi';
-                newResources[idx].type = 'social';
-                newResources[idx].role = 'social';
-            } else if (v.includes('booth.pm/')) {
-                newResources[idx].platform = 'booth';
-                newResources[idx].type = 'commerce';
-                newResources[idx].role = 'social';
-            } else if (v.includes('vgen.co/')) {
-                newResources[idx].platform = 'vgen';
-                newResources[idx].type = 'social';
-                newResources[idx].role = 'social';
-            } else if (v.includes('skeb.jp/')) {
-                newResources[idx].platform = 'skeb';
-                newResources[idx].type = 'social';
-                newResources[idx].role = 'social';
-            } else if (v.includes('patreon.com/')) {
-                newResources[idx].platform = 'patreon';
-                newResources[idx].type = 'social';
-                newResources[idx].role = 'social';
-            } else if (v.includes('fanbox.cc/')) {
-                newResources[idx].platform = 'fanbox';
-                newResources[idx].type = 'social';
-                newResources[idx].role = 'social';
-            } else if (v.includes('pixiv.net/')) {
-                newResources[idx].platform = 'pixiv';
-                newResources[idx].type = 'social';
-                newResources[idx].role = 'social';
-            } else if (v.includes('bandcamp.com/')) {
-                newResources[idx].platform = 'bandcamp';
-                newResources[idx].type = 'audio';
-                newResources[idx].role = 'audio';
-            } else if (v.includes('instagram.com/')) {
-                newResources[idx].platform = 'instagram';
-                newResources[idx].type = 'social';
-                newResources[idx].role = 'social';
-            } else if (v.includes('tiktok.com/')) {
-                newResources[idx].platform = 'tiktok';
-                newResources[idx].type = 'social';
-                newResources[idx].role = 'social';
-            } else if (v.includes('crunchyroll.com/')) {
-                newResources[idx].platform = 'crunchyroll';
-                newResources[idx].type = 'video';
-                newResources[idx].role = 'video';
-            } else if (v.includes('netflix.com/')) {
-                newResources[idx].platform = 'netflix';
-                newResources[idx].type = 'video';
-                newResources[idx].role = 'video';
-            } else if (v.includes('steampowered.com/') || v.includes('steamcommunity.com/')) {
-                newResources[idx].platform = 'steam';
-                newResources[idx].type = 'commerce';
-                newResources[idx].role = 'social';
-            } else if (v.includes('amazon.com/') && (v.includes('prime') || v.includes('video'))) {
-                newResources[idx].platform = 'amazon_prime';
-                newResources[idx].type = 'video';
-                newResources[idx].role = 'video';
-            }
+            } else if (v.includes('spotify.com/')) { newResources[idx].platform = 'spotify'; newResources[idx].type = 'audio'; newResources[idx].role = 'audio'; }
+            else if (v.includes('soundcloud.com/')) { newResources[idx].platform = 'soundcloud'; newResources[idx].type = 'audio'; newResources[idx].role = 'audio'; }
+            else if (v.includes('apple.com/')) { newResources[idx].platform = 'apple_music'; newResources[idx].type = 'audio'; newResources[idx].role = 'audio'; }
+            else if (v.includes('bilibili.com/')) { newResources[idx].platform = 'bilibili'; newResources[idx].type = 'video'; newResources[idx].role = 'video'; }
+            else if (v.includes('nicovideo.jp/')) { newResources[idx].platform = 'niconico'; newResources[idx].type = 'video'; newResources[idx].role = 'video'; }
+            else if (v.includes('x.com/')) { newResources[idx].platform = 'x'; newResources[idx].type = 'social'; newResources[idx].role = 'social'; }
+            else if (v.includes('ko-fi.com/')) { newResources[idx].platform = 'ko_fi'; newResources[idx].type = 'social'; newResources[idx].role = 'social'; }
+            else if (v.includes('booth.pm/')) { newResources[idx].platform = 'booth'; newResources[idx].type = 'commerce'; newResources[idx].role = 'social'; }
+            else if (v.includes('vgen.co/')) { newResources[idx].platform = 'vgen'; newResources[idx].type = 'social'; newResources[idx].role = 'social'; }
+            else if (v.includes('skeb.jp/')) { newResources[idx].platform = 'skeb'; newResources[idx].type = 'social'; newResources[idx].role = 'social'; }
+            else if (v.includes('patreon.com/')) { newResources[idx].platform = 'patreon'; newResources[idx].type = 'social'; newResources[idx].role = 'social'; }
+            else if (v.includes('fanbox.cc/')) { newResources[idx].platform = 'fanbox'; newResources[idx].type = 'social'; newResources[idx].role = 'social'; }
+            else if (v.includes('pixiv.net/')) { newResources[idx].platform = 'pixiv'; newResources[idx].type = 'social'; newResources[idx].role = 'social'; }
+            else if (v.includes('bandcamp.com/')) { newResources[idx].platform = 'bandcamp'; newResources[idx].type = 'audio'; newResources[idx].role = 'audio'; }
+            else if (v.includes('instagram.com/')) { newResources[idx].platform = 'instagram'; newResources[idx].type = 'social'; newResources[idx].role = 'social'; }
+            else if (v.includes('tiktok.com/')) { newResources[idx].platform = 'tiktok'; newResources[idx].type = 'social'; newResources[idx].role = 'social'; }
+            else if (v.includes('crunchyroll.com/')) { newResources[idx].platform = 'crunchyroll'; newResources[idx].type = 'video'; newResources[idx].role = 'video'; }
+            else if (v.includes('netflix.com/')) { newResources[idx].platform = 'netflix'; newResources[idx].type = 'video'; newResources[idx].role = 'video'; }
+            else if (v.includes('steampowered.com/') || v.includes('steamcommunity.com/')) { newResources[idx].platform = 'steam'; newResources[idx].type = 'commerce'; newResources[idx].role = 'social'; }
+            else if (v.includes('amazon.com/') && (v.includes('prime') || v.includes('video'))) { newResources[idx].platform = 'amazon_prime'; newResources[idx].type = 'video'; newResources[idx].role = 'video'; }
         }
-
         newResources[idx] = { ...newResources[idx], [field]: value };
-
-        // Auto-thumbnail extraction for specific platforms (YouTube priority)
         if (field === 'url' && value) {
             const isYT = newResources[idx].platform === 'youtube';
-            const isAL = value.includes('s4.anilist.co');
-
-            // We update the thumbnail if it's empty OR if it's currently showing a previous auto-generated one
-            const isCurrentAuto = !thumbnailUrl ||
-                thumbnailUrl.includes('img.youtube.com') ||
-                thumbnailUrl.includes('s4.anilist.co');
-
+            const isCurrentAuto = !thumbnailUrl || thumbnailUrl.includes('img.youtube.com') || thumbnailUrl.includes('s4.anilist.co');
             if (isYT && isCurrentAuto) {
                 const id = extractMediaId(value, 'youtube');
                 const thumb = getThumbnailUrl(id, 'youtube');
                 if (thumb) handleExternalThumbnail(thumb);
             }
         }
-
         setResources(newResources);
     };
 
-    const addCredit = () => setCredits([...credits, {
-        entityId: '',
-        role: '',
-        contributorClass: 'staff',
-        isPrimary: false,
-        isOriginalArtist: false,
-        position: credits.length
-    }]);
+    const addCredit = () => setCredits([...credits, { entityId: '', role: '', contributorClass: 'staff', isPrimary: false, isOriginalArtist: false, position: credits.length }]);
     const removeCredit = (idx: number) => setCredits(credits.filter((_, i) => i !== idx));
     const updateCredit = (idx: number, field: keyof Credit, value: any) => {
         const newCredits = [...credits];
@@ -449,90 +352,88 @@ export default function ArtifactForm({
         e.preventDefault();
         setIsSubmitting(true);
         try {
+            // 1. Upload/Prepare Thumbnail
             let finalThumbnailId = thumbnailId;
-            let finalThumbnailUrl = thumbnailUrl;
-
             if (pendingThumbnailFile) {
-                toast.info('Uploading local thumbnail image...');
+                toast.info('Uploading local thumbnail...');
                 const formData = new FormData();
                 formData.append('file', pendingThumbnailFile);
                 formData.append('context', 'artifact_asset');
                 formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalThumbnailId = res.mediaId;
-                finalThumbnailUrl = res.url;
             } else if (pendingThumbnailUrl) {
-                toast.info('Downloading external thumbnail image...');
+                toast.info('Downloading external thumbnail...');
                 const formData = new FormData();
                 formData.append('url', pendingThumbnailUrl);
                 formData.append('context', 'artifact_asset');
                 formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalThumbnailId = res.mediaId;
-                finalThumbnailUrl = res.url;
             }
 
-            // Handle delayed image upload: POSTER
+            // 2. Upload/Prepare Poster
             let finalPosterId = posterId;
-            let finalPosterUrl = posterUrl;
             if (pendingPosterFile) {
-                toast.info('Uploading local poster image...');
+                toast.info('Uploading local poster...');
                 const formData = new FormData();
                 formData.append('file', pendingPosterFile);
                 formData.append('context', 'artifact_asset');
                 formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalPosterId = res.mediaId;
-                finalPosterUrl = res.url;
             } else if (pendingPosterUrl) {
-                toast.info('Downloading external poster image...');
+                toast.info('Downloading external poster...');
                 const formData = new FormData();
                 formData.append('url', pendingPosterUrl);
                 formData.append('context', 'artifact_asset');
                 formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalPosterId = res.mediaId;
-                finalPosterUrl = res.url;
             }
 
-            // Handle delayed image upload: VINYL
+            // 3. Upload/Prepare Vinyl
             let finalVinylId = vinylId;
-            let finalVinylUrl = vinylUrl;
             if (pendingVinylFile) {
-                toast.info('Uploading local vinyl cover...');
+                toast.info('Uploading local vinyl...');
                 const formData = new FormData();
                 formData.append('file', pendingVinylFile);
                 formData.append('context', 'artifact_asset');
                 formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalVinylId = res.mediaId;
-                finalVinylUrl = res.url;
             } else if (pendingVinylUrl) {
-                toast.info('Downloading external vinyl cover...');
+                toast.info('Downloading external vinyl...');
                 const formData = new FormData();
                 formData.append('url', pendingVinylUrl);
                 formData.append('context', 'artifact_asset');
                 formData.append('contextId', artifactId);
                 const res = await uploadMediaAction(formData);
                 finalVinylId = res.mediaId;
-                finalVinylUrl = res.url;
             }
 
+            // 4. Map to Assets array
+            const localAssets = resources
+                .filter(r => r.platform === 'r2' && r.url)
+                .map(r => ({
+                    mediaId: r.url.split('/').pop() || '',
+                    role: r.role === 'hosted_audio' ? 'audio' : r.role,
+                    isPrimary: r.isPrimary,
+                    position: 0
+                }));
 
+            const visualAssets = [
+                finalThumbnailId && { mediaId: finalThumbnailId, role: 'thumbnail', isPrimary: true, position: 0 },
+                finalPosterId && { mediaId: finalPosterId, role: 'poster', isPrimary: false, position: 1 },
+                finalVinylId && { mediaId: finalVinylId, role: 'vinyl', isPrimary: false, position: 2 },
+            ].filter(Boolean) as any[];
+
+            const finalAssets = [...visualAssets, ...localAssets];
+
+            // 5. Build Final Payload
             const cleanCredits = credits.filter(c => c.entityId.trim() !== '');
-            
-            // --- Client-Side Validation ---
-            const cleanSpecs = specs.reduce((acc, curr) => {
-                if (curr.key.trim()) acc[curr.key] = curr.value;
-                return acc;
-            }, {} as Record<string, string>);
-
-            const cleanResources = resources.filter(r => r.url).map(r => ({
-                platform: r.platform,
-                url: r.url,
-                role: r.role,
-                isPrimary: r.isPrimary,
-            }));
+            const cleanSpecs = specs.reduce((acc, curr) => { if (curr.key.trim()) acc[curr.key] = curr.value; return acc; }, {} as Record<string, string>);
+            const cleanResources = resources.filter(r => r.url).map(r => ({ platform: r.platform, url: r.url, role: r.role, isPrimary: r.isPrimary }));
             const cleanTags = tags.filter(t => t.name.trim() !== '');
             const cleanTranslations = translations.filter(t => t.title.trim() !== '');
 
@@ -541,16 +442,10 @@ export default function ArtifactForm({
                 category,
                 sourceArtifactId,
                 animeType,
-                isHosted,
-                thumbnailId: finalThumbnailId,
-                posterId: finalPosterId,
-                vinylId: finalVinylId,
+                assets: finalAssets,
                 resources: cleanResources,
                 credits: cleanCredits,
-                exhibits: exhibits.map(ex => ({
-                    ...ex,
-                    translations: ex.translations.filter(t => t.title.trim() !== '')
-                })),
+                exhibits: exhibits.map(ex => ({ ...ex, translations: ex.translations.filter(t => t.title.trim() !== '') })),
                 specs: cleanSpecs,
                 tags: cleanTags,
                 translations: cleanTranslations,
@@ -560,27 +455,7 @@ export default function ArtifactForm({
 
             const validation = artifactSchema.safeParse(payload);
             if (!validation.success) {
-                const errorMap: Record<string, string> = {
-                    'credits': 'Every contributor requires an assigned department.',
-                    'translations': 'An artifact title is required in at least one locale.',
-                    'category': 'Please select a primary category (Anime/Music).',
-                    'resources': 'At least one valid resource URL is required.'
-                };
-
-                validation.error.issues.forEach((issue: ZodIssue) => {
-                    const path = issue.path[0] as string;
-                    const field = issue.path[issue.path.length - 1] as string;
-                    const customMessage = errorMap[path];
-                    const message = customMessage ? `${customMessage} (${issue.message})` : `Registry_Error [${path}.${field}]: ${issue.message}`;
-                    
-                    if (path === 'credits') {
-                        const index = issue.path[1] as number;
-                        const subField = issue.path[2] as string;
-                        toast.error(`Contributor Ledger Error (Entry #${index + 1}): Missing ${subField === 'role' ? 'Department' : 'Resident Record'}`);
-                    } else {
-                        toast.error(message);
-                    }
-                });
+                validation.error.issues.forEach((issue) => { toast.error(`Registry_Error: ${issue.path.join('.')}: ${issue.message}`); });
                 setIsSubmitting(false);
                 return;
             }
@@ -593,9 +468,8 @@ export default function ArtifactForm({
                 toast.success('System: New Artifact Registered');
             }
 
-            if (onComplete) {
-                onComplete();
-            } else {
+            if (onComplete) onComplete();
+            else {
                 router.refresh();
                 router.push('/artifacts');
             }
@@ -609,17 +483,13 @@ export default function ArtifactForm({
 
     const upsertSpec = (key: string, value: string) => {
         const idx = specs.findIndex(s => s.key === key);
-        if (idx !== -1) {
-            updateSpec(idx, 'value', value);
-        } else {
-            setSpecs(prev => [...prev, { key, value }]);
-        }
+        if (idx !== -1) updateSpec(idx, 'value', value);
+        else setSpecs(prev => [...prev, { key, value }]);
     };
 
     return (
         <div className="relative pb-24">
             <form onSubmit={handleSubmit} className="space-y-12">
-                {/* Context Awareness Section */}
                 {category === 'anime' && !initialData?.id && (
                     <AnilistSync onSync={handleAnilistSync} initialIdentifier={anilistId} />
                 )}
@@ -652,21 +522,10 @@ export default function ArtifactForm({
                     animeType={animeType}
                     setAnimeType={setAnimeType}
                     artifactId={artifactId}
-                    isHosted={isHosted}
-                    setIsHosted={setIsHosted}
                     onHostedAudioUploaded={(url: string) => {
                         const existingAudio = resources.find(r => r.role === 'hosted_audio');
-                        if (existingAudio) {
-                            updateResource(resources.indexOf(existingAudio), 'url', url);
-                        } else {
-                            setResources([...resources, { 
-                                type: 'other',
-                                platform: 'r2', 
-                                url, 
-                                role: 'hosted_audio', 
-                                isPrimary: true 
-                            }]);
-                        }
+                        if (existingAudio) updateResource(resources.indexOf(existingAudio), 'url', url);
+                        else setResources([...resources, { type: 'audio', platform: 'r2', url, role: 'hosted_audio', isPrimary: true }]);
                     }}
                     sourceArtifactId={sourceArtifactId}
                     setSourceArtifactId={setSourceArtifactId}
@@ -696,11 +555,10 @@ export default function ArtifactForm({
                     onMediaUploaded={handleExhibitMediaUploaded}
                 />
 
-                {/* 04. ARTIFACT_METADATA / INHERITANCE */}
                 {!workId ? (
                     <MetadataSection
                         category={category}
-                        isHosted={isHosted}
+                        isHosted={resources.some(r => r.role === 'hosted_audio' && r.platform === 'r2')}
                         specs={specs}
                         updateSpec={updateSpec}
                         upsertSpec={upsertSpec}
@@ -729,19 +587,9 @@ export default function ArtifactForm({
                                 </p>
                             </div>
                             <div className="flex items-center gap-4 mt-4">
-                                <button 
-                                    type="button"
-                                    onClick={() => { setWorkId(null); setWorkTitle(null); }}
-                                    className="text-[9px] font-black uppercase text-zinc-600 hover:text-white transition-all border-b border-transparent hover:border-white"
-                                >
-                                    UNLINK_ANCHOR
-                                </button>
+                                <button type="button" onClick={() => { setWorkId(null); setWorkTitle(null); }} className="text-[9px] font-black uppercase text-zinc-600 hover:text-white transition-all border-b border-transparent hover:border-white">UNLINK_ANCHOR</button>
                                 {workId && (
-                                    <a 
-                                        href={`/works/${workId}`} 
-                                        target="_blank"
-                                        className="text-[9px] font-black uppercase text-zinc-500 hover:text-sky-500 flex items-center gap-1 transition-all"
-                                    >
+                                    <a href={`/works/${workId}`} target="_blank" className="text-[9px] font-black uppercase text-zinc-500 hover:text-sky-500 flex items-center gap-1 transition-all">
                                         VIEW_CANONICAL_SOURCE <Icon icon="lucide:external-link" width={10} />
                                     </a>
                                 )}
@@ -762,14 +610,7 @@ export default function ArtifactForm({
                 <div className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-zinc-900 p-4 z-50 animate-in slide-in-from-bottom-full duration-500">
                     <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
                         <div className="hidden md:flex items-center gap-6 text-zinc-500">
-                            <div className="flex items-center gap-2">
-                                <kbd className="px-1.5 py-0.5 bg-zinc-900 border border-zinc-800 rounded text-[10px] font-mono">ESC</kbd>
-                                <span className="text-[10px] uppercase font-bold">Discard</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <kbd className="px-1.5 py-0.5 bg-zinc-900 border border-zinc-800 rounded text-[10px] font-mono">^ S</kbd>
-                                <span className="text-[10px] uppercase font-bold">Commit_Registry</span>
-                            </div>
+                             <span className="text-[10px] uppercase font-bold tracking-widest opacity-40">System_Prompt: Ensure all records are verified before commitment.</span>
                         </div>
 
                         <div className="flex items-center gap-3 w-full md:w-auto">
@@ -794,3 +635,4 @@ export default function ArtifactForm({
         </div>
     );
 }
+

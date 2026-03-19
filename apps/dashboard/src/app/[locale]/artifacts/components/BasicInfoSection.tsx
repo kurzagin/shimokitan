@@ -3,7 +3,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 import { MediaUploader, PresignedUploader } from '@shimokitan/ui';
-import { uploadMediaAction } from '../../media-actions';
 import ArtifactSearchPicker from './ArtifactSearchPicker';
 import WorkSearchPicker from './WorkSearchPicker';
 
@@ -18,6 +17,7 @@ interface BasicInfoSectionProps {
     setActiveTab: (tab: 'en' | 'id' | 'ja') => void;
     translations: Translation[];
     updateTrans: (locale: string, field: 'title' | 'description', value: string) => void;
+    
     thumbnailId: string | null;
     setThumbnailId: (id: string | null) => void;
     thumbnailUrl: string;
@@ -46,10 +46,8 @@ interface BasicInfoSectionProps {
     setSourceArtifactId: (val: string | null) => void;
     animeType: string | null;
     setAnimeType: (val: string | null) => void;
-    isHosted: boolean;
-    setIsHosted: (val: boolean) => void;
-    sourceArtifactTitle?: string | null;
 
+    sourceArtifactTitle?: string | null;
     entities: { id: string; name: string; type: string }[];
     userRole?: string;
     lockFlags?: boolean;
@@ -86,15 +84,11 @@ export default function BasicInfoSection({
     onVinylUrlSelect,
     category,
     setCategory,
-
     sourceArtifactId,
     setSourceArtifactId,
     animeType,
     setAnimeType,
-    isHosted,
-    setIsHosted,
     sourceArtifactTitle,
-
     entities,
     userRole,
     lockFlags = false,
@@ -110,7 +104,6 @@ export default function BasicInfoSection({
         <div className="space-y-12">
             {/* 01. REGISTRY & VISUALS */}
             <div className="space-y-8">
-            {/* 01. CORE_SYSTEM_ORCHESTRATOR */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
                 {/* 01.A SYSTEM_SIDEBAR */}
                 <div className="lg:col-span-4 space-y-8">
@@ -131,45 +124,30 @@ export default function BasicInfoSection({
                                     <option value="music">MUSIC_TRACK</option>
                                     <option value="anime">ANIME_FEATURE</option>
                                     <option value="game">GAME_ENTITY</option>
-                                    <option value="software">SOFTWARE_UNIT</option>
-                                    <option value="zine">ZINE_RECORD</option>
-                                    <option value="event">EVENT_LOG</option>
-                                    <option value="other">OTHER_SIGNAL</option>
                                 </select>
                             </div>
 
                             {category === 'music' && (
                                 <div className="space-y-4 animate-in fade-in slide-in-from-top-1">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-mono uppercase text-zinc-500 pl-1">Hosting_Signal</label>
-                                        <select
-                                            value={isHosted ? "hosted" : "unhosted"}
-                                            onChange={(e) => setIsHosted(e.target.value === "hosted")}
-                                            className="w-full bg-black border border-zinc-900 p-3 text-xs text-white focus:border-violet-600 outline-none transition-all rounded-lg appearance-none cursor-pointer font-bold"
-                                        >
-                                            <option value="unhosted">UNHOSTED_EXTERNAL</option>
-                                            <option value="hosted">HOSTED_INTERNAL</option>
-                                        </select>
-                                    </div>
-
-                                    {isHosted && (
-                                        <div className="space-y-2 p-4 bg-violet-950/10 border border-violet-900/30 rounded-lg">
-                                            <label className="text-[9px] font-mono uppercase text-violet-400 mb-2 block">Canonical_Audio_Uplink</label>
-                                            <PresignedUploader
-                                                context="artifacts"
-                                                contextId={artifactId}
-                                                accept="audio/*,application/x-mpegURL,.m3u8,.ts,.m4s,.m4a"
-                                                label="UPLINK_BATCH"
-                                                multiple={true}
-                                                preserveFilename={true}
-                                                onUploadSuccess={(url) => {
-                                                    if (onHostedAudioUploaded) onHostedAudioUploaded(url);
-                                                }}
-                                                className="h-24 border-dashed border-zinc-800 hover:border-violet-600 bg-black/40"
-                                            />
-                                            <p className="text-[7px] text-zinc-600 font-mono italic uppercase text-center">HLS Segment Synchronization Required.</p>
+                                    <div className="space-y-2 p-4 bg-violet-950/10 border border-violet-900/30 rounded-lg">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <label className="text-[9px] font-mono uppercase text-violet-400 block">Canonical_Audio_Vault</label>
+                                            <Icon icon="lucide:database" width={12} className="text-violet-500" />
                                         </div>
-                                    )}
+                                        <PresignedUploader
+                                            context="artifacts"
+                                            contextId={artifactId}
+                                            accept="audio/*,application/x-mpegURL,.m3u8,.ts,.m4s,.m4a"
+                                            label="UPLINK_BATCH"
+                                            multiple={true}
+                                            preserveFilename={true}
+                                            onUploadSuccess={(url) => {
+                                                if (onHostedAudioUploaded) onHostedAudioUploaded(url);
+                                            }}
+                                            className="h-24 border-dashed border-zinc-800 hover:border-violet-600 bg-black/40"
+                                        />
+                                        <p className="text-[7px] text-zinc-600 font-mono italic uppercase text-center mt-2">HLS Segment Synchronization Ready.</p>
+                                    </div>
                                 </div>
                             )}
 

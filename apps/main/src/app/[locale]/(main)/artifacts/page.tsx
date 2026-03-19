@@ -6,6 +6,8 @@ import type { Metadata } from 'next';
 
 import { getDictionary, Locale } from "@shimokitan/utils";
 
+const getMediaByRole = (media: any[], role: string) => media?.find(m => m.role === role)?.media;
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const locale = (await params).locale;
     const dict = getDictionary(locale as Locale);
@@ -29,13 +31,16 @@ export default async function ArtifactsBrowsePage(props: { params: Promise<{ loc
         const translation = resolveTranslation(w.translations, locale);
         const primaryCredit = w.credits?.find((c: any) => c.isPrimary) || w.credits?.[0];
         const artistName = resolveTranslation(primaryCredit?.entity?.translations, locale)?.name;
+        
+        const poster = getMediaByRole(w.media, 'poster');
+        const thumbnail = getMediaByRole(w.media, 'thumbnail');
 
         return {
             id: w.id,
             slug: w.slug,
             title: translation?.title || "Untitled",
             category: w.category,
-            coverImage: w.poster?.url || w.thumbnail?.url || null,
+            coverImage: poster?.url || thumbnail?.url || null,
             status: w.status,
             resonance: w.resonance || 0,
             isMajor: (w.resonance || 0) > 20,
@@ -56,12 +61,15 @@ export default async function ArtifactsBrowsePage(props: { params: Promise<{ loc
             ? resolveTranslation(sourceWork.credits?.find((c: any) => c.isPrimary)?.entity?.translations, locale)?.name
             : resolveTranslation(a.credits?.find((c: any) => c.isPrimary)?.entity?.translations, locale)?.name;
 
+        const thumbnail = getMediaByRole(a.media, 'thumbnail');
+        const poster = getMediaByRole(a.media, 'poster');
+
         return {
             id: a.id,
             slug: a.slug,
             title: translation?.title || "Untitled",
             category: a.category,
-            coverImage: a.thumbnail?.url || a.poster?.url || null,
+            coverImage: thumbnail?.url || poster?.url || null,
             status: a.status,
             resonance: a.resonance || 0,
             isMajor: (a.resonance || 0) > 10,
@@ -73,9 +81,6 @@ export default async function ArtifactsBrowsePage(props: { params: Promise<{ loc
     });
 
     // 3. Merged Registry
-    // Logic: 
-    // - For Anime/Game: Show ONLY the Work.
-    // - For Music: Show all Artifacts (since each song is unique).
     const mergedRegistry = [
         ...formattedWorks.filter(w => w.category === 'anime' || w.category === 'game'),
         ...formattedArtifacts.filter(a => a.category === 'music')

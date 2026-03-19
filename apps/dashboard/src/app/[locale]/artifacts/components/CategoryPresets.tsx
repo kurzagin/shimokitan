@@ -32,19 +32,14 @@ export default function CategoryPresets({
                     { key: 'format', label: 'Audio_Format', placeholder: 'e.g. FLAC 24-bit' }
                 ];
             case 'anime':
-            case 'manga':
                 return [
-                    { key: 'episodes', label: category === 'anime' ? 'Episode_Count' : 'Chapter_Count', placeholder: 'e.g. 12' },
+                    { key: 'episodes', label: 'Episode_Count', placeholder: 'e.g. 12' },
                     { key: 'year', label: 'Release_Year', placeholder: 'e.g. 2024' },
                     { key: 'anilist_id', label: 'AniList_Ref', placeholder: 'e.g. 153518' }
                 ];
-            case 'software':
-                return [
-                    { key: 'version', label: 'Build_Version', placeholder: 'e.g. v1.4.2' },
-                    { key: 'license', label: 'License_Type', placeholder: 'e.g. MIT' },
-                    { key: 'engine', label: 'Runtime_Engine', placeholder: 'e.g. Bun 1.1' }
-                ];
             default:
+
+
                 return [];
         }
     };

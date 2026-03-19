@@ -46,8 +46,11 @@ export default async function AppPage({
       where: isNull(schema.artifacts.deletedAt),
       limit: 12, // Fetch more to allow in-memory sorting
       with: {
-        thumbnail: true,
-        poster: true,
+        media: {
+          with: {
+            media: true
+          }
+        },
         translations: true,
       },
     });
@@ -56,12 +59,15 @@ export default async function AppPage({
     spotlightArtifacts = rawArtifacts
       .map((a: any) => {
         const trans = resolveTranslation(a.translations, locale);
+        const thumbnailMedia = (a.media as any[])?.find((m: any) => m.role === 'thumbnail')?.media;
+        const posterMedia = (a.media as any[])?.find((m: any) => m.role === 'poster')?.media;
+        
         return {
           ...a,
           title: trans?.title || "Untitled",
           description: trans?.description || "",
-          thumbnailImage: a.thumbnail?.url || null,
-          posterImage: a.poster?.url || null,
+          thumbnailImage: thumbnailMedia?.url || null,
+          posterImage: posterMedia?.url || null,
         };
       })
       .sort((a, b) => (b.resonance || 0) - (a.resonance || 0))
@@ -81,8 +87,11 @@ export default async function AppPage({
       with: {
         artifact: {
           with: {
-            thumbnail: true,
-            poster: true,
+            media: {
+              with: {
+                media: true
+              }
+            },
             translations: true,
           },
         },
@@ -93,22 +102,24 @@ export default async function AppPage({
 
     recentZines = rawZines.map((z: any) => {
       const zineTrans = resolveTranslation(z.translations, locale);
-      const artifactTrans = z.artifact ? resolveTranslation(z.artifact.translations, locale) : null;
-      
-      return {
-        ...z,
-        content: zineTrans?.content || "",
-        author: z.author?.name || "Anonymous",
-        artifact: z.artifact
-          ? {
-            ...z.artifact,
-            title: artifactTrans?.title || "Untitled",
-            description: artifactTrans?.description || "",
-            thumbnailImage: z.artifact.thumbnail?.url || null,
-            posterImage: z.artifact.poster?.url || null,
-          }
-          : null,
-      };
+        const artifactTrans = z.artifact ? resolveTranslation(z.artifact.translations, locale) : null;
+        const thumbnailMedia = (z.artifact?.media as any[])?.find((m: any) => m.role === 'thumbnail')?.media;
+        const posterMedia = (z.artifact?.media as any[])?.find((m: any) => m.role === 'poster')?.media;
+        
+        return {
+          ...z,
+          content: zineTrans?.content || "",
+          author: z.author?.name || "Anonymous",
+          artifact: z.artifact
+            ? {
+              ...z.artifact,
+              title: artifactTrans?.title || "Untitled",
+              description: artifactTrans?.description || "",
+              thumbnailImage: thumbnailMedia?.url || null,
+              posterImage: posterMedia?.url || null,
+            }
+            : null,
+        };
     });
   } catch (e: any) {
     if (process.env.NODE_ENV !== "production")
@@ -127,8 +138,11 @@ export default async function AppPage({
       orderBy: sql`RANDOM()`,
       limit: 10,
       with: {
-        thumbnail: true,
-        poster: true,
+        media: {
+          with: {
+            media: true
+          }
+        },
         translations: true,
         resources: true,
       },
@@ -157,12 +171,15 @@ export default async function AppPage({
         }
       }
 
+      const thumbnailMedia = (raw.media as any[])?.find((m: any) => m.role === 'thumbnail')?.media;
+      const posterMedia = (raw.media as any[])?.find((m: any) => m.role === 'poster')?.media;
+
       return {
         ...raw,
         title: trans?.title || "Untitled",
         description: trans?.description || "",
-        thumbnailImage: raw.thumbnail?.url || null,
-        posterImage: raw.poster?.url || null,
+        thumbnailImage: thumbnailMedia?.url || null,
+        posterImage: posterMedia?.url || null,
         videoUrl: videoUrl,
       };
     };
@@ -261,22 +278,29 @@ export default async function AppPage({
   // 6. Fetch Latest Hosted Track for Audio Widget
   let currentTrack: any = null;
   try {
-    const latestHosted = await db.query.artifacts.findFirst({
+    const latestHostedResource = await db.query.artifactResources.findFirst({
       where: and(
-        eq(schema.artifacts.isHosted, true),
-        eq(schema.artifacts.category, 'music'),
-        isNull(schema.artifacts.deletedAt)
+        eq(schema.artifactResources.role, 'hosted_audio'),
+        eq(schema.artifactResources.isActive, true)
       ),
-      orderBy: [desc(schema.artifacts.createdAt)],
+      orderBy: [desc(schema.artifactResources.createdAt)],
       with: {
-        thumbnail: true,
-        translations: true,
-        resources: true,
-        credits: {
+        artifact: {
           with: {
-            entity: {
+            media: {
               with: {
-                translations: true
+                media: true
+              }
+            },
+            translations: true,
+            resources: true,
+            credits: {
+              with: {
+                entity: {
+                  with: {
+                    translations: true
+                  }
+                }
               }
             }
           }
@@ -284,9 +308,11 @@ export default async function AppPage({
       }
     });
 
-    if (latestHosted) {
+    if (latestHostedResource?.artifact) {
+      const latestHosted = latestHostedResource.artifact;
       const trans = resolveTranslation(latestHosted.translations, locale);
       const audioRes = latestHosted.resources?.find(r => r.role === 'hosted_audio');
+      const thumbnailMedia = (latestHosted.media as any[])?.find((m: any) => m.role === 'thumbnail')?.media;
       const artistNames = (latestHosted as any).credits
         ?.filter((c: any) => c.isPrimary)
         .map((c: any) => {
@@ -300,7 +326,7 @@ export default async function AppPage({
         title: trans?.title || "Untitled",
         artist: artistNames,
         album: trans?.description?.slice(0, 50) || "Single",
-        cover: latestHosted.thumbnail?.url || "https://upload.wikimedia.org/wikipedia/en/3/39/The_Weeknd_-_Starboy.png",
+        cover: thumbnailMedia?.url || "https://upload.wikimedia.org/wikipedia/en/3/39/The_Weeknd_-_Starboy.png",
         bitrate: "1411 KBPS",
         format: (audioRes as any)?.value?.endsWith('.m3u8') ? "HLS" : "LOSSLESS",
         src: (audioRes as any)?.value || ""
