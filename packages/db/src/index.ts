@@ -49,12 +49,6 @@ const artifactRelations = {
     },
     translations: true,
     resources: true,
-    sourceArtifact: {
-        with: {
-            translations: true
-        }
-    },
-    externalOriginal: true,
     zines: {
         with: {
             translations: true,

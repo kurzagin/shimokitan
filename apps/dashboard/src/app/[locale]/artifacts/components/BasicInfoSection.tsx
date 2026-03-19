@@ -3,7 +3,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 import { MediaUploader, PresignedUploader } from '@shimokitan/ui';
-import ArtifactSearchPicker from './ArtifactSearchPicker';
 import WorkSearchPicker from './WorkSearchPicker';
 
 interface Translation {
@@ -42,12 +41,8 @@ interface BasicInfoSectionProps {
     category: string;
     setCategory: (val: string) => void;
 
-    sourceArtifactId: string | null;
-    setSourceArtifactId: (val: string | null) => void;
     animeType: string | null;
     setAnimeType: (val: string | null) => void;
-
-    sourceArtifactTitle?: string | null;
     entities: { id: string; name: string; type: string }[];
     userRole?: string;
     lockFlags?: boolean;
@@ -84,11 +79,8 @@ export default function BasicInfoSection({
     onVinylUrlSelect,
     category,
     setCategory,
-    sourceArtifactId,
-    setSourceArtifactId,
     animeType,
     setAnimeType,
-    sourceArtifactTitle,
     entities,
     userRole,
     lockFlags = false,
@@ -200,24 +192,6 @@ export default function BasicInfoSection({
                                 </div>
                             </div>
 
-                            <div className="flex flex-col bg-zinc-950/50 border border-zinc-900 rounded-lg transition-all hover:bg-zinc-950">
-                                <div className="bg-zinc-900/50 px-3 py-1.5 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Icon icon="lucide:git-branch" width={10} className="text-zinc-500" />
-                                        <span className="text-[8px] text-zinc-400 font-black uppercase tracking-widest">Derivation_Source</span>
-                                    </div>
-                                    {sourceArtifactId && <Icon icon="lucide:link-2" width={10} className="text-amber-500" />}
-                                </div>
-                                <div className="p-3">
-                                    <ArtifactSearchPicker
-                                        label=""
-                                        value={sourceArtifactId}
-                                        initialTitle={sourceArtifactTitle}
-                                        onSelect={(art) => setSourceArtifactId(art?.id || null)}
-                                        placeholder="Original record link..."
-                                    />
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>

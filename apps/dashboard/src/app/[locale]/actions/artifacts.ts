@@ -22,7 +22,6 @@ export async function createFullArtifact(data: z.infer<typeof artifactSchema>) {
             id: artifactId,
             category: validated.category,
             nature: validated.nature,
-            sourceArtifactId: validated.sourceArtifactId,
             animeType: validated.animeType,
             slug,
             status: validated.status,
@@ -164,7 +163,6 @@ export async function updateFullArtifact(id: string, data: z.infer<typeof artifa
             .set({
                 category: validated.category,
                 nature: validated.nature,
-                sourceArtifactId: validated.sourceArtifactId,
                 animeType: validated.animeType,
                 status: validated.status,
                 specs: validated.specs,
@@ -172,10 +170,6 @@ export async function updateFullArtifact(id: string, data: z.infer<typeof artifa
                 updatedAt: new Date(),
             })
             .where(eq(schema.artifacts.id, id));
-
-        if (validated.nature === 'original' || validated.nature === 'compilation') {
-            await tx.delete(schema.externalOriginals).where(eq(schema.externalOriginals.artifactId, id));
-        }
 
         // Bridge Table Sync for Assets
         await tx.delete(schema.artifactMedia).where(eq(schema.artifactMedia.artifactId, id));

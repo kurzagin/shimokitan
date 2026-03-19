@@ -121,7 +121,6 @@ export const artifactSchema = z.object({
     id: z.string().optional(),
     category: z.enum(ARTIFACT_CATEGORIES),
     nature: z.enum(ARTIFACT_NATURES).default('original'),
-    sourceArtifactId: z.string().optional().nullable(),
     animeType: z.enum(ANIME_TYPES).optional().nullable(),
 
     status: z.enum(ARTIFACT_STATUSES).default('back_alley'),

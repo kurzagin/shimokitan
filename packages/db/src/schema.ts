@@ -256,8 +256,6 @@ export const worksI18n = pgTable("works_i18n", {
 // Design principles:
 //   - `category`      : the domain (music | anime)
 //   - `nature`        : the creative intent (original | cover | live | compilation)
-//   - `hostingStatus` : the player readiness lifecycle (music only)
-//   - `sourceArtifactId` : FK to original work (required when nature = cover)
 //   - `specs`         : jsonb for category+nature-aware optional signatures
 //                       validated by Zod in app layer, never mandatory in DB
 // ==================================================================
@@ -269,12 +267,6 @@ export const artifacts = pgTable("artifacts", {
 
     // IP Anchor linkage
     workId: text("work_id").references(() => works.id, { onDelete: "set null" }),
-
-    // For covers: points to the original artifact IF it exists in the registry.
-    // NULL is valid — the original may be external (e.g. a VOCALOID song on NND).
-    sourceArtifactId: text("source_artifact_id").references(
-        (): any => artifacts.id, { onDelete: "set null" }
-    ),
 
     // For anime: narrows down the visual context
     animeType: animeTypeEnum("anime_type"),  // null for music artifacts
@@ -405,35 +397,6 @@ export const artifactCreditsI18n = pgTable("artifact_credits_i18n", {
     role: text("role"), // Localized role name (e.g. "Vocalist" vs "ボーカル")
 }, (t) => ({
     pk: primaryKey({ columns: [t.creditId, t.locale] }),
-}));
-
-// ==================================================================
-// 5.5. EXTERNAL ORIGINAL REFERENCE
-//
-// When nature = cover and the original work is NOT in the registry,
-// we still want to record the source properly (not just a text field).
-// ==================================================================
-
-export const externalOriginals = pgTable("external_originals", {
-    id: text("id").primaryKey(),
-    artifactId: text("artifact_id").references(() => artifacts.id, { onDelete: "cascade" }).notNull().unique(),
-
-    // The original work's identity
-    title: text("title"),                  // Deprecated: move to i18n table
-    originalArtistName: text("original_artist_name"), // Deprecated: move to i18n table
-    platform: text("platform"),
-    platformUrl: text("platform_url"),           // link to original on NND, YouTube, etc.
-
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
-
-export const externalOriginalsI18n = pgTable("external_originals_i18n", {
-    externalId: text("external_id").references(() => externalOriginals.id, { onDelete: "cascade" }).notNull(),
-    locale: localeEnum("locale").notNull(),
-    title: text("title").notNull(),
-    originalArtistName: text("original_artist_name"),
-}, (t) => ({
-    pk: primaryKey({ columns: [t.externalId, t.locale] }),
 }));
 
 export const workMedia = pgTable("work_media", {
@@ -667,17 +630,6 @@ export const artifactsRelations = relations(artifacts, ({ one, many }) => ({
     tags: many(artifactTags),
     verifications: many(verificationRegistry, { relationName: "artifact_verifications" }),
 
-    externalOriginal: one(externalOriginals, {
-        fields: [artifacts.id],
-        references: [externalOriginals.artifactId],
-    }),
-    // Self-referential: cover → original
-    sourceArtifact: one(artifacts, {
-        fields: [artifacts.sourceArtifactId],
-        references: [artifacts.id],
-        relationName: "source_artifact",
-    }),
-    derivedWorks: many(artifacts, { relationName: "source_artifact" }),
     work: one(works, {
         fields: [artifacts.workId],
         references: [works.id],
@@ -749,15 +701,6 @@ export const artifactCreditsRelations = relations(artifactCredits, ({ one, many 
 
 export const artifactCreditsI18nRelations = relations(artifactCreditsI18n, ({ one }) => ({
     credit: one(artifactCredits, { fields: [artifactCreditsI18n.creditId], references: [artifactCredits.id] }),
-}));
-
-export const externalOriginalsRelations = relations(externalOriginals, ({ one, many }) => ({
-    artifact: one(artifacts, { fields: [externalOriginals.artifactId], references: [artifacts.id] }),
-    translations: many(externalOriginalsI18n),
-}));
-
-export const externalOriginalsI18nRelations = relations(externalOriginalsI18n, ({ one }) => ({
-    externalOriginal: one(externalOriginals, { fields: [externalOriginalsI18n.externalId], references: [externalOriginals.id] }),
 }));
 
 export const entitiesRelations = relations(entities, ({ one, many }) => ({

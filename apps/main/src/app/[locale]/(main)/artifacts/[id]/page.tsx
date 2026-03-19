@@ -108,7 +108,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
     const stationCollaboratorCredits = manifestationCredits.filter((c: any) => c.contributorClass === 'collaborator');
     const stationStaffCredits = manifestationCredits.filter((c: any) => c.contributorClass === 'staff');
 
-    const hasProvenance = artifact.sourceArtifact || artifact.externalOriginal || heritageCredits.length > 0;
+    const hasProvenance = (artifact as any).work || heritageCredits.length > 0;
 
     const hostedAudio = artifact.resources?.find((r: any) => r.role === 'hosted_audio');
 

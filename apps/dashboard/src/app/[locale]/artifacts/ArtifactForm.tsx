@@ -168,7 +168,6 @@ export default function ArtifactForm({
 
 
     const [category, setCategory] = useState(initialData?.category || (anilistId ? 'anime' : 'music'));
-    const [sourceArtifactId, setSourceArtifactId] = useState<string | null>(initialData?.sourceArtifactId || null);
     const [animeType, setAnimeType] = useState(initialData?.animeType || null);
 
     const [workId, setWorkId] = useState<string | null>(initialData?.workId || null);
@@ -440,7 +439,6 @@ export default function ArtifactForm({
             const payload = {
                 id: artifactId,
                 category,
-                sourceArtifactId,
                 animeType,
                 assets: finalAssets,
                 resources: cleanResources,
@@ -527,9 +525,6 @@ export default function ArtifactForm({
                         if (existingAudio) updateResource(resources.indexOf(existingAudio), 'url', url);
                         else setResources([...resources, { type: 'audio', platform: 'r2', url, role: 'hosted_audio', isPrimary: true }]);
                     }}
-                    sourceArtifactId={sourceArtifactId}
-                    setSourceArtifactId={setSourceArtifactId}
-                    sourceArtifactTitle={initialData?.sourceArtifact?.translations?.find((t: any) => t.locale === 'en')?.title || initialData?.sourceArtifact?.translations?.[0]?.title}
                     entities={entities}
                     userRole={userRole}
                     lockFlags={!!verificationId}
