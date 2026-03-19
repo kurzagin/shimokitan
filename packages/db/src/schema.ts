@@ -49,6 +49,7 @@ export const resourceRoleEnum = pgEnum("resource_role", [
     "hosted_audio",    // R2-hosted canonical audio
     "download",        // direct file download
     "social",          // Twitter, Instagram post
+    "commerce",        // Booth, Fanbox, Steam
     "reference",       // original song reference for covers
 ]);
 
@@ -267,6 +268,7 @@ export const artifacts = pgTable("artifacts", {
 
     // IP Anchor linkage
     workId: text("work_id").references(() => works.id, { onDelete: "set null" }),
+    sourceArtifactId: text("source_artifact_id").references((): any => artifacts.id, { onDelete: "set null" }),
 
     // For anime: narrows down the visual context
     animeType: animeTypeEnum("anime_type"),  // null for music artifacts
@@ -633,6 +635,10 @@ export const artifactsRelations = relations(artifacts, ({ one, many }) => ({
     work: one(works, {
         fields: [artifacts.workId],
         references: [works.id],
+    }),
+    sourceArtifact: one(artifacts, {
+        fields: [artifacts.sourceArtifactId],
+        references: [artifacts.id],
     }),
 }));
 

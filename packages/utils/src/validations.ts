@@ -51,7 +51,7 @@ const translationSchema = z.object({
     thesis: z.string().optional(),
 }).passthrough();
 
-export const RESOURCE_ROLES = ['audio', 'video', 'hosted_audio', 'download', 'social', 'reference'] as const;
+export const RESOURCE_ROLES = ['audio', 'video', 'hosted_audio', 'download', 'social', 'commerce', 'reference'] as const;
 
 const youtubeVideoRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
 
