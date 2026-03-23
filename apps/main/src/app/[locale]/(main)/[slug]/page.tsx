@@ -15,8 +15,16 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
     const dict = getDictionary(locale as Locale);
     const s = dict.common.seo;
 
-    // CONSENT FIRST: Only residents have a public profile surface area.
-    if (!entity || entity.civilStatus !== 'resident') return { title: s.entity_not_found };
+    // Check if entity exists
+    if (!entity) return { title: s.entity_not_found };
+
+    // SEALED GATE: For sealed entities, we show a redacted title.
+    if (entity.civilStatus === 'sealed') {
+        return {
+            title: `[REDACTED] // ${s.entity_description.replace('{name}', s.entity_anonymous).replace('{status}', 'Sealed')}`,
+            description: "Signal lost. This entity has not opened a public channel."
+        };
+    }
 
     const translation = resolveTranslation(entity.translations, locale);
     const name = translation?.name || (entity as any).name || s.entity_anonymous;
@@ -80,9 +88,9 @@ export default async function EntityProfilePage(props: { params: Promise<{ local
     }
 
     // Since this is a catch-all at the root level, we only show it if the entity exists.
+    // CONSENT FIRST: Only residents or sealed entities have a surface area.
     // If not found, we let Next.js throw a 404.
-    // CONSENT FIRST: Only residents have a public surface area.
-    if (!entity || entity.civilStatus !== 'resident') {
+    if (!entity) {
         notFound();
     }
 
