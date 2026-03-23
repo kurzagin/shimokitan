@@ -1,6 +1,6 @@
 "use client"
  
-import React from 'react';
+import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import EntitySearchPicker from './EntitySearchPicker';
 import { CREDIT_ROLES } from '@shimokitan/utils';
@@ -39,6 +39,7 @@ export default function CreditsSection({
     removeCredit
 }: CreditsSectionProps) {
     const uiLocale = locale === 'id' ? 'en' : locale;
+    const [activePicker, setActivePicker] = useState<number | null>(null);
 
     return (
         <div className="space-y-4">
@@ -56,19 +57,21 @@ export default function CreditsSection({
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
                 {credits.map((credit, i) => {
                     const isHeritage = credit.isOriginalArtist;
                     return (
                         <div 
                             key={i} 
-                            className={`flex flex-col gap-3 p-4 relative overflow-hidden transition-all ${
+                            className={`flex flex-col gap-3 p-4 relative transition-all ${
+                                activePicker === i ? 'z-40' : 'z-0'
+                            } ${
                                 isHeritage 
                                     ? 'bg-violet-950/20 border-l-2 border-violet-600 ring-1 ring-violet-900/10' 
                                     : 'bg-zinc-950 border-l-2 border-zinc-900'
                             }`}
                         >
-                            <div className="flex gap-3 items-start relative z-10">
+                            <div className="flex gap-3 items-start relative z-20">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 ${
@@ -89,6 +92,7 @@ export default function CreditsSection({
                                         onSelect={(entity) => {
                                             updateCredit(i, 'entityId', entity?.id || '');
                                         }}
+                                        onOpenChange={(open) => setActivePicker(open ? i : null)}
                                         placeholder="Search residency..."
                                         entities={entities}
                                     />
@@ -126,7 +130,7 @@ export default function CreditsSection({
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2 relative z-10">
+                            <div className="grid grid-cols-2 gap-2">
                                  <select
                                      value={credit.role}
                                      onChange={(e) => updateCredit(i, 'role', e.target.value)}
@@ -150,7 +154,7 @@ export default function CreditsSection({
                             </div>
 
                              {!isHeritage && (
-                                <div className="flex gap-2 relative z-10">
+                                <div className="flex gap-2">
                                     <select
                                         value={credit.contributorClass}
                                         onChange={(e) => updateCredit(i, 'contributorClass', e.target.value)}

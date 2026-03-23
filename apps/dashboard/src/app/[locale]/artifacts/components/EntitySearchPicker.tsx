@@ -19,6 +19,7 @@ interface EntitySearchPickerProps {
     type: 'independent' | 'organization' | 'agency' | 'circle' | 'staff' | 'all';
     value?: string; // entityId
     onSelect: (entity: Entity | null) => void;
+    onOpenChange?: (isOpen: boolean) => void;
     placeholder?: string;
     entities?: Entity[]; // Optional pre-loaded entities to find names
 }
@@ -28,14 +29,21 @@ export default function EntitySearchPicker({
     type,
     value,
     onSelect,
+    onOpenChange,
     placeholder = "Search or create...",
     entities = []
 }: EntitySearchPickerProps) {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<Entity[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpenState] = useState(false);
     const [selectedName, setSelectedName] = useState('');
+
+    /** Wrapper to sync open state with parent. */
+    const setIsOpen = (open: boolean) => {
+        setIsOpenState(open);
+        onOpenChange?.(open);
+    };
 
     // Sync selectedName if value changes and we have entities
     useEffect(() => {

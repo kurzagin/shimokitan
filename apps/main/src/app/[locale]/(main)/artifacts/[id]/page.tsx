@@ -8,6 +8,7 @@ import Link from '@/components/Link';
 import { getEntityUrl } from '@shimokitan/utils';
 import { notFound } from 'next/navigation';
 import { PlayButton } from './PlayButton';
+import { ExhibitGallery } from './ExhibitGallery';
 import { StationTrack } from '@/lib/store/station-store';
 import { getDictionary, Locale } from '@shimokitan/utils';
 
@@ -437,37 +438,11 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                         </div>
 
                         {artifact.exhibits && artifact.exhibits.length > 0 && (
-                            <div className="flex flex-col border-t border-zinc-900 pb-12">
-                                <PanelHeader label="Exhibit_Root" icon="lucide:archive" />
-                                <div className="flex flex-col divide-y divide-zinc-900/60">
-                                    {artifact.exhibits.sort((a, b) => ((a.position || 0) - (b.position || 0))).map((exhibit: any) => {
-                                        const exTrans = resolveTranslation(exhibit.translations, locale);
-                                        return (
-                                            <div key={exhibit.id} className="p-6 md:p-8 flex flex-col md:flex-row gap-6 hover:bg-zinc-950/40 transition-colors group/exhibit">
-                                                <div className="w-full md:w-1/3 aspect-video md:aspect-[4/3] bg-zinc-900 border border-zinc-800 overflow-hidden relative">
-                                                    {exhibit.media?.url ? (
-                                                        <img src={exhibit.media.url} alt={exTrans?.title} className="w-full h-full object-cover group-hover/exhibit:scale-105 transition-transform duration-500" />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center">
-                                                            <Icon icon="lucide:file-text" width={32} className="text-zinc-800" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 space-y-4">
-                                                    <h4 className="text-xl font-black italic uppercase tracking-tighter text-white leading-tight">
-                                                        {exTrans?.title || "Untitled_Exhibit"}
-                                                    </h4>
-                                                    {exTrans?.description && (
-                                                        <p className="text-sm md:text-base text-zinc-400 font-serif italic leading-relaxed">
-                                                            {exTrans.description}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                            <ExhibitGallery
+                                exhibits={artifact.exhibits}
+                                locale={locale}
+                                resolveTranslation={resolveTranslation}
+                            />
                         )}
                     </div>
 
