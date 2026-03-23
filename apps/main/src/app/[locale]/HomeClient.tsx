@@ -116,8 +116,8 @@ export default function HomeClient({
   // Determine if the database is effectively empty/wiped
   const isDataEmpty = spotlightArtifacts.length === 0 && entities.length === 0;
   
-  // Audio-specific wipe: If no artifacts exist at all, any local audio state is likely stale seeder data
-  const shouldResetAudio = !currentTrack && spotlightArtifacts.length === 0;
+  // Audio-specific wipe: If no hosted audio exists at all on the server, any local audio state is likely stale seeder data
+  const shouldResetAudio = !currentTrack;
 
   // Sync Store with DB State: If the system is wiped or has no music, reset the local audio cache
   useEffect(() => {
