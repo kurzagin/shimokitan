@@ -532,42 +532,33 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                     <div className="order-4 md:order-2 lg:order-none lg:col-span-4 flex flex-col border-t lg:border-t-0 border-zinc-900">
                         <PanelHeader label="Provenance_Tree" icon="lucide:cpu" />
                         <div className="px-3 py-4 flex flex-col gap-5 pb-20">
-                            {artifact.work && (
-                                <div className="flex flex-col gap-2 relative z-10">
-                                    <div className="flex items-center gap-2 lg:pl-3 mb-0.5">
-                                        <Icon icon="lucide:anchor" width={12} className="text-violet-500 shrink-0" />
-                                        <span className="text-xs font-black text-violet-500 uppercase tracking-[0.35em]">Intellectual_Property</span>
-                                    </div>
-                                    <div className="flex flex-col gap-2 lg:pl-2">
-                                        <div className="flex items-center gap-3 p-3 bg-violet-950/20 border border-l-0 border-violet-900/30 relative overflow-hidden">
-                                            <div className="absolute top-0 left-0 w-0.5 h-full bg-violet-600 shadow-[0_0_6px_rgba(124,58,237,0.5)]" />
-                                            <div className="w-10 h-10 shrink-0 bg-zinc-950 border border-zinc-800 overflow-hidden flex items-center justify-center">
-                                                {getMediaByRole(artifact.work.media, 'thumbnail')?.url
-                                                    ? <img src={getMediaByRole(artifact.work.media, 'thumbnail').url} className="w-full h-full object-cover grayscale opacity-50" />
-                                                    : <Icon icon="lucide:cpu" width={14} className="text-violet-700" />
-                                                }
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="text-sm font-black text-violet-100 uppercase italic truncate leading-tight">
-                                                    {workTranslation?.title}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            {heritageCredits.length > 0 && (
+                                <ProvenanceGroup
+                                    label="Root_Authority"
+                                    icon="lucide:crown"
+                                    color="rose"
+                                    credits={heritageCredits}
+                                    locale={locale}
+                                />
                             )}
 
                             {stationAuthorCredits.length > 0 && (
-                                <TreeGroup label="Station_Authority" icon="lucide:star" color="violet" credits={stationAuthorCredits} locale={locale} />
+                                <ProvenanceGroup
+                                    label="Core_Authority"
+                                    icon="lucide:star"
+                                    color="violet"
+                                    credits={stationAuthorCredits}
+                                    locale={locale}
+                                />
                             )}
 
                             {(stationCollaboratorCredits.length > 0 || stationStaffCredits.length > 0) && (
-                                <TreeGroup 
-                                    label="Support_Grid" 
-                                    icon="lucide:users" 
-                                    color="zinc" 
-                                    credits={[...stationCollaboratorCredits, ...stationStaffCredits]} 
-                                    locale={locale} 
+                                <ProvenanceGroup
+                                    label="Collaborative_Flux"
+                                    icon="lucide:users"
+                                    color="zinc"
+                                    credits={[...stationCollaboratorCredits, ...stationStaffCredits]}
+                                    locale={locale}
                                 />
                             )}
                         </div>
@@ -589,8 +580,24 @@ function PanelHeader({ label, icon, dot, right }: { label: string; icon?: string
     );
 }
 
-function TreeGroup({ label, icon, color, credits, locale }: { label: string; icon: string; color: 'violet' | 'zinc'; credits: any[]; locale: string; }) {
-    const labelColor = color === 'violet' ? 'text-violet-500' : 'text-zinc-600';
+/**
+ * Provenance tree group — renders a labeled section with colored accent.
+ * @param label - Section header label
+ * @param icon - Iconify icon identifier
+ * @param color - Accent color tier (rose=root, violet=core, zinc=collab)
+ * @param credits - Array of credit objects to render
+ * @param locale - Current locale for translation resolution
+ */
+function ProvenanceGroup({ label, icon, color, credits, locale }: {
+    label: string; icon: string; color: 'rose' | 'violet' | 'zinc'; credits: any[]; locale: string;
+}) {
+    const colorMap = {
+        rose: 'text-rose-500',
+        violet: 'text-violet-500',
+        zinc: 'text-zinc-600',
+    };
+    const labelColor = colorMap[color];
+
     return (
         <div className="flex flex-col gap-2 relative z-10">
             <div className="flex items-center gap-2 lg:pl-3 mb-0.5">
@@ -599,33 +606,72 @@ function TreeGroup({ label, icon, color, credits, locale }: { label: string; ico
             </div>
             <div className="flex flex-col gap-2 lg:pl-2">
                 {credits.sort((a: any, b: any) => a.isPrimary ? -1 : 1).map((credit: any, i: number) => (
-                    <CreditRow key={i} credit={credit} locale={locale} isPrimary={credit.isPrimary} />
+                    <ProvenanceCreditRow key={i} credit={credit} locale={locale} color={color} />
                 ))}
             </div>
         </div>
     );
 }
 
-function CreditRow({ credit, locale, isPrimary }: { credit: any; locale: string; isPrimary: boolean }) {
+/**
+ * Individual credit row within a provenance group.
+ * Displays entity avatar, name, role badge, and contributor class.
+ * @param credit - Credit object with entity, role, and translation data
+ * @param locale - Current locale for translation resolution
+ * @param color - Accent color inherited from parent group
+ */
+function ProvenanceCreditRow({ credit, locale, color }: { credit: any; locale: string; color: 'rose' | 'violet' | 'zinc' }) {
     const name = resolveTranslation(credit.entity?.translations, locale)?.name || "Anon";
+    const roleName = resolveTranslation(credit.translations, locale)?.role || credit.role || "ORIGIN";
+    const contributorClass = credit.contributorClass || '';
+
+    const barColorMap = {
+        rose: 'bg-rose-600 shadow-[0_0_6px_rgba(225,29,72,0.5)]',
+        violet: 'bg-violet-600 shadow-[0_0_6px_rgba(124,58,237,0.5)]',
+        zinc: 'bg-zinc-600',
+    };
+    const bgMap = {
+        rose: 'bg-rose-950/20 border-rose-900/30 hover:border-rose-700/50',
+        violet: 'bg-violet-950/20 border-violet-900/30 hover:border-violet-700/50',
+        zinc: 'bg-zinc-900/30 border-zinc-800/60 hover:border-zinc-700/50',
+    };
+    const roleColorMap = {
+        rose: 'text-rose-400 bg-rose-600/10 border-rose-500/20',
+        violet: 'text-violet-400 bg-violet-600/10 border-violet-500/20',
+        zinc: 'text-zinc-400 bg-zinc-600/10 border-zinc-500/20',
+    };
+
     return (
         <Link
             href={credit.entity ? getEntityUrl(credit.entity) : '#'}
             className={cn(
-                "flex items-center gap-3 p-3 border border-l-0 transition-all",
-                isPrimary ? "bg-zinc-900 border-zinc-700/50" : "bg-zinc-900/30 border-zinc-800/60"
+                "flex items-center gap-3 p-3 border border-l-0 relative overflow-hidden transition-all",
+                bgMap[color]
             )}
         >
-            {isPrimary && <div className="absolute top-0 left-0 w-0.5 h-full bg-violet-600" />}
+            <div className={cn("absolute top-0 left-0 w-0.5 h-full", barColorMap[color])} />
             <div className="w-9 h-9 shrink-0 bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden">
                 {credit.entity?.avatar?.url ? (
                     <img src={credit.entity.avatar.url} className="w-full h-full object-cover grayscale" />
                 ) : (
-                    <Icon icon="lucide:user" width={14} className={cn("text-zinc-700", isPrimary && "text-violet-500")} />
+                    <Icon icon="lucide:user" width={14} className="text-zinc-700" />
                 )}
             </div>
             <div className="min-w-0 flex-1">
-                <div className="text-sm font-black text-zinc-100 uppercase italic truncate">{name}</div>
+                <div className="text-sm font-black text-zinc-100 uppercase italic truncate leading-tight">{name}</div>
+                <div className="flex items-center gap-2 mt-1">
+                    <span className={cn(
+                        "px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest leading-none border",
+                        roleColorMap[color]
+                    )}>
+                        {roleName}
+                    </span>
+                    {contributorClass && (
+                        <span className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.1em]">
+                            {contributorClass}
+                        </span>
+                    )}
+                </div>
             </div>
         </Link>
     );
