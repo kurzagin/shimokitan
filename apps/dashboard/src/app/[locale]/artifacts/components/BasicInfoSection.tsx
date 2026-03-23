@@ -221,24 +221,26 @@ export default function BasicInfoSection({
                         </div>
 
                         {/* Vinyl Square Asset */}
-                        <div className="md:col-span-3 space-y-3">
-                            <div className="flex flex-col pl-1">
-                                <span className="text-[10px] font-mono uppercase text-zinc-400">Vinyl_Aesthetic</span>
-                                <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 1:1</span>
+                        {category === 'music' && (
+                            <div className="md:col-span-3 space-y-3">
+                                <div className="flex flex-col pl-1">
+                                    <span className="text-[10px] font-mono uppercase text-zinc-400">Vinyl_Aesthetic</span>
+                                    <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 1:1</span>
+                                </div>
+                                <MediaUploader
+                                    value={vinylUrl}
+                                    contextType="artifact_asset"
+                                    onFileSelect={onVinylFileSelect}
+                                    onUrlSelect={onVinylUrlSelect}
+                                    className="aspect-square w-full rounded-xl border-zinc-900 group-hover:border-zinc-700"
+                                    label="Upload_Vinyl"
+                                />
+                                <p className="text-[7px] text-zinc-600 font-mono italic uppercase text-center mt-2 px-2">Primary Audio Identity Signature.</p>
                             </div>
-                            <MediaUploader
-                                value={vinylUrl}
-                                contextType="artifact_asset"
-                                onFileSelect={onVinylFileSelect}
-                                onUrlSelect={onVinylUrlSelect}
-                                className="aspect-square w-full rounded-xl border-zinc-900 group-hover:border-zinc-700"
-                                label="Upload_Vinyl"
-                            />
-                            <p className="text-[7px] text-zinc-600 font-mono italic uppercase text-center mt-2 px-2">Primary Audio Identity Signature.</p>
-                        </div>
+                        )}
 
                         {/* Landscape Hero Asset */}
-                        <div className="md:col-span-6 space-y-3">
+                        <div className={`${category === 'music' ? 'md:col-span-6' : 'md:col-span-9'} space-y-3`}>
                             <div className="flex flex-col pl-1">
                                 <span className="text-[10px] font-mono uppercase text-zinc-400">Landscape_Hero</span>
                                 <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 16:9 / 21:9</span>

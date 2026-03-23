@@ -106,3 +106,75 @@ export function getBrandIconUrl(platformId: string | null): string | null {
 
     return `https://cdn.shimokitan.live/media/images/platforms/${normalizedId}.webp`;
 }
+
+/**
+ * Global registry of supported external platforms for consistent 
+ * meta-mapping between Sector, Protocol, and Gateway.
+ */
+export const PLATFORM_REGISTRY = [
+    { id: 'youtube', name: 'YouTube', category: 'video', defaultRole: 'video' },
+    { id: 'bilibili', name: 'Bilibili', category: 'video', defaultRole: 'video' },
+    { id: 'niconico', name: 'Niconico', category: 'video', defaultRole: 'video' },
+    { id: 'crunchyroll', name: 'Crunchyroll', category: 'video', defaultRole: 'video' },
+    { id: 'netflix', name: 'Netflix', category: 'video', defaultRole: 'video' },
+    { id: 'amazon_prime', name: 'Amazon Prime', category: 'video', defaultRole: 'video' },
+    
+    { id: 'spotify', name: 'Spotify', category: 'audio', defaultRole: 'audio' },
+    { id: 'soundcloud', name: 'Soundcloud', category: 'audio', defaultRole: 'audio' },
+    { id: 'apple_music', name: 'Apple Music', category: 'audio', defaultRole: 'audio' },
+    { id: 'bandcamp', name: 'Bandcamp', category: 'audio', defaultRole: 'audio' },
+    
+    { id: 'x', name: 'X', category: 'social', defaultRole: 'social' },
+    { id: 'instagram', name: 'Instagram', category: 'social', defaultRole: 'social' },
+    { id: 'tiktok', name: 'TikTok', category: 'social', defaultRole: 'social' },
+    { id: 'pixiv', name: 'Pixiv', category: 'social', defaultRole: 'social' },
+    
+    { id: 'booth', name: 'BOOTH', category: 'commerce', defaultRole: 'commerce' },
+    { id: 'fanbox', name: 'Fanbox', category: 'commerce', defaultRole: 'commerce' },
+    { id: 'ko_fi', name: 'Ko-fi', category: 'commerce', defaultRole: 'commerce' },
+    { id: 'vgen', name: 'VGen', category: 'commerce', defaultRole: 'commerce' },
+    { id: 'skeb', name: 'Skeb', category: 'commerce', defaultRole: 'commerce' },
+    { id: 'patreon', name: 'Patreon', category: 'commerce', defaultRole: 'commerce' },
+    { id: 'steam', name: 'Steam', category: 'commerce', defaultRole: 'commerce' },
+    
+    { id: 'r2', name: 'Internal Vault', category: 'other', defaultRole: 'hosted_audio' },
+    { id: 'other', name: 'Other Source', category: 'other', defaultRole: 'reference' },
+] as const;
+
+export type PlatformId = (typeof PLATFORM_REGISTRY)[number]['id'];
+
+/**
+ * Detects the platform and metadata from a given URL.
+ */
+export function detectPlatformFromUrl(url: string | null): { 
+    platform: PlatformId; 
+    category: string; 
+    role: string;
+} | null {
+    if (!url) return null;
+    const v = url.toLowerCase();
+
+    if (v.includes('youtube.com/') || v.includes('youtu.be/')) return { platform: 'youtube', category: 'video', role: 'video' };
+    if (v.includes('spotify.com/')) return { platform: 'spotify', category: 'audio', role: 'audio' };
+    if (v.includes('soundcloud.com/')) return { platform: 'soundcloud', category: 'audio', role: 'audio' };
+    if (v.includes('apple.com/')) return { platform: 'apple_music', category: 'audio', role: 'audio' };
+    if (v.includes('bilibili.com/')) return { platform: 'bilibili', category: 'video', role: 'video' };
+    if (v.includes('nicovideo.jp/')) return { platform: 'niconico', category: 'video', role: 'video' };
+    if (v.includes('x.com/')) return { platform: 'x', category: 'social', role: 'social' };
+    if (v.includes('ko-fi.com/')) return { platform: 'ko_fi', category: 'commerce', role: 'commerce' };
+    if (v.includes('booth.pm/')) return { platform: 'booth', category: 'commerce', role: 'commerce' };
+    if (v.includes('vgen.co/')) return { platform: 'vgen', category: 'commerce', role: 'commerce' };
+    if (v.includes('skeb.jp/')) return { platform: 'skeb', category: 'commerce', role: 'commerce' };
+    if (v.includes('patreon.com/')) return { platform: 'patreon', category: 'commerce', role: 'commerce' };
+    if (v.includes('fanbox.cc/')) return { platform: 'fanbox', category: 'commerce', role: 'commerce' };
+    if (v.includes('pixiv.net/')) return { platform: 'pixiv', category: 'social', role: 'social' };
+    if (v.includes('bandcamp.com/')) return { platform: 'bandcamp', category: 'audio', role: 'audio' };
+    if (v.includes('instagram.com/')) return { platform: 'instagram', category: 'social', role: 'social' };
+    if (v.includes('tiktok.com/')) return { platform: 'tiktok', category: 'social', role: 'social' };
+    if (v.includes('crunchyroll.com/')) return { platform: 'crunchyroll', category: 'video', role: 'video' };
+    if (v.includes('netflix.com/')) return { platform: 'netflix', category: 'video', role: 'video' };
+    if (v.includes('steampowered.com/') || v.includes('steamcommunity.com/')) return { platform: 'steam', category: 'commerce', role: 'commerce' };
+    if (v.includes('amazon.com/') && (v.includes('prime') || v.includes('video'))) return { platform: 'amazon_prime', category: 'video', role: 'video' };
+
+    return null;
+}

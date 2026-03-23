@@ -4,7 +4,7 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 
-import { RESOURCE_ROLES } from '@shimokitan/utils';
+import { RESOURCE_ROLES, PLATFORM_REGISTRY, detectPlatformFromUrl } from '@shimokitan/utils';
 
 export interface Resource {
     type: string;
@@ -38,34 +38,10 @@ export default function ResourcesSection({
     platforms = []
 }: ResourcesSectionProps) {
 
-    // Minimal fallback platforms if none provided via props
-    const fallbackPlatforms: Platform[] = [
-        { id: 'youtube', name: 'YouTube', category: 'video' },
-        { id: 'bilibili', name: 'Bilibili', category: 'video' },
-        { id: 'niconico', name: 'Niconico', category: 'video' },
-        { id: 'crunchyroll', name: 'Crunchyroll', category: 'video' },
-        { id: 'spotify', name: 'Spotify', category: 'audio' },
-        { id: 'soundcloud', name: 'Soundcloud', category: 'audio' },
-        { id: 'bandcamp', name: 'Bandcamp', category: 'audio' },
-        { id: 'x', name: 'X', category: 'social' },
-        { id: 'instagram', name: 'Instagram', category: 'social' },
-        { id: 'booth', name: 'BOOTH', category: 'commerce' },
-        { id: 'fanbox', name: 'Fanbox', category: 'commerce' },
-        { id: 'vgen', name: 'VGen', category: 'commerce' },
-        { id: 'skeb', name: 'Skeb', category: 'commerce' },
-        { id: 'patreon', name: 'Patreon', category: 'commerce' },
-        { id: 'steam', name: 'Steam', category: 'commerce' },
-        { id: 'r2', name: 'Internal Vault', category: 'other' },
-    ];
-
-    const activePlatforms = platforms.length > 0 ? platforms : fallbackPlatforms;
+    const activePlatforms = platforms.length > 0 ? platforms : PLATFORM_REGISTRY;
 
     const getFilteredPlatforms = (type: string) => {
-        if (type === 'video') return activePlatforms.filter(p => p.category === 'video');
-        if (type === 'audio') return activePlatforms.filter(p => p.category === 'audio');
-        if (type === 'social') return activePlatforms.filter(p => p.category === 'social');
-        if (type === 'commerce') return activePlatforms.filter(p => p.category === 'commerce');
-        return activePlatforms;
+        return activePlatforms.filter(p => p.category === type || type === 'other');
     };
 
     const playableRoles = ['audio', 'video', 'hosted_audio'];
@@ -77,24 +53,61 @@ export default function ResourcesSection({
     const renderResource = (res: Resource, originalIdx: number) => (
         <div key={originalIdx} className="group relative flex flex-col md:flex-row gap-3 items-center bg-zinc-950/40 p-3 rounded-lg border border-zinc-900 transition-all hover:bg-zinc-950 hover:border-zinc-800">
             {/* Selector Group */}
-            <div className="grid grid-cols-3 gap-2 w-full md:w-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 w-full md:w-auto">
+                {/* 
+                  * 1. GATEWAY (Platform) - This is now the primary driver.
+                  * Selecting a platform automatically suggests the correct Sector and Protocol.
+                  */}
                 <div className="space-y-1">
-                    <span className="text-[7px] font-mono text-zinc-600 uppercase pl-1">Sector</span>
+                    <span className="text-[7px] font-mono text-zinc-600 uppercase pl-1">Gateway_Node</span>
+                    <select
+                        value={res.platform}
+                        onChange={(e) => {
+                            const platformId = e.target.value;
+                            const platformMeta = PLATFORM_REGISTRY.find(p => p.id === platformId);
+                            
+                            if (platformMeta) {
+                                const newResources = [...resources];
+                                newResources[originalIdx] = { 
+                                    ...newResources[originalIdx], 
+                                    platform: platformId,
+                                    type: platformMeta.category,
+                                    role: (platformMeta as any).defaultRole || 'reference'
+                                };
+                                setResources(newResources);
+                            } else {
+                                updateResource(originalIdx, 'platform', platformId);
+                            }
+                        }}
+                        className="w-full bg-black border border-zinc-900 p-2 text-[10px] font-bold uppercase text-zinc-300 outline-none rounded focus:border-rose-900 appearance-none cursor-pointer"
+                    >
+                        {activePlatforms.map(p => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* 
+                  * 2. SECTOR (Category) - Derived from Platform, but overrideable for custom links.
+                  */}
+                <div className="space-y-1">
+                    <span className="text-[7px] font-mono text-zinc-600 uppercase pl-1">Sector_Domain</span>
                     <select
                         value={res.type}
                         onChange={(e) => {
                             const newType = e.target.value;
-                            let defaultPlatform = 'other';
-                            if (newType === 'video') defaultPlatform = 'youtube';
-                            if (newType === 'audio') defaultPlatform = 'spotify';
-                            if (newType === 'social') defaultPlatform = 'x';
-                            if (newType === 'commerce') defaultPlatform = 'booth';
+                            const platformMeta = PLATFORM_REGISTRY.find(p => p.category === newType);
                             
                             const newResources = [...resources];
-                            newResources[originalIdx] = { ...newResources[originalIdx], type: newType, platform: defaultPlatform };
+                            newResources[originalIdx] = { 
+                                ...newResources[originalIdx], 
+                                type: newType, 
+                                platform: platformMeta?.id || 'other',
+                                role: (platformMeta as any)?.defaultRole || 'reference'
+                            };
                             setResources(newResources);
                         }}
-                        className="w-full bg-black border border-zinc-900 p-2 text-[10px] font-bold uppercase text-zinc-400 outline-none rounded focus:border-rose-900 appearance-none cursor-pointer"
+                        className="w-full bg-black border border-zinc-900 p-2 text-[10px] font-bold uppercase text-zinc-500 outline-none rounded focus:border-rose-900 appearance-none cursor-pointer"
                     >
                         <option value="video">VIDEO</option>
                         <option value="audio">AUDIO</option>
@@ -104,8 +117,11 @@ export default function ResourcesSection({
                     </select>
                 </div>
 
+                {/* 
+                  * 3. PROTOCOL (Role) - The functional identity of the link.
+                  */}
                 <div className="space-y-1">
-                    <span className="text-[7px] font-mono text-zinc-600 uppercase pl-1">Protocol</span>
+                    <span className="text-[7px] font-mono text-zinc-600 uppercase pl-1">Protocol_Role</span>
                     <select
                         value={res.role}
                         onChange={(e) => updateResource(originalIdx, 'role', e.target.value)}
@@ -115,7 +131,7 @@ export default function ResourcesSection({
                             <>
                                 <option value="video">VIDEO_MANIFEST</option>
                                 <option value="audio">AUDIO_STREAM</option>
-                                <option value="hosted_audio">HOSTED_VAULT</option>
+                                <option value="hosted_audio">INTERNAL_VAULT</option>
                             </>
                         ) : null}
                         {linkRoles.includes(res.role) || res.type === 'social' || res.type === 'commerce' || res.type === 'other' ? (
@@ -126,21 +142,6 @@ export default function ResourcesSection({
                                 <option value="download">DIRECT_FETCH</option>
                             </>
                         ) : null}
-                    </select>
-                </div>
-
-                <div className="space-y-1">
-                    <span className="text-[7px] font-mono text-zinc-600 uppercase pl-1">Gateway</span>
-                    <select
-                        value={res.platform}
-                        onChange={(e) => updateResource(originalIdx, 'platform', e.target.value)}
-                        className="w-full bg-black border border-zinc-900 p-2 text-[10px] font-bold uppercase text-zinc-400 outline-none rounded focus:border-rose-900 appearance-none cursor-pointer"
-                    >
-                        {getFilteredPlatforms(res.type).map(p => (
-                            <option key={p.id} value={p.id}>{p.name}</option>
-                        ))}
-                        <option value="r2">R2_STORAGE</option>
-                        <option value="other">OTHER</option>
                     </select>
                 </div>
             </div>
@@ -215,8 +216,8 @@ export default function ResourcesSection({
                 <div className="space-y-3">
                     <div className="flex items-center gap-2 mb-2">
                         <div className="w-1 h-3 bg-zinc-600"></div>
-                        <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest font-mono">External_Junctions</span>
-                        <span className="text-[7px] text-zinc-600 uppercase font-mono">(Outbound Links / Commerce)</span>
+                        <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest font-mono">Outbound_Uplinks</span>
+                        <span className="text-[7px] text-zinc-600 uppercase font-mono">(Social / Commerce / References)</span>
                     </div>
                     {linkResources.length > 0 ? (
                         linkResources.map(res => renderResource(res, resources.indexOf(res)))
