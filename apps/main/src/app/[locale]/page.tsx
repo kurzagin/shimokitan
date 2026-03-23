@@ -77,54 +77,6 @@ export default async function AppPage({
       console.error("Spotlight Fetch Failed:", e.message);
   }
 
-  // 2. Fetch Recent Zines + their related artifacts
-  let recentZines: any[] = [];
-  try {
-    const rawZines = await db.query.zines.findMany({
-      where: isNull(schema.zines.deletedAt),
-      limit: 6,
-      orderBy: [desc(schema.zines.createdAt)],
-      with: {
-        artifact: {
-          with: {
-            media: {
-              with: {
-                media: true
-              }
-            },
-            translations: true,
-          },
-        },
-        translations: true,
-        author: true,
-      },
-    });
-
-    recentZines = rawZines.map((z: any) => {
-      const zineTrans = resolveTranslation(z.translations, locale);
-        const artifactTrans = z.artifact ? resolveTranslation(z.artifact.translations, locale) : null;
-        const thumbnailMedia = (z.artifact?.media as any[])?.find((m: any) => m.role === 'thumbnail')?.media;
-        const posterMedia = (z.artifact?.media as any[])?.find((m: any) => m.role === 'poster')?.media;
-        
-        return {
-          ...z,
-          content: zineTrans?.content || "",
-          author: z.author?.name || "Anonymous",
-          artifact: z.artifact
-            ? {
-              ...z.artifact,
-              title: artifactTrans?.title || "Untitled",
-              description: artifactTrans?.description || "",
-              thumbnailImage: thumbnailMedia?.url || null,
-              posterImage: posterMedia?.url || null,
-            }
-            : null,
-        };
-    });
-  } catch (e: any) {
-    if (process.env.NODE_ENV !== "production")
-      console.error("Zines Fetch Failed:", e.message);
-  }
 
   // 3. Featured Artifacts (The ones in "The Pit")
   let featuredArtifact: any = null;
@@ -386,7 +338,6 @@ export default async function AppPage({
       />
       <HomeClient
         spotlightArtifacts={spotlightArtifacts}
-        recentZines={recentZines}
         featuredArtifact={featuredArtifact}
         videoArtifact={videoArtifact}
         entities={entities}

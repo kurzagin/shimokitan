@@ -436,6 +436,90 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                             )}
                         </div>
 
+                        {/* --- Echo Flux: Pulse Stream --- */}
+                        <div className="shrink-0 border-t border-zinc-900 px-4 pt-6 pb-12 flex flex-col gap-6 bg-zinc-950/20">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <div className="w-1.5 h-4 bg-rose-600 shadow-[0_0_10px_rgba(225,29,72,0.5)] shrink-0" />
+                                    <span className="text-xs text-rose-500 uppercase tracking-[0.35em] font-black">Echo_Flux</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Active_Signals //</span>
+                                    <span className="text-[10px] font-black text-rose-500 italic bg-rose-500/10 px-1.5 py-0.5 border border-rose-500/20">
+                                        {(artifact as any).zines?.length || 0}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-4">
+                                {((artifact as any).zines || []).length > 0 ? (
+                                    (artifact as any).zines.map((zine: any, idx: number) => {
+                                        const zineTrans = resolveTranslation(zine.translations, locale);
+                                        return (
+                                            <div key={zine.id} className="relative group/zine">
+                                                <div className="flex gap-4 p-4 border border-zinc-900 bg-zinc-950/40 hover:border-rose-900/40 hover:bg-rose-950/5 transition-all duration-500">
+                                                    <div className="flex flex-col items-center shrink-0 pt-1">
+                                                        <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center p-0 overflow-hidden shadow-inner shrink-0 leading-none">
+                                                            {zine.author?.avatarUrl ? (
+                                                                <img src={zine.author.avatarUrl} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <Icon icon="lucide:user" className="text-zinc-700" width={14} />
+                                                            )}
+                                                        </div>
+                                                        <div className="w-[1px] flex-1 bg-gradient-to-b from-zinc-800 to-transparent my-2" />
+                                                    </div>
+                                                    
+                                                    <div className="min-w-0 flex-1 flex flex-col gap-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-[10px] font-black uppercase italic text-zinc-500 group-hover/zine:text-rose-400 transition-colors">
+                                                                {zine.author?.name || 'Resident_Source'}
+                                                            </span>
+                                                            <div className="flex items-center gap-1.5">
+                                                                <Icon icon="lucide:zap" width={10} className="text-rose-500" />
+                                                                <span className="text-[10px] font-black text-rose-500 italic">{zine.resonance || 0}</span>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <p className="text-sm text-zinc-300 leading-relaxed italic font-serif opacity-90 group-hover/zine:opacity-100 transition-opacity">
+                                                            &ldquo;{zineTrans?.content || "Signal interference... memory fragment corrupted."}&rdquo;
+                                                        </p>
+                                                        
+                                                        <div className="flex items-center gap-3 mt-1 opacity-40 group-hover/zine:opacity-80 transition-opacity">
+                                                            <span className="text-[8px] font-mono text-zinc-600 uppercase tracking-tighter">
+                                                                Log_Time: {new Date(zine.createdAt).toLocaleDateString().replace(/\//g, '.')}
+                                                            </span>
+                                                            <span className="text-[8px] font-mono text-rose-800 shadow-sm">// SHARD_{idx.toString().padStart(2, '0')}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Decorative vertical line for the "pulse stream" effect */}
+                                                {idx !== (artifact as any).zines.length - 1 && (
+                                                    <div className="absolute left-8 top-12 bottom-0 w-[1px] bg-zinc-900 z-0" />
+                                                )}
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="py-8 flex flex-col items-center justify-center gap-3 border border-dashed border-zinc-900 rounded-lg opacity-30 group/empty hover:opacity-100 transition-opacity">
+                                        <Icon icon="lucide:message-square-off" width={24} className="text-zinc-600" />
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-[10px] font-mono uppercase tracking-[0.3em] font-black mb-1">Zero_Resonance_Detected</span>
+                                            <p className="text-[9px] font-mono text-zinc-600 uppercase italic">Waiting for the first echo fragment...</p>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <Link 
+                                    href={`/artifacts/${artifact.id}/zines/post`}
+                                    className="mt-4 flex items-center justify-center gap-2 py-3 bg-zinc-900 border border-zinc-800 text-[10px] font-black uppercase tracking-[0.4em] italic hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all group/init"
+                                >
+                                    <Icon icon="lucide:plus" width={12} className="group-hover/init:rotate-90 transition-transform" />
+                                    Initialize_New_Zine
+                                </Link>
+                            </div>
+                        </div>
+
                         {artifact.exhibits && artifact.exhibits.length > 0 && (
                             <ExhibitGallery
                                 exhibits={artifact.exhibits}

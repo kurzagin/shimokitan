@@ -22,13 +22,6 @@ type Artifact = {
   videoUrl?: string | null;
 };
 
-type Zine = {
-  id: string;
-  artifactId: string;
-  author: string;
-  content: string;
-  resonance: number | null;
-};
 
 type Transmission = {
   id: string;
@@ -44,7 +37,6 @@ type Transmission = {
 
 export default function HomeClient({
   spotlightArtifacts,
-  recentZines,
   featuredArtifact,
   videoArtifact,
   entities,
@@ -57,7 +49,6 @@ export default function HomeClient({
   currentTrack,
 }: {
   spotlightArtifacts: Artifact[];
-  recentZines: (Zine & { artifact: Artifact })[];
   featuredArtifact: Artifact | null;
   videoArtifact: Artifact | null;
   entities: any[];
