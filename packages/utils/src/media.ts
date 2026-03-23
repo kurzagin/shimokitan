@@ -69,6 +69,21 @@ export function getThumbnailUrl(id: string | null, platform: string): string | n
 }
 
 /**
+ * Finds a media object from a media bridge array by its role.
+ * Works with both artifact_media and work_media joins.
+ */
+export function getMediaByRole(mediaArray: any[] | null | undefined, role: string): any {
+    return mediaArray?.find(m => m.role === role)?.media;
+}
+
+/**
+ * Extracts a URL from a media object, with optional optimization.
+ */
+export function getMediaUrl(media: any | null | undefined): string | null {
+    return media?.url || null;
+}
+
+/**
  * Generates a Cloudflare-optimized image URL.
  * Applies WebP format and 80% quality by default as per Phase 1 requirements.
  * 

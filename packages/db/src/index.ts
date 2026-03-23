@@ -169,15 +169,17 @@ export async function getAllEntities() {
     with: {
       translations: true,
       avatar: true,
+      thumbnail: true,
       credits: {
         with: {
           artifact: {
             with: {
               translations: true,
+              resources: true,
               media: {
-                  with: {
-                      media: true
-                  }
+                with: {
+                  media: true
+                }
               }
             }
           }
@@ -226,7 +228,8 @@ export async function getAllWorks() {
                     entity: {
                         with: {
                             translations: true,
-                            avatar: true
+                            avatar: true,
+                            thumbnail: true
                         }
                     }
                 }
@@ -244,6 +247,7 @@ export async function getEntityById(id: string) {
     with: {
       translations: true,
       avatar: true,
+      thumbnail: true,
       credits: {
         with: {
           artifact: {
@@ -272,6 +276,7 @@ export async function getEntityBySlug(slug: string) {
     with: {
       translations: true,
       avatar: true,
+      thumbnail: true,
       credits: {
         with: {
           artifact: {

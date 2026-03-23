@@ -5,7 +5,7 @@ import { Icon } from '@iconify/react';
 import { BrandIcon } from '@/components/BrandIcon';
 import { MainLayout } from '@/components/layout/MainLayout';
 import Link from 'next/link';
-import { Dictionary } from '@shimokitan/utils';
+import { Dictionary, getMediaByRole } from '@shimokitan/utils';
 
 // ─── Link Category Detection ─────────────────────────────────────────────────
 type LinkCategory = 'social_media' | 'commerce' | 'platform' | 'video' | 'audio';
@@ -228,9 +228,9 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                     <div className="relative w-full h-[400px] md:h-[580px] lg:h-[700px] overflow-hidden bg-zinc-950 border-b border-zinc-900">
 
                         {/* Background thumbnail */}
-                        {featuredCredit.artifact.thumbnail?.url ? (
+                        {getMediaByRole(featuredCredit.artifact.media, 'thumbnail')?.url || getMediaByRole(featuredCredit.artifact.media, 'poster')?.url ? (
                             <img
-                                src={featuredCredit.artifact.thumbnail.url}
+                                src={getMediaByRole(featuredCredit.artifact.media, 'thumbnail')?.url || getMediaByRole(featuredCredit.artifact.media, 'poster')?.url}
                                 className="absolute inset-0 w-full h-full object-cover object-[center_25%] opacity-45 scale-[1.02] group-hover:scale-100 transition-transform duration-700"
                                 alt=""
                             />
@@ -296,8 +296,8 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                 <div className="relative flex-shrink-0 w-16 h-16 border border-zinc-600 bg-zinc-950 overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.05)]">
                                     <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-zinc-400 z-10" />
                                     <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-zinc-400 z-10" />
-                                    {entity.avatar?.url ? (
-                                        <img src={entity.avatar.url} className="w-full h-full object-cover" alt={name} />
+                                    {entity.avatar?.url || entity.thumbnail?.url ? (
+                                        <img src={entity.avatar?.url || entity.thumbnail?.url} className="w-full h-full object-cover" alt={name} />
                                     ) : (
                                         <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-600">
                                             <Icon icon="lucide:user-round" width={24} />
@@ -332,8 +332,8 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                         <div className="relative flex-shrink-0 w-24 h-24 border-2 border-zinc-700 bg-zinc-950 overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.05)]">
                             <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-zinc-500 z-10" />
                             <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-zinc-500 z-10" />
-                            {entity.avatar?.url ? (
-                                <img src={entity.avatar.url} className="w-full h-full object-cover" alt={name} />
+                            {entity.avatar?.url || entity.thumbnail?.url ? (
+                                <img src={entity.avatar?.url || entity.thumbnail?.url} className="w-full h-full object-cover" alt={name} />
                             ) : (
                                 <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700">
                                     <Icon icon="lucide:user-round" width={48} />
@@ -573,9 +573,9 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                         >
                                             {/* Thumbnail */}
                                             <div className={`flex-shrink-0 bg-zinc-900 border-2 border-zinc-800 overflow-hidden group-hover:border-zinc-500 transition-all shadow-xl ${isFirst ? 'w-28 h-20 md:w-36 md:h-24' : 'w-20 h-14 md:w-28 md:h-18'}`}>
-                                                {credit.artifact.thumbnail?.url ? (
+                                                {getMediaByRole(credit.artifact.media, 'thumbnail')?.url ? (
                                                     <img
-                                                        src={credit.artifact.thumbnail.url}
+                                                        src={getMediaByRole(credit.artifact.media, 'thumbnail').url}
                                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                                         alt=""
                                                     />

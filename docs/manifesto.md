@@ -34,7 +34,7 @@ Ranking on the homepage is not driven by popularity. It is driven by Zines — p
 
 Any artist on the platform may opt into an "Open Collaboration" badge. This signals openness to working with other artists directly.
 
-Shimokitan does not intervene here. The terms of collaboration belong entirely to the artists involved — their language, their agreement. The platform takes no position on the legality or structure of any arrangement. The badge is simply a visible declaration of intent.
+Shimokitan does not intervene here. The terms of collaboration belong entirely to the artists involved — their language, their agreement. However, A2A is strictly non-commercial. While the platform remains hands-off, using this model for transactional purposes is prohibited; any evidence of payment will result in a decrease in account weight or the revocation of the work archive.
 
 #### B2B — Business to Artist
 

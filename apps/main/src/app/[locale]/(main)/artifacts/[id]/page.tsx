@@ -10,11 +10,10 @@ import { notFound } from 'next/navigation';
 import { PlayButton } from './PlayButton';
 import { ExhibitGallery } from './ExhibitGallery';
 import { StationTrack } from '@/lib/store/station-store';
-import { getDictionary, Locale } from '@shimokitan/utils';
-
+import { getDictionary, Locale, getMediaByRole } from '@shimokitan/utils';
 import type { Metadata } from 'next';
 
-const getMediaByRole = (media: any[], role: string) => media?.find(m => m.role === role)?.media;
+// Helper removed, using shared version from @shimokitan/utils
 
 export async function generateMetadata(props: { params: Promise<{ locale: string, id: string }> }): Promise<Metadata> {
     const { locale, id } = await props.params;

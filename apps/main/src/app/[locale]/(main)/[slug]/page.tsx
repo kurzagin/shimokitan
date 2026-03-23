@@ -40,7 +40,7 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
             description: description,
             images: [
                 {
-                    url: entity.avatar?.url || "/tokyo.jpg",
+                    url: entity.avatar?.url || entity.thumbnail?.url || "/tokyo.jpg",
                     alt: name
                 }
             ],
@@ -50,7 +50,7 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
             card: "summary",
             title: name,
             description: description,
-            images: [entity.avatar?.url || "/tokyo.jpg"]
+            images: [entity.avatar?.url || entity.thumbnail?.url || "/tokyo.jpg"]
         }
     };
 }
@@ -94,7 +94,7 @@ export default async function EntityProfilePage(props: { params: Promise<{ local
         "@type": entity.type === 'independent' ? 'Person' : 'Organization',
         "name": name,
         "description": translation?.bio || `Registry Profile: ${name}. Data resonance active.`,
-        "image": entity.avatar?.url || "",
+        "image": entity.avatar?.url || entity.thumbnail?.url || "",
         "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://shimokitan.live'}/${locale}/${entity.slug}`,
     };
 
