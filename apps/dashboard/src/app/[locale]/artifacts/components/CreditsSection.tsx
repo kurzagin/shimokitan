@@ -111,8 +111,9 @@ export default function CreditsSection({
                                         onClick={() => {
                                             const newState = !credit.isOriginalArtist;
                                             updateCredit(i, 'isOriginalArtist', newState);
-                                            if (newState && !credit.role) {
-                                                updateCredit(i, 'role', 'original');
+                                            if (newState) {
+                                                updateCredit(i, 'contributorClass', 'author');
+                                                if (!credit.role) updateCredit(i, 'role', 'original');
                                             }
                                         }}
                                         className={`p-2 transition-all ${isHeritage ? 'text-violet-400 bg-violet-600/20' : 'text-zinc-700 hover:text-violet-500'}`}
@@ -160,9 +161,9 @@ export default function CreditsSection({
                                         onChange={(e) => updateCredit(i, 'contributorClass', e.target.value)}
                                         className="bg-zinc-900/50 border border-zinc-800 p-2 text-[10px] font-mono text-zinc-600 outline-none flex-1"
                                     >
-                                        <option value="author">Class: Author (Manifestation)</option>
-                                        <option value="collaborator">Class: Collaborator</option>
-                                        <option value="staff">Class: Staff</option>
+                                        <option value="author">Placement: CORE_AUTHORITY (Violet)</option>
+                                        <option value="collaborator">Placement: COLLABORATIVE_FLUX (Zinc)</option>
+                                        <option value="staff">Placement: SUPPORT_GRID (Zinc / Extra)</option>
                                     </select>
                                     <input
                                         type="number"

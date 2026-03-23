@@ -666,11 +666,6 @@ function ProvenanceCreditRow({ credit, locale, color }: { credit: any; locale: s
                     )}>
                         {roleName}
                     </span>
-                    {contributorClass && (
-                        <span className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.1em]">
-                            {contributorClass}
-                        </span>
-                    )}
                 </div>
             </div>
         </Link>
