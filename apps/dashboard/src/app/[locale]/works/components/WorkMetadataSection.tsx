@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Icon } from '@iconify/react';
-import { ARTIFACT_NATURES, ARTIFACT_STATUSES } from '@shimokitan/utils';
+
 
 interface Spec {
     key: string;

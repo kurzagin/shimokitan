@@ -12,7 +12,6 @@ type Artifact = {
     category: string;
     nature: string;
     coverImage: string | null;
-    status: string | null;
     resonance: number | null;
     isMajor: boolean;
     isVerified: boolean;
@@ -160,8 +159,8 @@ export default function BackAlleyBrowser({ initialArtifacts }: { initialArtifact
                             <div className="hidden sm:flex items-center gap-8 shrink-0 text-right pl-4 relative z-10">
                                 <div className="flex flex-col items-end gap-1">
                                     <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em]">Quality</span>
-                                    <Badge variant={artifact.status === 'the_pit' ? 'distortion' : 'clean'} className="text-[10px] py-0 px-2 border-none bg-zinc-800/80">
-                                        {artifact.status === 'the_pit' ? 'LO-FI' : 'LOSSLESS'}
+                                    <Badge variant='clean' className="text-[10px] py-0 px-2 border-none bg-zinc-800/80">
+                                        LOSSLESS
                                     </Badge>
                                 </div>
                                 <div className="flex flex-col items-end gap-1 w-16">

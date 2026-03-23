@@ -187,7 +187,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                             <div className="flex items-center gap-2">
                                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                                 <span className="text-sm font-black italic text-emerald-400 uppercase truncate">
-                                    {(artifact.status || 'the_pit').replace(/_/g, ' ')}
+                                    ACTIVE
                                 </span>
                             </div>
                         </div>

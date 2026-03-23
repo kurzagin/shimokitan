@@ -42,7 +42,6 @@ export async function createFullWork(data: z.infer<typeof workSchema>) {
             id: workId,
             category: validated.category,
             nature: validated.nature,
-            status: validated.status,
             slug,
             specs: validated.specs || {},
         });
@@ -131,7 +130,6 @@ export async function updateFullWork(id: string, data: z.infer<typeof workSchema
         const updateData: any = {
             category: validated.category,
             nature: validated.nature,
-            status: validated.status,
             specs: validated.specs || {},
             updatedAt: new Date(),
         };

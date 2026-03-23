@@ -33,8 +33,6 @@ export const artifactCategoryEnum = pgEnum("artifact_category", ["music", "anime
 // compilation: a curated set (EP, OST, etc.) that wraps multiple works
 export const artifactNatureEnum = pgEnum("artifact_nature", ["original", "cover", "live", "compilation"]);
 
-export const artifactStatusEnum = pgEnum("artifact_status", ["the_pit", "back_alley", "archived"]);
-
 // true   : audio file is live on R2, player can serve it
 // false  : external links only
 
@@ -196,7 +194,6 @@ export const works = pgTable("works", {
     slug: text("slug").notNull().unique(),
     category: artifactCategoryEnum("category").notNull(),
     nature: artifactNatureEnum("nature").default("original").notNull(),
-    status: artifactStatusEnum("status").default("back_alley"),
 
     resonance: numeric("resonance", { precision: 12, scale: 4 }).default("0.0000"),
     isVerified: boolean("is_verified").default(false),
@@ -210,7 +207,6 @@ export const works = pgTable("works", {
 }, (t) => ({
     categoryIdx: index("idx_works_category").on(t.category),
     natureIdx: index("idx_works_nature").on(t.nature),
-    statusIdx: index("idx_works_status").on(t.status),
 }));
 
 export const workTags = pgTable("work_tags", {
@@ -274,7 +270,6 @@ export const artifacts = pgTable("artifacts", {
     animeType: animeTypeEnum("anime_type"),  // null for music artifacts
 
     slug: text("slug").notNull().unique(),
-    status: artifactStatusEnum("status").default("back_alley"),
 
     resonance: numeric("resonance", { precision: 12, scale: 4 }).default("0.0000"),
     specs: jsonb("specs").default({}),
@@ -285,7 +280,6 @@ export const artifacts = pgTable("artifacts", {
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
 }, (t) => ({
     categoryIdx: index("idx_artifacts_category").on(t.category),
-    statusIdx: index("idx_artifacts_status").on(t.status),
     natureIdx: index("idx_artifacts_nature").on(t.nature),
     // Composite — common query: "all music originals"
     categoryNatureIdx: index("idx_artifacts_cat_nature").on(

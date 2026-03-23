@@ -36,7 +36,6 @@ export default async function BackAlleyPage(props: { params: Promise<{ locale: s
                 category: a.category || "UNKNOWN",
                 nature: a.nature || "original",
                 coverImage: a.thumbnail?.url || a.poster?.url || null,
-                status: a.status,
                 resonance: a.resonance || 0,
                 isMajor: (a.resonance || 0) > 10,
                 isVerified: a.isVerified ?? false,

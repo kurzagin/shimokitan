@@ -17,7 +17,6 @@ type Artifact = {
   posterImage: string | null;
   description: string | null;
   resonance: number | null;
-  status: string | null;
   specs: any;
   videoUrl?: string | null;
 };

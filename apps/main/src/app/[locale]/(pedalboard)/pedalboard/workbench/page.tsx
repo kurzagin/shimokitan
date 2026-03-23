@@ -75,8 +75,8 @@ export default async function WorkbenchPage({ params }: PageProps) {
                                             <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-tighter">{art.category}</span>
                                             <span className="text-[10px] font-mono text-rose-500 uppercase tracking-tighter">[{art.zines?.length || 0} Zines]</span>
                                         </div>
-                                        <span className={`text-[8px] font-bold px-1.5 py-0.5 ${art.status === 'back_alley' ? 'bg-emerald-500 text-emerald-950' : 'bg-amber-500 text-amber-950'}`}>
-                                            {art.status === 'back_alley' ? 'LIVE' : art.status?.toUpperCase()}
+                                        <span className="text-[8px] font-bold px-1.5 py-0.5 bg-emerald-500 text-emerald-950">
+                                            LIVE
                                         </span>
                                     </div>
                                     <div className="text-xl font-black text-white uppercase group-hover:text-rose-500 transition-colors italic">{art.translations?.[0]?.title || 'Untitled'}</div>

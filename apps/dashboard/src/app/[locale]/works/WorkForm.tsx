@@ -36,7 +36,6 @@ export default function WorkForm({
     const [category, setCategory] = useState(initialData?.category || 'music');
     const [slug, setSlug] = useState(initialData?.slug || '');
     const [nature, setNature] = useState(initialData?.nature || 'original');
-    const [status, setStatus] = useState(initialData?.status || 'back_alley');
     
     // Metadata State (Specs & Tags)
     const [specs, setSpecs] = useState<{ key: string, value: string }[]>(
@@ -108,7 +107,6 @@ export default function WorkForm({
             const payload = {
                 category,
                 nature,
-                status,
                 slug: slug || null,
                 translations: translations.filter(t => t.title.trim() !== ''),
                 assets,
@@ -133,7 +131,7 @@ export default function WorkForm({
         } finally {
             setIsSubmitting(false);
         }
-    }, [isSubmitting, initialData?.id, category, nature, status, slug, translations, thumbnailId, posterId, pendingThumbnailUrl, pendingPosterUrl, specs, tags, credits, router]);
+    }, [isSubmitting, initialData?.id, category, nature, slug, translations, thumbnailId, posterId, pendingThumbnailUrl, pendingPosterUrl, specs, tags, credits, router]);
 
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -284,7 +282,6 @@ export default function WorkForm({
                                     <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 italic font-mono">Authority_Module</h3>
                                 </div>
                                 <div className="space-y-5">
-                                    <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-mono uppercase text-zinc-500 pl-1">Nature</label>
                                             <select
@@ -298,19 +295,6 @@ export default function WorkForm({
                                                 <option value="compilation">EP/OST</option>
                                             </select>
                                         </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-mono uppercase text-zinc-500 pl-1">Status</label>
-                                            <select
-                                                value={status}
-                                                onChange={(e) => setStatus(e.target.value as any)}
-                                                className="w-full bg-black border border-zinc-900 p-3 text-xs text-white focus:border-emerald-600 outline-none transition-all rounded-lg appearance-none cursor-pointer font-bold"
-                                            >
-                                                <option value="back_alley">ACTIVE</option>
-                                                <option value="the_pit">PIT</option>
-                                                <option value="archived">ARCHIVE</option>
-                                            </select>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>

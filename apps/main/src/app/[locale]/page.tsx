@@ -83,12 +83,8 @@ export default async function AppPage({
   let videoArtifact: any = null;
   try {
     const rawPitArtifacts = await db.query.artifacts.findMany({
-      where: and(
-        eq(schema.artifacts.status, "the_pit"),
-        sql`${schema.artifacts.category} IN ('anime', 'music')`
-      ),
-      orderBy: sql`RANDOM()`,
-      limit: 10,
+      orderBy: desc(schema.artifacts.resonance),
+      limit: 20, // Fetch more to ensure we find ones with video resources
       with: {
         media: {
           with: {
@@ -97,18 +93,21 @@ export default async function AppPage({
         },
         translations: true,
         resources: true,
+        zines: true, // Include zines to identify editorially endorsed content
       },
     });
 
     const processArtifact = (raw: any) => {
       const trans = resolveTranslation(raw.translations, locale);
       let videoUrl = null;
+      
+      // Specifically look for video/youtube first
       const primaryVideo = raw.resources?.find(
         (r: any) =>
           r.role === "video" ||
-          r.role === "audio" ||
           r.platform === "youtube",
-      );
+      ) || raw.resources?.find((r: any) => r.role === "audio"); // Fallback to audio if no video
+
       if (primaryVideo) {
         if (primaryVideo.value.includes("youtube.com/watch?v=")) {
           const vId = primaryVideo.value.split("v=")[1]?.split("&")[0];

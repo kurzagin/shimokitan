@@ -38,7 +38,7 @@ export default async function ConsolePage({ params }: PageProps) {
     // Fetch All Data for Metrics
     const [allArtifacts, allWorks, entities, verifications, exhibits] = await Promise.all([
         db.query.artifacts.findMany({
-            columns: { id: true, status: true, category: true, deletedAt: true }
+            columns: { id: true, category: true, deletedAt: true }
         }),
         db.query.works.findMany({
              columns: { id: true, deletedAt: true }
@@ -172,7 +172,7 @@ export default async function ConsolePage({ params }: PageProps) {
                         {recentArtifacts.map(art => (
                             <div key={art.id} className="flex items-center gap-4 text-xs font-mono border-b border-zinc-900 pb-2">
                                 <span className="text-zinc-700">[{art.id.slice(0, 8)}]</span>
-                                <span className="text-rose-500 uppercase">{art.status}</span>
+                                <span className="text-zinc-500 uppercase">{art.category}</span>
                                 <span className="text-white truncate">{art.translations?.[0]?.title || 'Untitled'}</span>
                             </div>
                         ))}

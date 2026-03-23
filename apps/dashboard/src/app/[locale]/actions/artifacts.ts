@@ -24,7 +24,6 @@ export async function createFullArtifact(data: z.infer<typeof artifactSchema>) {
             nature: validated.nature,
             animeType: validated.animeType,
             slug,
-            status: validated.status,
             resonance: "0",
             specs: validated.specs || {},
             isVerified: false,
@@ -163,8 +162,7 @@ export async function updateFullArtifact(id: string, data: z.infer<typeof artifa
             .set({
                 category: validated.category,
                 nature: validated.nature,
-                animeType: validated.animeType,
-                status: validated.status,
+                animeType: validated.nature === 'live' ? 'special' : validated.animeType, // Ensure anime properties match if logic requires it
                 specs: validated.specs,
                 workId: validated.workId,
                 updatedAt: new Date(),
