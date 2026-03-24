@@ -23,6 +23,7 @@ interface BasicInfoSectionProps {
     setThumbnailUrl: (url: string) => void;
     onThumbnailFileSelect?: (file: File, objectUrl: string) => void;
     onThumbnailUrlSelect?: (url: string) => void;
+    onThumbnailRemove?: () => void;
 
     posterId: string | null;
     setPosterId: (id: string | null) => void;
@@ -30,6 +31,7 @@ interface BasicInfoSectionProps {
     setPosterUrl: (url: string) => void;
     onPosterFileSelect?: (file: File, objectUrl: string) => void;
     onPosterUrlSelect?: (url: string) => void;
+    onPosterRemove?: () => void;
 
     vinylId: string | null;
     setVinylId: (id: string | null) => void;
@@ -37,6 +39,7 @@ interface BasicInfoSectionProps {
     setVinylUrl: (url: string) => void;
     onVinylFileSelect?: (file: File, objectUrl: string) => void;
     onVinylUrlSelect?: (url: string) => void;
+    onVinylRemove?: () => void;
 
     category: string;
     setCategory: (val: string) => void;
@@ -65,18 +68,21 @@ export default function BasicInfoSection({
     setThumbnailUrl,
     onThumbnailFileSelect,
     onThumbnailUrlSelect,
+    onThumbnailRemove,
     posterId,
     setPosterId,
     posterUrl,
     setPosterUrl,
     onPosterFileSelect,
     onPosterUrlSelect,
+    onPosterRemove,
     vinylId,
     setVinylId,
     vinylUrl,
     setVinylUrl,
     onVinylFileSelect,
     onVinylUrlSelect,
+    onVinylRemove,
     category,
     setCategory,
     animeType,
@@ -215,6 +221,7 @@ export default function BasicInfoSection({
                                 contextType="artifact_asset"
                                 onFileSelect={onPosterFileSelect}
                                 onUrlSelect={onPosterUrlSelect}
+                                onRemove={onPosterRemove}
                                 className="aspect-[2/3] w-full rounded-xl border-zinc-900 group-hover:border-zinc-700"
                                 label="Upload_Poster"
                             />
@@ -232,6 +239,7 @@ export default function BasicInfoSection({
                                     contextType="artifact_asset"
                                     onFileSelect={onVinylFileSelect}
                                     onUrlSelect={onVinylUrlSelect}
+                                    onRemove={onVinylRemove}
                                     className="aspect-square w-full rounded-xl border-zinc-900 group-hover:border-zinc-700"
                                     label="Upload_Vinyl"
                                 />
@@ -250,6 +258,7 @@ export default function BasicInfoSection({
                                 contextType="artifact_asset"
                                 onFileSelect={onThumbnailFileSelect}
                                 onUrlSelect={onThumbnailUrlSelect}
+                                onRemove={onThumbnailRemove}
                                 className="aspect-video w-full rounded-xl border-zinc-900 group-hover:border-zinc-700"
                                 label="Upload_Hero_Cover"
                             />

@@ -533,7 +533,6 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                             <ExhibitGallery
                                 exhibits={artifact.exhibits}
                                 locale={locale}
-                                resolveTranslation={resolveTranslation}
                             />
                         )}
                     </div>

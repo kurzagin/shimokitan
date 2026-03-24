@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { storagePaths, nanoid } from '@shimokitan/utils';
 import { Buffer } from 'node:buffer';
@@ -156,6 +156,23 @@ export async function getPresignedUploadUrl(
     });
 
     return await getSignedUrl(client, command, { expiresIn });
+}
+
+/**
+ * Core utility to delete a file from R2.
+ * 
+ * @param key - The R2 object key (path)
+ */
+export async function deleteFileFromR2(key: string): Promise<void> {
+    const client = getS3Client();
+    const bucketName = process.env.R2_BUCKET_NAME || 'shimokitan';
+
+    const command = new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+    });
+
+    await client.send(command);
 }
 
 export { R2_DOMAIN };

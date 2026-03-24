@@ -5,6 +5,8 @@ import { Icon } from "@iconify/react";
 import { cn } from "@shimokitan/ui";
 import { useTheaterStore } from "@/lib/store/theater-store";
 
+import { resolveTranslation } from "@shimokitan/utils";
+
 /**
  * Exhibit type as defined in the database schema.
  */
@@ -41,10 +43,6 @@ export interface ExhibitItem {
 interface ExhibitGalleryProps {
   exhibits: ExhibitItem[];
   locale: string;
-  resolveTranslation: (
-    translations: ExhibitTranslation[],
-    locale: string
-  ) => ExhibitTranslation | undefined;
 }
 
 /**
@@ -110,7 +108,6 @@ const extractYouTubeId = (url: string): string | null => {
 export function ExhibitGallery({
   exhibits,
   locale,
-  resolveTranslation,
 }: ExhibitGalleryProps) {
   const [activeTab, setActiveTab] = useState<ExhibitType | "all">("all");
   const [lightboxExhibit, setLightboxExhibit] = useState<ExhibitItem | null>(
@@ -321,7 +318,6 @@ export function ExhibitGallery({
         <ExhibitLightbox
           exhibit={lightboxExhibit}
           locale={locale}
-          resolveTranslation={resolveTranslation}
           onClose={closeLightbox}
           onPrev={() => navigateLightbox("prev")}
           onNext={() => navigateLightbox("next")}
@@ -344,7 +340,6 @@ export function ExhibitGallery({
 function ExhibitLightbox({
   exhibit,
   locale,
-  resolveTranslation,
   onClose,
   onPrev,
   onNext,
@@ -353,10 +348,6 @@ function ExhibitLightbox({
 }: {
   exhibit: ExhibitItem;
   locale: string;
-  resolveTranslation: (
-    translations: ExhibitTranslation[],
-    locale: string
-  ) => ExhibitTranslation | undefined;
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;

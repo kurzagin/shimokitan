@@ -5,7 +5,7 @@ import React, { useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { extractMediaId, getThumbnailUrl, nanoid, artifactSchema, RESOURCE_ROLES, detectPlatformFromUrl } from '@shimokitan/utils';
 import { createFullArtifact, updateFullArtifact } from '../actions/artifacts';
-import { uploadMediaAction } from '../media-actions';
+import { uploadMediaAction, deleteMediaAction } from '../media-actions';
 import { toast } from 'sonner';
 import { z, type ZodIssue } from 'zod';
 
@@ -133,6 +133,7 @@ export default function ArtifactForm({
                 url: ex.url,
                 mediaId: ex.mediaId,
                 mediaUrl: ex.media?.url,
+                isPrimary: ex.isPrimary,
                 translations: ['en', 'id', 'ja'].map(lang => {
                     const t = ex.translations?.find((t: any) => t.locale === lang);
                     return { locale: lang as any, title: t?.title || '', description: t?.description || '' };
@@ -247,6 +248,48 @@ export default function ArtifactForm({
         setPendingVinylFile(null);
     };
 
+    const handleThumbnailRemove = async () => {
+        if (thumbnailId) {
+            toast.promise(deleteMediaAction(thumbnailId), {
+                loading: 'Removing from R2...',
+                success: 'Asset deleted from storage.',
+                error: 'Failed to delete asset.'
+            });
+        }
+        setThumbnailId(null);
+        setThumbnailUrl('');
+        setPendingThumbnailFile(null);
+        setPendingThumbnailUrl(null);
+    };
+
+    const handlePosterRemove = async () => {
+        if (posterId) {
+            toast.promise(deleteMediaAction(posterId), {
+                loading: 'Removing from R2...',
+                success: 'Asset deleted from storage.',
+                error: 'Failed to delete asset.'
+            });
+        }
+        setPosterId(null);
+        setPosterUrl('');
+        setPendingPosterFile(null);
+        setPendingPosterUrl(null);
+    };
+
+    const handleVinylRemove = async () => {
+        if (vinylId) {
+            toast.promise(deleteMediaAction(vinylId), {
+                loading: 'Removing from R2...',
+                success: 'Asset deleted from storage.',
+                error: 'Failed to delete asset.'
+            });
+        }
+        setVinylId(null);
+        setVinylUrl('');
+        setPendingVinylFile(null);
+        setPendingVinylUrl(null);
+    };
+
 
     const updateTrans = (locale: string, field: 'title' | 'description', value: string) => {
         setTranslations(translations.map(t => t.locale === locale ? { ...t, [field]: value } : t));
@@ -311,9 +354,11 @@ export default function ArtifactForm({
     const addCredit = () => setCredits([...credits, { entityId: '', role: '', contributorClass: 'staff', isPrimary: false, isOriginalArtist: false, position: credits.length }]);
     const removeCredit = (idx: number) => setCredits(credits.filter((_, i) => i !== idx));
     const updateCredit = (idx: number, field: keyof Credit, value: any) => {
-        const newCredits = [...credits];
-        newCredits[idx] = { ...newCredits[idx], [field]: value };
-        setCredits(newCredits);
+        setCredits(prev => {
+            const newCredits = [...prev];
+            newCredits[idx] = { ...newCredits[idx], [field]: value };
+            return newCredits;
+        });
     };
 
     const handleExhibitMediaUploaded = (idx: number, mediaId: string, url: string) => {
@@ -498,18 +543,21 @@ export default function ArtifactForm({
                     setThumbnailUrl={setThumbnailUrl}
                     onThumbnailFileSelect={handleThumbnailFileSelect}
                     onThumbnailUrlSelect={handleThumbnailUrlSelect}
+                    onThumbnailRemove={handleThumbnailRemove}
                     posterId={posterId}
                     setPosterId={setPosterId}
                     posterUrl={posterUrl}
                     setPosterUrl={setPosterUrl}
                     onPosterFileSelect={handlePosterFileSelect}
                     onPosterUrlSelect={handlePosterUrlSelect}
+                    onPosterRemove={handlePosterRemove}
                     vinylId={vinylId}
                     setVinylId={setVinylId}
                     vinylUrl={vinylUrl}
                     setVinylUrl={setVinylUrl}
                     onVinylFileSelect={handleVinylFileSelect}
                     onVinylUrlSelect={handleVinylUrlSelect}
+                    onVinylRemove={handleVinylRemove}
                     category={category}
                     setCategory={setCategory}
                     animeType={animeType}

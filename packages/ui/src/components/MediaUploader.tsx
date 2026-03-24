@@ -12,11 +12,12 @@ interface MediaUploaderProps {
     contextType?: "entity_avatar" | "entity_header" | "entity_thumbnail" | "artifact_cover" | "artifact_poster" | "artifact_asset" | "work_asset" | "work_poster" | "general";
     onFileSelect?: (file: File, objectUrl: string) => void;
     onUrlSelect?: (url: string) => void;
+    onRemove?: () => void;
     className?: string;
     label?: string;
 }
 
-export function MediaUploader({ value, onChange, uploadAction, contextType = "general", onFileSelect, onUrlSelect, className, label = "UPLOAD_AVATAR" }: MediaUploaderProps) {
+export function MediaUploader({ value, onChange, uploadAction, contextType = "general", onFileSelect, onUrlSelect, onRemove, className, label = "UPLOAD_AVATAR" }: MediaUploaderProps) {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [preview, setPreview] = useState<string | null>(value || null);
@@ -117,8 +118,24 @@ export function MediaUploader({ value, onChange, uploadAction, contextType = "ge
                     onChange={handleFileChange}
                 />
                 {preview ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={preview} alt="Preview" className={`w-full h-full object-cover transition-opacity ${uploading ? 'opacity-50' : 'opacity-100'}`} />
+                    <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={preview} alt="Preview" className={`w-full h-full object-cover transition-opacity ${uploading ? 'opacity-50' : 'opacity-100'}`} />
+                        {onRemove && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPreview(null);
+                                    setUrlInput("");
+                                    onRemove();
+                                }}
+                                className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-rose-600 block rounded-full text-white backdrop-blur-md transition-colors z-30 shadow-lg"
+                            >
+                                <Icon icon="lucide:x" width={14} />
+                            </button>
+                        )}
+                    </>
                 ) : (
                     <div className="flex flex-col items-center justify-center text-zinc-600 group-hover:text-violet-500 transition-colors p-4 text-center">
                         <Icon icon="lucide:upload-cloud" width={24} />

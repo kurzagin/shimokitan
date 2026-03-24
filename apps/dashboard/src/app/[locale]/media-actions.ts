@@ -2,7 +2,7 @@
 
 import { getDb, schema, eq } from '@shimokitan/db';
 import { requireUser } from './auth-helpers';
-import { uploadFileToR2 } from '@/lib/r2';
+import { uploadFileToR2, deleteFileFromR2 } from '@/lib/r2';
 import sharp from 'sharp';
 import { encode } from 'blurhash';
 import { revalidatePath } from 'next/cache';
@@ -113,4 +113,30 @@ export async function uploadMediaAction(formData: FormData) {
     });
 
     return { mediaId, url: publicUrl, blurhash: blurhashStr };
+}
+
+export async function deleteMediaAction(mediaId: string) {
+    const user = await requireUser();
+    const db = getDb();
+    if (!db) throw new Error('DB_Terminal_Offline');
+
+    const existingMedia = await db.query.media.findFirst({
+        where: eq(schema.media.id, mediaId)
+    });
+
+    if (!existingMedia) {
+        return { success: false, reason: 'Media_Not_Found' };
+    }
+
+    if (existingMedia.r2Key) {
+        try {
+            await deleteFileFromR2(existingMedia.r2Key);
+        } catch (e) {
+            console.error('Failed to delete from R2', e);
+        }
+    }
+
+    await db.delete(schema.media).where(eq(schema.media.id, mediaId));
+    
+    return { success: true };
 }
