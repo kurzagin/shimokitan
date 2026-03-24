@@ -13,6 +13,7 @@ export interface Exhibit {
     url?: string | null;
     mediaId?: string | null;
     mediaUrl?: string | null;
+    isPrimary?: boolean;
     translations: {
         locale: 'en' | 'id' | 'ja';
         title: string;
@@ -152,7 +153,7 @@ export default function ExhibitsSection({
                             className={`group relative border rounded-xl overflow-hidden cursor-pointer transition-all ${
                                 editingIndex === i
                                     ? 'border-rose-500 ring-1 ring-rose-500/30'
-                                    : 'border-zinc-800 hover:border-zinc-600'
+                                    : ex.isPrimary ? 'border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'border-zinc-800 hover:border-zinc-600'
                             }`}
                             onClick={() => setEditingIndex(editingIndex === i ? null : i)}
                         >
@@ -207,11 +208,14 @@ export default function ExhibitsSection({
 
                             {/* Card Footer */}
                             <div className="px-2.5 py-2 bg-zinc-900/40 border-t border-zinc-800/50">
-                                <div className="flex items-center gap-1.5 mb-1">
+                                <div className="flex items-center gap-1.5 mb-1 justify-between">
                                     <span className={`inline-flex items-center gap-1 px-1 py-0.5 border text-[7px] font-black uppercase tracking-wider rounded-sm ${TYPE_COLORS[ex.type] || TYPE_COLORS.other}`}>
                                         <Icon icon={TYPE_ICONS[ex.type] || 'lucide:file'} width={8} />
                                         {ex.type}
                                     </span>
+                                    {ex.isPrimary && (
+                                        <Icon icon="lucide:star" className="text-amber-500 shrink-0 fill-amber-500/20" width={12} />
+                                    )}
                                 </div>
                                 <p className="text-[10px] font-bold text-zinc-400 truncate leading-tight">
                                     {getDisplayTitle(ex)}
@@ -293,6 +297,18 @@ function ExhibitEditor({
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono">
                         Edit_Exhibit
                     </span>
+                    <button
+                        type="button"
+                        onClick={() => onUpdate('isPrimary', !exhibit.isPrimary)}
+                        className={`ml-3 flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                            exhibit.isPrimary 
+                                ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]' 
+                                : 'bg-transparent border-zinc-800 text-zinc-500 hover:text-amber-500 hover:border-amber-900/50'
+                        }`}
+                    >
+                        <Icon icon="lucide:star" width={14} className={exhibit.isPrimary ? 'fill-amber-500/30' : ''} />
+                        Primary_Exhibit
+                    </button>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
@@ -351,6 +367,32 @@ function ExhibitEditor({
                                 placeholder="URL..."
                                 className="w-full bg-black border border-zinc-800 p-3 text-xs text-zinc-300 outline-none focus:border-rose-900 transition-all rounded-xl"
                             />
+                            {exhibit.url?.includes('youtu') && !exhibit.mediaUrl && (
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        try {
+                                            const { extractMediaId, getThumbnailUrl } = await import('@shimokitan/utils');
+                                            const id = extractMediaId(exhibit.url!, 'youtube');
+                                            const thumbUrl = getThumbnailUrl(id, 'youtube');
+                                            if (thumbUrl) {
+                                                const formData = new FormData();
+                                                formData.append('url', thumbUrl);
+                                                formData.append('context', 'artifact_asset');
+                                                formData.append('contextId', artifactId);
+                                                const res = await uploadMediaAction(formData);
+                                                onMediaUploaded(res.mediaId, res.url);
+                                            }
+                                        } catch (e: any) {
+                                            console.error("Failed to fetch YT thumbnail", e);
+                                        }
+                                    }}
+                                    className="text-[9px] font-mono uppercase bg-rose-600/10 text-rose-500 border border-rose-900/30 hover:border-rose-500 px-3 py-1.5 rounded w-full flex items-center justify-center gap-2 mt-2 transition-all"
+                                >
+                                    <Icon icon="lucide:download" width={12} />
+                                    Fetch_YT_Thumbnail
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

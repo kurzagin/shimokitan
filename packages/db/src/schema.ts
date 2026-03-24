@@ -480,11 +480,13 @@ export const exhibits = pgTable("exhibits", {
     url: text("url"),
     
     position: integer("position").default(0).notNull(),
+    isPrimary: boolean("is_primary").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 }, (t) => ({
     artifactIdx: index("idx_exhibits_artifact").on(t.artifactId),
     typeIdx: index("idx_exhibits_type").on(t.type),
+    primaryIdx: index("idx_exhibits_primary").on(t.artifactId, t.isPrimary),
 }));
 
 export const exhibitsI18n = pgTable("exhibits_i18n", {

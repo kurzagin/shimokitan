@@ -9,6 +9,8 @@ import { getEntityUrl } from '@shimokitan/utils';
 import { notFound } from 'next/navigation';
 import { PlayButton } from './PlayButton';
 import { ExhibitGallery } from './ExhibitGallery';
+import { TheaterPlayer } from './TheaterPlayer';
+import { TheaterVideo } from '@/lib/store/theater-store';
 import { StationTrack } from '@/lib/store/station-store';
 import { getDictionary, Locale, getMediaByRole } from '@shimokitan/utils';
 import type { Metadata } from 'next';
@@ -153,6 +155,25 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
         "author": { "@type": "Person", "name": primaryArtistName },
         "datePublished": artifact.createdAt,
     };
+
+    let initialVideo: TheaterVideo | null = null;
+    const primaryExhibit = artifact.exhibits?.find((e: any) => e.isPrimary);
+    
+    // Fallback logic for the Theater Player if there's no primary gateway
+    if (primaryResource?.platform === 'youtube') {
+        initialVideo = { id: primaryResource.id, url: primaryResource.value, platform: 'youtube', thumbnailUrl: thumbnail?.url };
+    } else if (primaryExhibit?.url) {
+        let platform: 'youtube' | 'local' | 'unknown' = 'unknown';
+        if (primaryExhibit.url.includes('youtube') || primaryExhibit.url.includes('youtu.be')) platform = 'youtube';
+        initialVideo = { id: primaryExhibit.id, url: primaryExhibit.url, platform, thumbnailUrl: primaryExhibit.media?.url || thumbnail?.url };
+    } else if (artifact.exhibits?.length) {
+        const fallbackEx = artifact.exhibits.find((e: any) => ['trailer', 'opening', 'ending'].includes(e.type) && e.url);
+        if (fallbackEx && fallbackEx.url) {
+            let platform: 'youtube' | 'local' | 'unknown' = 'unknown';
+            if (fallbackEx.url.includes('youtube') || fallbackEx.url.includes('youtu.be')) platform = 'youtube';
+            initialVideo = { id: fallbackEx.id, url: fallbackEx.url, platform, thumbnailUrl: fallbackEx.media?.url || thumbnail?.url };
+        }
+    }
 
     return (
         <MainLayout>
@@ -386,23 +407,11 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                             <div className="absolute inset-0 opacity-20 filter blur-3xl saturate-200 pointer-events-none scale-110 z-0">
                                 <img src={thumbnail?.url || undefined} className="w-full h-full object-cover" />
                             </div>
-
-                            {primaryResource?.platform === 'youtube' ? (
-                                <iframe
-                                    src={`https://www.youtube.com/embed/${primaryResource.value.includes('v=')
-                                        ? primaryResource.value.split('v=')[1].split('&')[0]
-                                        : primaryResource.value.split('/').pop()
-                                        }`}
-                                    className="absolute inset-0 w-full h-full border-0 z-10"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                />
-                            ) : (
-                                <div className="absolute inset-0 flex items-center justify-center z-10">
-                                    <img src={thumbnail?.url || undefined} className="w-full h-full object-cover opacity-60 mix-blend-screen" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-                                </div>
-                            )}
+                            {/* Dynamic Theater Player managed by Client Component */}
+                            <TheaterPlayer 
+                                initialVideo={initialVideo} 
+                                defaultThumbnail={thumbnail?.url} 
+                            />
 
                             <div className="absolute inset-0 z-20 pointer-events-none">
                                 <div className="absolute top-2 left-2 border-t border-l border-violet-500/40 w-5 h-5" />

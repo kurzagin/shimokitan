@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { Icon } from "@iconify/react";
 import { cn } from "@shimokitan/ui";
+import { useTheaterStore } from "@/lib/store/theater-store";
 
 /**
  * Exhibit type as defined in the database schema.
@@ -151,7 +152,24 @@ export function ExhibitGallery({
         exhibits.length * 0.6);
 
   const openLightbox = (exhibit: ExhibitItem) => {
-    setLightboxExhibit(exhibit);
+    if (isVideoType(exhibit.type) && exhibit.url) {
+      // It's a video, use theater player instead of lightbox
+      let platform: 'youtube' | 'local' | 'unknown' = 'unknown';
+      if (exhibit.url.includes('youtube') || exhibit.url.includes('youtu.be')) platform = 'youtube';
+      
+      const { setActiveVideo } = useTheaterStore.getState();
+      setActiveVideo({
+        id: exhibit.id,
+        url: exhibit.url,
+        platform,
+        thumbnailUrl: exhibit.media?.url
+      });
+      
+      // Scroll to media hub smoothly
+      window.scrollTo({ top: 300, behavior: 'smooth' }); // Rough estimation of where the player is, could just be top: 0
+    } else {
+      setLightboxExhibit(exhibit);
+    }
   };
 
   const closeLightbox = () => {

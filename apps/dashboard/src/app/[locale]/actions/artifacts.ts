@@ -131,6 +131,7 @@ export async function createFullArtifact(data: z.infer<typeof artifactSchema>) {
                     type: ex.type,
                     url: ex.url,
                     mediaId: ex.mediaId,
+                    isPrimary: ex.isPrimary,
                 });
                 if (ex.translations?.length) {
                     await tx.insert(schema.exhibitsI18n).values(
@@ -274,6 +275,7 @@ export async function updateFullArtifact(id: string, data: z.infer<typeof artifa
                     type: ex.type,
                     url: ex.url,
                     mediaId: ex.mediaId,
+                    isPrimary: ex.isPrimary,
                 });
                 if (ex.translations?.length) {
                     await tx.insert(schema.exhibitsI18n).values(

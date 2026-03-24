@@ -87,6 +87,7 @@ export const exhibitSchema = z.object({
     url: z.string().url().optional().nullable(),
     isExternal: z.boolean().default(true),
     mediaId: z.string().optional().nullable(),
+    isPrimary: z.boolean().default(false),
     translations: z.array(translationSchema).optional(),
 });
 
