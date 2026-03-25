@@ -9,15 +9,27 @@ interface MediaUploaderProps {
     blurhash?: string | null;
     onChange?: (mediaId: string, url: string, blurhash: string | null) => void;
     uploadAction?: (formData: FormData) => Promise<{ mediaId: string, url: string, blurhash: string | null }>;
-    contextType?: "entity_avatar" | "entity_header" | "entity_thumbnail" | "artifact_cover" | "artifact_poster" | "artifact_asset" | "work_asset" | "work_poster" | "general";
+    contextType?: "entity_avatar" | "entity_header" | "entity_thumbnail" | "artifact_cover" | "artifact_poster" | "artifact_asset" | "work_asset" | "work_poster" | "platform_icon" | "general";
     onFileSelect?: (file: File, objectUrl: string) => void;
     onUrlSelect?: (url: string) => void;
     onRemove?: () => void;
     className?: string;
     label?: string;
+    contextId?: string;
 }
 
-export function MediaUploader({ value, onChange, uploadAction, contextType = "general", onFileSelect, onUrlSelect, onRemove, className, label = "UPLOAD_AVATAR" }: MediaUploaderProps) {
+export function MediaUploader({ 
+    value, 
+    onChange, 
+    uploadAction, 
+    contextType = "general", 
+    onFileSelect, 
+    onUrlSelect, 
+    onRemove, 
+    className, 
+    label = "UPLOAD_AVATAR",
+    contextId 
+}: MediaUploaderProps) {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [preview, setPreview] = useState<string | null>(value || null);
@@ -48,6 +60,7 @@ export function MediaUploader({ value, onChange, uploadAction, contextType = "ge
         const formData = new FormData();
         formData.append("file", file);
         formData.append("context", contextType);
+        if (contextId) formData.append("contextId", contextId);
 
         setUploading(true);
         setProgress(30); // Simulated progress
@@ -81,6 +94,7 @@ export function MediaUploader({ value, onChange, uploadAction, contextType = "ge
         const formData = new FormData();
         formData.append("url", urlInput);
         formData.append("context", contextType);
+        if (contextId) formData.append("contextId", contextId);
 
         setUploading(true);
         setProgress(30);
@@ -140,6 +154,7 @@ export function MediaUploader({ value, onChange, uploadAction, contextType = "ge
                     <div className="flex flex-col items-center justify-center text-zinc-600 group-hover:text-violet-500 transition-colors p-4 text-center">
                         <Icon icon="lucide:upload-cloud" width={24} />
                         <span className="text-[10px] font-mono mt-2 tracking-widest uppercase">{label}</span>
+                        <span className="text-[8px] font-mono mt-1 text-zinc-800 group-hover:text-violet-700 transition-colors uppercase tracking-widest">[ Click_to_Browse ]</span>
                     </div>
                 )}
 

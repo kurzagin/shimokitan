@@ -25,8 +25,10 @@ export async function uploadMediaAction(formData: FormData) {
 
     const file = formData.get('file') as File | null;
     const url = formData.get('url') as string | null;
-    const contextType = formData.get('context') as 'entity_avatar' | 'artifact_asset' | 'work_asset' | 'general' || 'general';
-    const contextId = formData.get('contextId') as string | null;
+    const contextType = formData.get('context') as 'entity_avatar' | 'artifact_asset' | 'work_asset' | 'platform_icon' | 'general' || 'general';
+    
+    const mediaId = nanoid();
+    const contextId = formData.get('contextId') as string || mediaId;
 
     if (!file && !url) throw new Error('No_File_Or_Url_Provided');
 
@@ -52,7 +54,6 @@ export async function uploadMediaAction(formData: FormData) {
     const MAX_SIZE = 10 * 1024 * 1024;
     if (buffer.length > MAX_SIZE) throw new Error('File_Too_Large');
 
-    const mediaId = nanoid();
     const isImage = originalMimeType.startsWith('image/') || originalName.match(/\.(jpg|jpeg|png|webp|avif|gif)$/i);
 
     let processedBuffer = buffer;
@@ -67,8 +68,8 @@ export async function uploadMediaAction(formData: FormData) {
         const image = sharp(buffer);
         const metadata = await image.metadata();
 
-        // Resize for avatars
-        if (contextType === 'entity_avatar') {
+        // Resize for avatars / icons
+        if (contextType === 'entity_avatar' || contextType === 'platform_icon') {
             image.resize(1024, 1024, { fit: 'inside', withoutEnlargement: true });
         }
 
@@ -87,11 +88,13 @@ export async function uploadMediaAction(formData: FormData) {
 
     let key = '';
     if (contextType === 'entity_avatar') {
-        key = storagePaths.userAvatar(contextId || mediaId, `${nanoid()}.${extension}`);
+        key = storagePaths.userAvatar(contextId, `${nanoid()}.${extension}`);
     } else if (contextType === 'work_asset') {
-        key = storagePaths.workImage(contextId || mediaId, `${nanoid()}.${extension}`, contextId ? mediaId : undefined);
+        key = storagePaths.workImage(contextId, `${nanoid()}.${extension}`, contextId === mediaId ? undefined : mediaId);
+    } else if (contextType === 'platform_icon') {
+        key = storagePaths.platformLogo(contextId);
     } else {
-        key = storagePaths.artifactImage(contextId || mediaId, `${nanoid()}.${extension}`, contextId ? mediaId : undefined);
+        key = storagePaths.artifactImage(contextId, `${nanoid()}.${extension}`, contextId === mediaId ? undefined : mediaId);
     }
 
     // Upload optimized buffer to R2
