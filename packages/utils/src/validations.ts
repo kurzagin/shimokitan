@@ -111,6 +111,7 @@ export const entitySchema = z.object({
     civilStatus: z.enum(ENTITY_CIVIL_STATUSES).default('sealed'),
     avatarId: z.string().optional().nullable(),
     thumbnailId: z.string().optional().nullable(),
+    primaryArtifactId: z.string().optional().nullable(),
     socialLinks: z.any().optional(), // JSON
     translations: z.array(translationSchema).optional(),
     members: z.array(unitMemberSchema).optional(),

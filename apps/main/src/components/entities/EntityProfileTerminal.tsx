@@ -204,7 +204,17 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
     const professionalTitle = translation?.status?.toUpperCase() || "";
     const credits = entity.credits || [];
     const sortedCredits = [...credits].sort((a: any, b: any) => (b.artifact?.resonance || 0) - (a.artifact?.resonance || 0));
-    const featuredCredit = sortedCredits[0];
+    
+    // PRIORITY: Use explicit primary artifact if defined. NO FALLBACK.
+    let featuredCredit = null;
+    if (entity.primaryArtifact) {
+        const primaryCredit = credits.find((c: any) => c.artifactId === entity.primaryArtifact.id);
+        featuredCredit = primaryCredit || {
+            artifact: entity.primaryArtifact,
+            role: translation?.status || "Featured"
+        };
+    }
+
     const commerceLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform, platforms) === 'commerce');
     const videoLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform, platforms) === 'video');
     const audioLinks = (entity.socialLinks || []).filter((l: any) => getLinkCategory(l.platform, platforms) === 'audio');

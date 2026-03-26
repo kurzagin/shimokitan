@@ -123,6 +123,7 @@ export const entities = pgTable("entities", {
     isActive: boolean("is_active").default(true),   // soft-disable without deletion
     avatarId: text("avatar_id").references(() => media.id, { onDelete: "set null" }),
     thumbnailId: text("thumbnail_id").references(() => media.id, { onDelete: "set null" }),
+    primaryArtifactId: text("primary_artifact_id").references((): any => artifacts.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
@@ -715,6 +716,10 @@ export const entitiesRelations = relations(entities, ({ one, many }) => ({
     tags: many(entityTags),
     avatar: one(media, { fields: [entities.avatarId], references: [media.id] }),
     thumbnail: one(media, { fields: [entities.thumbnailId], references: [media.id] }),
+    primaryArtifact: one(artifacts, {
+        fields: [entities.primaryArtifactId],
+        references: [artifacts.id],
+    }),
 }));
 
 export const entitiesI18nRelations = relations(entitiesI18n, ({ one }) => ({

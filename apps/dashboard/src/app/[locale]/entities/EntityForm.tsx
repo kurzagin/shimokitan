@@ -81,6 +81,13 @@ export default function EntityForm({
     const [tags, setTags] = useState<{ name: string }[]>(
         initialData?.tags?.map((t: any) => ({ name: t.tag.translations?.[0]?.name || '' })) || []
     );
+    const [primaryArtifactId, setPrimaryArtifactId] = useState<string | null>(initialData?.primaryArtifactId || null);
+    const [primaryArtifactTitle, setPrimaryArtifactTitle] = useState<string | null>(initialData?.primaryArtifact?.translations?.[0]?.title || null);
+
+    const creditedArtifacts = initialData?.credits?.map((c: any) => ({
+        id: c.artifact.id,
+        title: c.artifact.translations?.find((t: any) => t.locale === 'en')?.title || c.artifact.translations?.[0]?.title || 'Untitled'
+    })) || [];
 
     const SUGGESTED_IDENTITIES = ['VSinger', 'VTuber', 'Utaite', 'Illustrator', 'Vocaloid Producer', 'Animator', 'Composer', 'Voice Actor'];
 
@@ -121,7 +128,8 @@ export default function EntityForm({
                 members: type === 'circle' ? members.filter(m => m.memberId) : [],
                 tags: tags.filter(t => t.name.trim() !== ''),
                 avatarId: finalAvatarId,
-                thumbnailId: finalThumbnailId
+                thumbnailId: finalThumbnailId,
+                primaryArtifactId: primaryArtifactId
             };
 
             if (initialData?.id) {
@@ -140,7 +148,7 @@ export default function EntityForm({
         } finally {
             setIsSubmitting(false);
         }
-    }, [isSubmitting, initialData?.id, socials, type, uid, slug, civilStatus, translations, members, avatarId, thumbnailId, pendingAvatarUrl, pendingThumbnailUrl, router, tags]);
+    }, [isSubmitting, initialData?.id, socials, type, uid, slug, civilStatus, translations, members, avatarId, thumbnailId, primaryArtifactId, pendingAvatarUrl, pendingThumbnailUrl, router, tags]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -457,13 +465,56 @@ export default function EntityForm({
                     </div>
                 </div>
 
-                {/* Unit Members Section */}
+                {/* 04. FEATURE_HIGHLIGHT */}
+                <div className="space-y-4 pt-8 border-t border-zinc-900 mt-8">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="space-y-1">
+                            <span className="text-xs font-black uppercase text-violet-500 tracking-[0.2em]">04 // FEATURE_HIGHLIGHT</span>
+                            <p className="text-[9px] text-zinc-600 font-mono italic">PIN A PRIMARY ARTIFACT TO THIS PROFILE HERO SECTION.</p>
+                        </div>
+                    </div>
+                    <div className="bg-zinc-950 p-6 border border-zinc-900 rounded-xl space-y-4">
+                        <div className="max-w-2xl space-y-3">
+                            <label className="text-[10px] font-mono uppercase text-zinc-500 pl-1">Primary_Record_Selection</label>
+                            {creditedArtifacts.length > 0 ? (
+                                <div className="relative">
+                                    <select
+                                        value={primaryArtifactId || ''}
+                                        onChange={(e) => setPrimaryArtifactId(e.target.value || null)}
+                                        className="w-full bg-black border border-zinc-800 p-4 text-xs text-white focus:border-violet-600 outline-none transition-all rounded-lg appearance-none cursor-pointer uppercase font-bold"
+                                    >
+                                        <option value="">(No_Pin: Use_Resonance_Logic)</option>
+                                        {creditedArtifacts.map((art: any) => (
+                                            <option key={art.id} value={art.id}>
+                                                {art.title.toUpperCase()}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-600">
+                                        <Icon icon="lucide:chevron-down" width={16} />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="p-4 bg-black border border-dashed border-zinc-800 rounded-lg text-center">
+                                    <p className="text-[10px] text-zinc-600 font-mono italic uppercase">
+                                        No_Work_History_Detected: Add artifacts to the registry to enable pinning...
+                                    </p>
+                                </div>
+                            )}
+                            <p className="text-[8px] text-zinc-600 font-mono italic mt-2 uppercase tracking-tighter">
+                                Only works with registered artist credits can be pinned as a primary highlight.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 05. Unit Members Section */}
                 {type === 'circle' && (
                     <div className="space-y-4 pt-8 border-t border-zinc-900 mt-8">
                         <div className="flex items-center justify-between mb-4">
                             <div className="space-y-1">
-                            <span className="text-xs font-black uppercase text-violet-500 tracking-[0.2em]">04 // UNIT_COMPOSITION_LEDGER</span>
-                            <p className="text-[9px] text-zinc-600 font-mono">LINK INDEPENDENT ENTITIES TO THIS CREATIVE NODE.</p>
+                            <span className="text-xs font-black uppercase text-violet-500 tracking-[0.2em]">05 // UNIT_COMPOSITION_LEDGER</span>
+                            <p className="text-[9px] text-zinc-600 font-mono italic">LINK INDEPENDENT ENTITIES TO THIS CREATIVE NODE.</p>
                         </div>
                             <button type="button" onClick={addMember} className="bg-zinc-950 border border-zinc-800 px-4 py-2 text-[10px] uppercase font-bold text-violet-500 hover:text-white hover:border-violet-600 flex items-center gap-2 transition-all rounded-lg">
                                 <Icon icon="lucide:user-plus" width={14} /> ADD_MEMBER_NODE
@@ -507,12 +558,12 @@ export default function EntityForm({
                     </div>
                 )}
 
-                {/* Social Links */}
+                {/* 06. Social Links */}
                 <div className="space-y-4 pt-8 border-t border-zinc-900 mt-8">
                     <div className="flex items-center justify-between mb-4">
                         <div className="space-y-1">
-                            <span className="text-xs font-black uppercase text-violet-500 tracking-[0.2em]">05 // SOCIAL_NETWORK_NODES</span>
-                            <p className="text-[9px] text-zinc-600 font-mono">EXTERNAL COMMUNICATION ENDPOINTS.</p>
+                            <span className="text-xs font-black uppercase text-violet-500 tracking-[0.2em]">06 // SOCIAL_NETWORK_NODES</span>
+                            <p className="text-[9px] text-zinc-600 font-mono italic">EXTERNAL COMMUNICATION ENDPOINTS.</p>
                         </div>
                         <button type="button" onClick={addSocial} className="bg-zinc-950 border border-zinc-800 px-4 py-2 text-[10px] uppercase font-bold text-violet-500 hover:text-white hover:border-violet-600 flex items-center gap-2 transition-all rounded-lg">
                             <Icon icon="lucide:share-2" width={14} /> ADD_NETWORK_EXIT

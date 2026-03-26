@@ -133,6 +133,7 @@ export async function createFullEntity(data: z.infer<typeof entitySchema>) {
             socialLinks: validated.socialLinks ? JSON.stringify(validated.socialLinks) : '[]',
             avatarId: validated.avatarId || null,
             thumbnailId: validated.thumbnailId || null,
+            primaryArtifactId: validated.primaryArtifactId || null,
         });
 
         if (validated.avatarId) {
@@ -268,6 +269,7 @@ export async function updateFullEntity(id: string, data: z.infer<typeof entitySc
             socialLinks: validated.socialLinks ? JSON.stringify(validated.socialLinks) : '[]',
             avatarId: validated.avatarId || null,
             thumbnailId: validated.thumbnailId || null,
+            primaryArtifactId: validated.primaryArtifactId || null,
             updatedAt: new Date(),
         };
 

@@ -17,6 +17,16 @@ export default async function EditEntityPage(props: { params: Promise<{ locale: 
             members: true,
             avatar: true,
             thumbnail: true,
+            primaryArtifact: true,
+            credits: {
+                with: {
+                    artifact: {
+                        with: {
+                            translations: true
+                        }
+                    }
+                }
+            },
             tags: {
                 with: {
                     tag: {

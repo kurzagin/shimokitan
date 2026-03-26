@@ -184,6 +184,17 @@ export async function getAllEntities() {
             }
           }
         }
+      },
+      primaryArtifact: {
+        with: {
+          translations: true,
+          resources: true,
+          media: {
+            with: {
+              media: true
+            }
+          }
+        }
       }
     }
   });
@@ -262,6 +273,17 @@ export async function getEntityById(id: string) {
             }
           }
         }
+      },
+      primaryArtifact: {
+        with: {
+          translations: true,
+          resources: true,
+          media: {
+            with: {
+              media: true
+            }
+          }
+        }
       }
     }
   });
@@ -288,6 +310,17 @@ export async function getEntityBySlug(slug: string) {
                       media: true
                   }
               }
+            }
+          }
+        }
+      },
+      primaryArtifact: {
+        with: {
+          translations: true,
+          resources: true,
+          media: {
+            with: {
+              media: true
             }
           }
         }
