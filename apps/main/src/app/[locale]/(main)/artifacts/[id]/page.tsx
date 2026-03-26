@@ -356,6 +356,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                                             <div className="flex items-center gap-3">
                                                                 <BrandIcon
                                                                     platform={res.platform}
+                                                                    iconUrl={res.platformData?.iconUrl}
                                                                     className="text-zinc-600 group-hover/gate:text-violet-400 shrink-0"
                                                                     width={13}
                                                                     height={13}

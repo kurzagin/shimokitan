@@ -24,7 +24,7 @@ export const transmissionTypeEnum = pgEnum("transmission_type", ["issue", "edito
 export const exhibitTypeEnum = pgEnum("exhibit_type", ["trailer", "opening", "ending", "promotion", "gallery", "other"]);
 
 // Artifact-level enums
-export const artifactCategoryEnum = pgEnum("artifact_category", ["music", "anime", "game"]);
+export const artifactCategoryEnum = pgEnum("artifact_category", ["music", "anime", "game", "illustration"]);
 
 // Work Nature — the single most important discriminator
 // original   : a first-creation work
@@ -54,7 +54,7 @@ export const resourceRoleEnum = pgEnum("resource_role", [
 export const contributorClassEnum = pgEnum("contributor_class", ["author", "collaborator", "staff"]);
 export const verificationTargetEnum = pgEnum("verification_target", ["artifact", "entity", "role_upgrade"]);
 export const verificationStatusEnum = pgEnum("verification_status", ["pending", "approved", "rejected"]);
-export const artifactMediaRoleEnum = pgEnum("artifact_media_role", ["cover", "poster", "background", "logo", "gallery", "thumbnail", "vinyl", "audio", "video", "source"]);
+export const artifactMediaRoleEnum = pgEnum("artifact_media_role", ["cover", "poster", "background", "logo", "gallery", "thumbnail", "vinyl", "audio", "video", "source", "NETWORK_GATEWAYS"]);
 export const workMediaRoleEnum = pgEnum("work_media_role", ["poster", "thumbnail", "background", "logo", "gallery"]);
 export const registryApplicationStatusEnum = pgEnum("registry_application_status", ["pending", "reviewed", "approved", "rejected"]);
 
@@ -605,8 +605,8 @@ export const registryApplications = pgTable("registry_applications", {
 export const externalPlatforms = pgTable("external_platforms", {
     id: text("id").primaryKey().default(sql`nanoid()`), // nanoid(12) or similar unique identifier
     name: text("name").notNull(),
-    category: text("category").notNull(), // 'social' | 'commerce' | 'platform'
-    iconUrl: text("icon_url"),           // Optional override, default is cdn.shimokitan.live/platforms/{id}.webp
+    category: text("category").notNull(), // 'social' | 'commerce' | 'platform' | 'streaming' | 'archive' | 'portfolio' | 'video' | 'audio' | 'other'
+    iconUrl: text("icon_url"),           // Optional override, default is cdn.shimokitan.live/platform/{id}.webp
     accentColor: text("accent_color"),   // e.g. '#0096fa'
     isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

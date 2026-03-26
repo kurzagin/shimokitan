@@ -135,8 +135,13 @@ export default function PlatformForm({
                         className="w-full bg-black border border-zinc-900 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 outline-none rounded focus:border-rose-900 appearance-none cursor-pointer"
                     >
                         <option value="platform">PLATFORM</option>
+                        <option value="video">VIDEO / CHANNEL</option>
+                        <option value="audio">AUDIO / STREAMING</option>
                         <option value="social">SOCIAL</option>
+                        <option value="streaming">LIVE / BROADCAST</option>
                         <option value="commerce">COMMERCE</option>
+                        <option value="archive">ARCHIVE</option>
+                        <option value="portfolio">PORTFOLIO</option>
                         <option value="other">OTHER</option>
                     </select>
                 </div>

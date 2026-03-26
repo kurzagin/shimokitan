@@ -112,7 +112,22 @@ export async function uploadMediaAction(formData: FormData) {
         sizeBytes: processedBuffer.length,
         mimeType,
         uploaderId: user.id,
-        isOrphan: true // Always orphan until parent action links it
+        isOrphan: true
+    }).onConflictDoUpdate({
+        target: schema.media.r2Key,
+        set: {
+            id: mediaId,
+            type: isImage ? 'image' : 'document',
+            url: publicUrl,
+            blurhash: blurhashStr,
+            width,
+            height,
+            sizeBytes: processedBuffer.length,
+            mimeType,
+            uploaderId: user.id,
+            isOrphan: true,
+            createdAt: new Date()
+        }
     });
 
     return { mediaId, url: publicUrl, blurhash: blurhashStr };

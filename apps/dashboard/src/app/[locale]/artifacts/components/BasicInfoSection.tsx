@@ -40,6 +40,14 @@ interface BasicInfoSectionProps {
     onVinylFileSelect?: (file: File, objectUrl: string) => void;
     onVinylUrlSelect?: (url: string) => void;
     onVinylRemove?: () => void;
+    
+    illustrationId: string | null;
+    setIllustrationId: (id: string | null) => void;
+    illustrationUrl: string;
+    setIllustrationUrl: (url: string) => void;
+    onIllustrationFileSelect?: (file: File, objectUrl: string) => void;
+    onIllustrationUrlSelect?: (url: string) => void;
+    onIllustrationRemove?: () => void;
 
     category: string;
     setCategory: (val: string) => void;
@@ -83,6 +91,13 @@ export default function BasicInfoSection({
     onVinylFileSelect,
     onVinylUrlSelect,
     onVinylRemove,
+    illustrationId,
+    setIllustrationId,
+    illustrationUrl,
+    setIllustrationUrl,
+    onIllustrationFileSelect,
+    onIllustrationUrlSelect,
+    onIllustrationRemove,
     category,
     setCategory,
     animeType,
@@ -122,6 +137,7 @@ export default function BasicInfoSection({
                                     <option value="music">MUSIC_TRACK</option>
                                     <option value="anime">ANIME_FEATURE</option>
                                     <option value="game">GAME_ENTITY</option>
+                                    <option value="illustration">ILLUSTRATION_WORK</option>
                                 </select>
                             </div>
 
@@ -211,7 +227,7 @@ export default function BasicInfoSection({
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                         {/* Portrait Key Visual */}
-                        <div className="md:col-span-3 space-y-3">
+                        <div className={`${category === 'illustration' ? 'hidden' : 'md:col-span-3'} space-y-3`}>
                             <div className="flex flex-col pl-1">
                                 <span className="text-[10px] font-mono uppercase text-zinc-400">Portrait_KV</span>
                                 <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 2:3 / 3:4</span>
@@ -247,8 +263,28 @@ export default function BasicInfoSection({
                             </div>
                         )}
 
+                        {/* Illustration Asset */}
+                        {category === 'illustration' && (
+                            <div className="md:col-span-12 space-y-3">
+                                <div className="flex flex-col pl-1">
+                                    <span className="text-[10px] font-mono uppercase text-zinc-400">NETWORK_GATEWAYS</span>
+                                    <span className="text-[8px] font-mono text-zinc-600 uppercase">Primary Illustration Identity</span>
+                                </div>
+                                <MediaUploader
+                                    value={illustrationUrl}
+                                    contextType="artifact_asset"
+                                    onFileSelect={onIllustrationFileSelect}
+                                    onUrlSelect={onIllustrationUrlSelect}
+                                    onRemove={onIllustrationRemove}
+                                    className="aspect-video w-full rounded-xl border-zinc-900 group-hover:border-zinc-700"
+                                    label="Upload_Network_Gateway"
+                                />
+                                <p className="text-[7px] text-zinc-600 font-mono italic uppercase text-center mt-2 px-2">Canonical Visual Gateway for this Illustration.</p>
+                            </div>
+                        )}
+
                         {/* Landscape Hero Asset */}
-                        <div className={`${category === 'music' ? 'md:col-span-6' : 'md:col-span-9'} space-y-3`}>
+                        <div className={`${category === 'music' ? 'md:col-span-6' : (category === 'illustration' ? 'hidden' : 'md:col-span-9')} space-y-3`}>
                             <div className="flex flex-col pl-1">
                                 <span className="text-[10px] font-mono uppercase text-zinc-400">Landscape_Hero</span>
                                 <span className="text-[8px] font-mono text-zinc-600 uppercase">Aspect: 16:9 / 21:9</span>

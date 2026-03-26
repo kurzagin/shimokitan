@@ -11,6 +11,7 @@ interface BrandIconProps {
   width?: number;
   height?: number;
   fallbackIcon?: string;
+  iconUrl?: string | null;
 }
 
 /**
@@ -22,10 +23,11 @@ export function BrandIcon({
   className, 
   width, 
   height, 
-  fallbackIcon 
+  fallbackIcon,
+  iconUrl
 }: BrandIconProps) {
   const [error, setError] = useState(false);
-  const cdnUrl = getBrandIconUrl(platform);
+  const cdnUrl = iconUrl || getBrandIconUrl(platform);
 
   if (cdnUrl && !error) {
     return (

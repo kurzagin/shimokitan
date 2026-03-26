@@ -121,7 +121,11 @@ function HeroLinkCard({ link, dict, platforms }: { link: any, dict: Dictionary, 
         >
             <div className="flex items-center gap-4">
                 <div className="w-10 h-10 flex items-center justify-center border border-zinc-800 group-hover:border-zinc-600 bg-black transition-colors">
-                    <BrandIcon platform={link.platform} className="w-6 h-6 text-zinc-400 group-hover:text-white transition-colors" />
+                    <BrandIcon 
+                        platform={link.platform} 
+                        iconUrl={platforms.find(p => p.id === link.platform)?.iconUrl}
+                        className="w-6 h-6 text-zinc-400 group-hover:text-white transition-colors" 
+                    />
                 </div>
                 <div className="space-y-0.5">
                     <div className={`text-[8px] font-black uppercase tracking-[0.25em] ${labelColor}`}>{label}</div>

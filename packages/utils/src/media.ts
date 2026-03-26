@@ -119,7 +119,7 @@ export function getBrandIconUrl(platformId: string | null): string | null {
     // Normalize platform ID (e.g. 'ko_fi' -> 'ko-fi') but mostly we expect NanoIDs now.
     const normalizedId = platformId.toLowerCase().replace(/_/g, '-');
 
-    return `https://cdn.shimokitan.live/media/images/platforms/${normalizedId}.webp`;
+    return `https://cdn.shimokitan.live/platform/${normalizedId}.webp`;
 }
 
 /**

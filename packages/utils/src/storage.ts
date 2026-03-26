@@ -99,7 +99,7 @@ export const storagePaths = {
      * Path for a platform logo.
      */
     platformLogo: (platformId: string) =>
-        generateStoragePath({ mediaType: 'images', context: 'platforms', identifier: platformId, filename: `${platformId}.webp` }),
+        `platform/${platformId}.webp`,
 
     /**
      * Path for unsupported files or failed uploads (Dumps).

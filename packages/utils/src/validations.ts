@@ -5,7 +5,7 @@ export const LOCALES = ['en', 'id', 'ja'] as const;
 export const ENTITY_TYPES = ['independent', 'organization', 'agency', 'circle'] as const;
 export const CONTRIBUTOR_CLASSES = ['author', 'collaborator', 'staff'] as const;
 
-export const ARTIFACT_CATEGORIES = ['anime', 'music', 'game'] as const;
+export const ARTIFACT_CATEGORIES = ['anime', 'music', 'game', 'illustration'] as const;
 export const ARTIFACT_NATURES = ['original', 'cover', 'live', 'compilation'] as const;
 export const ANIME_TYPES = ['pv', 'mv', 'trailer', 'op', 'ed', 'special'] as const;
 export const EXHIBIT_TYPES = ['trailer', 'opening', 'ending', 'promotion', 'gallery', 'other'] as const;
@@ -174,7 +174,7 @@ export const verificationSchema = z.object({
 export const externalPlatformSchema = z.object({
     id: z.string().min(1).max(20),
     name: z.string().min(1).max(50),
-    category: z.enum(['social', 'commerce', 'platform', 'other']).default('social'),
+    category: z.enum(['social', 'commerce', 'platform', 'streaming', 'archive', 'portfolio', 'video', 'audio', 'other']).default('social'),
     iconUrl: z.string().url().or(z.literal('')).optional().nullable(),
     accentColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).or(z.literal('')).optional().nullable(),
     isActive: z.boolean().default(true),

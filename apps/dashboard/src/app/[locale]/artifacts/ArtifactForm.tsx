@@ -173,6 +173,11 @@ export default function ArtifactForm({
     const [pendingVinylFile, setPendingVinylFile] = useState<File | null>(null);
     const [pendingVinylUrl, setPendingVinylUrl] = useState<string | null>(null);
 
+    const [illustrationId, setIllustrationId] = useState<string | null>(getInitialMediaId('NETWORK_GATEWAYS'));
+    const [illustrationUrl, setIllustrationUrl] = useState(getInitialMediaUrl('NETWORK_GATEWAYS'));
+    const [pendingIllustrationFile, setPendingIllustrationFile] = useState<File | null>(null);
+    const [pendingIllustrationUrl, setPendingIllustrationUrl] = useState<string | null>(null);
+
 
     const [category, setCategory] = useState(initialData?.category || (anilistId ? 'anime' : 'music'));
     const [animeType, setAnimeType] = useState(initialData?.animeType || null);
@@ -248,6 +253,18 @@ export default function ArtifactForm({
         setPendingVinylFile(null);
     };
 
+    const handleIllustrationFileSelect = (file: File, objectUrl: string) => {
+        setIllustrationUrl(objectUrl);
+        setPendingIllustrationFile(file);
+        setPendingIllustrationUrl(null);
+    };
+
+    const handleIllustrationUrlSelect = (url: string) => {
+        setIllustrationUrl(url);
+        setPendingIllustrationUrl(url);
+        setPendingIllustrationFile(null);
+    };
+
     const handleThumbnailRemove = async () => {
         if (thumbnailId) {
             toast.promise(deleteMediaAction(thumbnailId), {
@@ -288,6 +305,20 @@ export default function ArtifactForm({
         setVinylUrl('');
         setPendingVinylFile(null);
         setPendingVinylUrl(null);
+    };
+
+    const handleIllustrationRemove = async () => {
+        if (illustrationId) {
+            toast.promise(deleteMediaAction(illustrationId), {
+                loading: 'Removing from R2...',
+                success: 'Asset deleted from storage.',
+                error: 'Failed to delete asset.'
+            });
+        }
+        setIllustrationId(null);
+        setIllustrationUrl('');
+        setPendingIllustrationFile(null);
+        setPendingIllustrationUrl(null);
     };
 
 
@@ -451,6 +482,30 @@ export default function ArtifactForm({
                 finalVinylId = null;
             }
 
+            // 3b. Upload/Prepare Illustration
+            let finalIllustrationId = illustrationId;
+            if (category === 'illustration') {
+                if (pendingIllustrationFile) {
+                    toast.info('Uploading local illustration...');
+                    const formData = new FormData();
+                    formData.append('file', pendingIllustrationFile);
+                    formData.append('context', 'artifact_asset');
+                    formData.append('contextId', artifactId);
+                    const res = await uploadMediaAction(formData);
+                    finalIllustrationId = res.mediaId;
+                } else if (pendingIllustrationUrl) {
+                    toast.info('Downloading external illustration...');
+                    const formData = new FormData();
+                    formData.append('url', pendingIllustrationUrl);
+                    formData.append('context', 'artifact_asset');
+                    formData.append('contextId', artifactId);
+                    const res = await uploadMediaAction(formData);
+                    finalIllustrationId = res.mediaId;
+                }
+            } else {
+                finalIllustrationId = null;
+            }
+
             // 4. Map to Assets array
             const localAssets = resources
                 .filter(r => r.platform === 'r2' && r.url)
@@ -465,6 +520,7 @@ export default function ArtifactForm({
                 finalThumbnailId && { mediaId: finalThumbnailId, role: 'thumbnail', isPrimary: true, position: 0 },
                 finalPosterId && { mediaId: finalPosterId, role: 'poster', isPrimary: false, position: 1 },
                 (category === 'music' && finalVinylId) && { mediaId: finalVinylId, role: 'vinyl', isPrimary: false, position: 2 },
+                (category === 'illustration' && finalIllustrationId) && { mediaId: finalIllustrationId, role: 'NETWORK_GATEWAYS', isPrimary: true, position: 0 },
             ].filter(Boolean) as any[];
 
             const finalAssets = [...visualAssets, ...localAssets];
@@ -558,6 +614,13 @@ export default function ArtifactForm({
                     onVinylFileSelect={handleVinylFileSelect}
                     onVinylUrlSelect={handleVinylUrlSelect}
                     onVinylRemove={handleVinylRemove}
+                    illustrationId={illustrationId}
+                    setIllustrationId={setIllustrationId}
+                    illustrationUrl={illustrationUrl}
+                    setIllustrationUrl={setIllustrationUrl}
+                    onIllustrationFileSelect={handleIllustrationFileSelect}
+                    onIllustrationUrlSelect={handleIllustrationUrlSelect}
+                    onIllustrationRemove={handleIllustrationRemove}
                     category={category}
                     setCategory={setCategory}
                     animeType={animeType}
