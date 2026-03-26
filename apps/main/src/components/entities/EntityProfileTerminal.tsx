@@ -5,7 +5,8 @@ import { Icon } from '@iconify/react';
 import { BrandIcon } from '@/components/BrandIcon';
 import { MainLayout } from '@/components/layout/MainLayout';
 import Link from 'next/link';
-import { Dictionary, getMediaByRole } from '@shimokitan/utils';
+import { Dictionary, getMediaByRole, resolveTranslation } from '@shimokitan/utils';
+import { cn } from '@shimokitan/ui';
 
 // ─── Link Category Detection ─────────────────────────────────────────────────
 type LinkCategory = 'social_media' | 'commerce' | 'platform' | 'video' | 'audio';
@@ -139,15 +140,7 @@ function HeroLinkCard({ link, dict, platforms }: { link: any, dict: Dictionary, 
     );
 }
 
-function VerifiedBadge({ className = "" }: { className?: string }) {
-    return (
-        <div className={`flex-shrink-0 flex items-center justify-center w-3.5 h-3.5 bg-violet-600 rotate-45 border border-violet-400/50 shadow-[0_0_8px_rgba(139,92,246,0.4)] ${className}`}>
-            <Icon icon="lucide:check" width={10} strokeWidth={4} className="-rotate-45 text-white" />
-        </div>
-    );
-}
 
-import { resolveTranslation } from '@shimokitan/utils';
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: { entity: any, locale: string, dict: Dictionary, platforms?: any[] }) {
@@ -322,10 +315,9 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                 {/* Identity Block */}
                                 <div className="flex flex-col gap-1.5 min-w-0">
                                     <div className="flex items-center gap-2.5">
-                                        <h1 className="font-black italic tracking-tighter uppercase text-white leading-none truncate" style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)' }}>
+                                        <h1 className="font-black italic tracking-tighter uppercase text-white leading-none" style={{ fontSize: 'clamp(1.4rem, 5vw, 2rem)' }}>
                                             {name}
                                         </h1>
-                                        {entity.civilStatus === 'resident' && <VerifiedBadge className="w-4 h-4" />}
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <div className="w-4 h-[1px] bg-zinc-700" />
@@ -340,30 +332,38 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                     </div>
                 )}
 
-                {/* ── If no featured artifact, show compact identity header ── */}
+                {/* ── If no featured artifact, show enhanced identity header ── */}
                 {!featuredCredit && (
-                    <div className="border-b border-zinc-900 p-8 md:p-12 -mx-4 flex items-center gap-8 bg-zinc-950/50">
-                        <div className="relative flex-shrink-0 w-24 h-24 border-2 border-zinc-700 bg-zinc-950 overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.05)]">
-                            <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-zinc-500 z-10" />
-                            <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-zinc-500 z-10" />
-                            {entity.avatar?.url || entity.thumbnail?.url ? (
-                                <img src={entity.avatar?.url || entity.thumbnail?.url} className="w-full h-full object-cover" alt={name} />
-                            ) : (
-                                <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700">
-                                    <Icon icon="lucide:user-round" width={48} />
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase text-white leading-none">{name}</h1>
-                                {entity.civilStatus === 'resident' && <VerifiedBadge className="w-5 h-5" />}
+                    <div className="relative w-full h-[300px] md:h-[450px] lg:h-[550px] flex items-end px-5 md:px-8 bg-zinc-950 border-b border-zinc-900 overflow-hidden">
+                        {/* Ambient background for the empty hero */}
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(139,92,246,0.04),transparent)]" />
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(244,63,94,0.02),transparent)]" />
+                        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
+                        
+                        <div className="relative z-10 flex items-center gap-4 pb-20 md:pb-32 lg:pb-40">
+                            <div className="relative flex-shrink-0 w-16 h-16 md:w-20 md:h-20 border border-zinc-600 bg-zinc-950 overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+                                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-zinc-400 z-10" />
+                                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-zinc-400 z-10" />
+                                {entity.avatar?.url || entity.thumbnail?.url ? (
+                                    <img src={entity.avatar?.url || entity.thumbnail?.url} className="w-full h-full object-cover" alt={name} />
+                                ) : (
+                                    <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-600">
+                                        <Icon icon="lucide:user-round" width={32} />
+                                    </div>
+                                )}
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-6 h-[1px] bg-zinc-700" />
-                                <div className="text-[11px] font-mono text-zinc-500 uppercase tracking-[0.4em] font-black">
-                                    {professionalTitle && <span className="text-zinc-300">{professionalTitle} // </span>}
-                                    {entityType}
+                            <div className="flex flex-col gap-1.5 min-w-0">
+                                <div className="flex items-center gap-2.5">
+                                    <h1 className="font-black italic tracking-tighter uppercase text-white leading-none" style={{ fontSize: 'clamp(1.4rem, 5vw, 2.5rem)' }}>
+                                        {name}
+                                    </h1>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-[1px] bg-zinc-700" />
+                                    <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.3em] font-black">
+                                        {professionalTitle && <span className="text-zinc-200">{professionalTitle} // </span>}
+                                        {entityType}
+                                    </span>
                                 </div>
                             </div>
                         </div>
