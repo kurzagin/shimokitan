@@ -158,7 +158,9 @@
             "social_media": "MEDIA SOSIAL",
             "active_links": "LINK AKTIF",
             "no_uplinks": "Tidak ada uplink yang terhubung"
-        }
+        },
+        "authorized_works": "KARYA_RESMI",
+        "credited_works": "KARYA_TERKREDIT"
     },
     "legal": {
         "last_updated": "Terakhir Diperbarui",

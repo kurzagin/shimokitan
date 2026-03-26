@@ -158,7 +158,9 @@
             "social_media": "SOCIAL_MEDIA",
             "active_links": "ACTIVE_LINKS",
             "no_uplinks": "No uplinks connected"
-        }
+        },
+        "authorized_works": "AUTHORIZED_WORKS",
+        "credited_works": "CREDITED_WORKS"
     },
     "legal": {
         "last_updated": "Last Updated",

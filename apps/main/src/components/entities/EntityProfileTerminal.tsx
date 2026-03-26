@@ -141,8 +141,63 @@ function HeroLinkCard({ link, dict, platforms }: { link: any, dict: Dictionary, 
 }
 
 
+function CreditRow({ credit, locale, isFirst }: { credit: any, locale: string, isFirst?: boolean }) {
+    const artifactTitle = resolveTranslation(credit.artifact.translations, locale)?.title || "UNTITLED";
+
+    return (
+        <Link
+            href={`/artifacts/${credit.artifact.id}`}
+            className="group flex gap-4 p-4 md:p-5 hover:bg-white/[0.025] transition-colors relative"
+        >
+            {/* Thumbnail */}
+            <div className={`flex-shrink-0 bg-zinc-900 border-2 border-zinc-800 overflow-hidden group-hover:border-zinc-500 transition-all shadow-xl ${isFirst ? 'w-28 h-20 md:w-36 md:h-24' : 'w-20 h-14 md:w-28 md:h-18'}`}>
+                {getMediaByRole(credit.artifact.media, 'thumbnail')?.url ? (
+                    <img
+                        src={getMediaByRole(credit.artifact.media, 'thumbnail').url}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        alt=""
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-zinc-800">
+                        <Icon icon="lucide:disc" width={24} />
+                    </div>
+                )}
+            </div>
+
+            {/* Metadata */}
+            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[8px] font-mono font-black text-zinc-600 uppercase tracking-widest bg-zinc-900 px-1.5 py-0.5">
+                        {credit.artifact.category}
+                    </span>
+                    <div className="flex items-center gap-1">
+                        <Icon icon="lucide:diamond" width={8} className="text-violet-600/50 group-hover:text-violet-500 transition-colors" />
+                        <span className="text-[8px] font-mono text-zinc-600 group-hover:text-violet-400 transition-colors">
+                            {credit.artifact.resonance || 0}
+                        </span>
+                    </div>
+                </div>
+
+                <h3 className={`font-black uppercase text-zinc-200 group-hover:text-white transition-colors leading-tight ${isFirst ? 'text-base md:text-lg' : 'text-sm md:text-base'}`}>
+                    {artifactTitle}
+                </h3>
+
+                <div className="flex items-center gap-1.5">
+                    <span className="text-[8px] font-mono text-zinc-600 uppercase">ROLE //</span>
+                    <span className="text-[9px] font-black uppercase tracking-wider text-zinc-300 group-hover:text-white transition-colors">
+                        {credit.role}
+                    </span>
+                </div>
+            </div>
+
+            {/* Right accent bar */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[2px] h-8 bg-zinc-800 group-hover:bg-violet-500 transition-colors" />
+        </Link>
+    );
+}
 
 // ─── Main Component ────────────────────────────────────────────────────────────
+
 export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: { entity: any, locale: string, dict: Dictionary, platforms?: any[] }) {
     const translation = resolveTranslation(entity.translations, locale);
     const name = translation?.name || (entity as any).name || "Anonymous Artist";
@@ -197,6 +252,11 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
     const professionalTitle = translation?.status?.toUpperCase() || "";
     const credits = entity.credits || [];
     const sortedCredits = [...credits].sort((a: any, b: any) => (b.artifact?.resonance || 0) - (a.artifact?.resonance || 0));
+
+    // Split credits by role
+    const authorizedCredits = sortedCredits.filter((c: any) => c.contributorClass === 'author');
+    const contributionCredits = sortedCredits.filter((c: any) => c.contributorClass !== 'author');
+
     
     // PRIORITY: Use explicit primary artifact if defined. NO FALLBACK.
     let featuredCredit = null;
@@ -557,93 +617,70 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                     </div>
 
                     {/* RIGHT: Archive — credits */}
-                    <div className="lg:col-span-7 bg-black min-h-screen">
-                        {/* Archive header */}
-                        <div className="lg:sticky lg:top-0 z-20 h-14 bg-zinc-950/90 backdrop-blur-md px-5 border-b border-zinc-900 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-5 h-5 border-2 border-zinc-600 flex items-center justify-center">
-                                    <div className="w-2 h-2 bg-zinc-400" />
+                    <div className="lg:col-span-7 bg-black min-h-screen border-l border-zinc-900">
+                        
+                        {/* ── SECTION: Authorized Works ── */}
+                        {authorizedCredits.length > 0 && (
+                            <div className="divide-y divide-zinc-900 border-b border-zinc-900 last:border-0 border-t border-zinc-900 first:border-t-0">
+                                <div className="lg:sticky lg:top-0 z-20 h-14 bg-zinc-950/90 backdrop-blur-md px-5 border-b border-zinc-900 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-5 h-5 border-2 border-violet-700 flex items-center justify-center">
+                                            <div className="w-2 h-2 bg-violet-400" />
+                                        </div>
+                                        <span className="text-[10px] font-black tracking-[0.2em] text-zinc-200 uppercase">
+                                            {dict.entities.authorized_works}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">COUNT //</span>
+                                        <span className="text-[10px] font-black text-violet-400">{authorizedCredits.length}</span>
+                                    </div>
                                 </div>
-                                <span className="text-[10px] font-black tracking-[0.2em] text-zinc-400 uppercase">CREDITED_WORKS</span>
+
+                                {authorizedCredits.map((credit: any, i: number) => (
+                                    <CreditRow key={i} credit={credit} locale={locale} isFirst={i === 0} />
+                                ))}
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[9px] font-mono text-zinc-600 uppercase">COUNT:</span>
-                                <span className="text-[10px] font-black text-zinc-300">{sortedCredits.length}</span>
-                            </div>
-                        </div>
+                        )}
 
-                        {/* Credits list */}
-                        <div className="divide-y divide-zinc-900">
-                            {sortedCredits.length > 0 ? (
-                                sortedCredits.map((credit: any, i: number) => {
-                                    const artifactTitle = resolveTranslation(credit.artifact.translations, locale)?.title || "UNTITLED";
-                                    const isFirst = i === 0;
-
-                                    return (
-                                        <Link
-                                            key={i}
-                                            href={`/artifacts/${credit.artifact.id}`}
-                                            className="group flex gap-4 p-4 md:p-5 hover:bg-white/[0.025] transition-colors relative"
-                                        >
-                                            {/* Thumbnail */}
-                                            <div className={`flex-shrink-0 bg-zinc-900 border-2 border-zinc-800 overflow-hidden group-hover:border-zinc-500 transition-all shadow-xl ${isFirst ? 'w-28 h-20 md:w-36 md:h-24' : 'w-20 h-14 md:w-28 md:h-18'}`}>
-                                                {getMediaByRole(credit.artifact.media, 'thumbnail')?.url ? (
-                                                    <img
-                                                        src={getMediaByRole(credit.artifact.media, 'thumbnail').url}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                                        alt=""
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-zinc-800">
-                                                        <Icon icon="lucide:disc" width={24} />
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Metadata */}
-                                            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1.5">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className="text-[8px] font-mono font-black text-zinc-600 uppercase tracking-widest bg-zinc-900 px-1.5 py-0.5">
-                                                        {credit.artifact.category}
-                                                    </span>
-                                                    <div className="flex items-center gap-1">
-                                                        <Icon icon="lucide:diamond" width={8} className="text-violet-600/50 group-hover:text-violet-500 transition-colors" />
-                                                        <span className="text-[8px] font-mono text-zinc-600 group-hover:text-violet-400 transition-colors">
-                                                            {credit.artifact.resonance || 0}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <h3 className={`font-black uppercase text-zinc-200 group-hover:text-white transition-colors leading-tight ${isFirst ? 'text-base md:text-lg' : 'text-sm md:text-base'}`}>
-                                                    {artifactTitle}
-                                                </h3>
-
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="text-[8px] font-mono text-zinc-600 uppercase">ROLE //</span>
-                                                    <span className="text-[9px] font-black uppercase tracking-wider text-zinc-300 group-hover:text-white transition-colors">
-                                                        {credit.role}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            {/* Right accent bar */}
-                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[2px] h-8 bg-zinc-800 group-hover:bg-violet-500 transition-colors" />
-                                        </Link>
-                                    );
-                                })
-                            ) : (
-                                <div className="p-16 text-center">
-                                    <Icon icon="lucide:archive" className="mx-auto text-zinc-800 mb-3" width={40} />
-                                    <span className="text-[10px] font-mono font-bold text-zinc-700 uppercase tracking-widest block">
-                                        NO_CREDITS_ARCHIVED
-                                    </span>
-                                    <span className="text-[9px] font-mono text-zinc-800 uppercase tracking-widest block mt-1">
-                                        Works will appear here when archived
-                                    </span>
+                        {/* ── SECTION: Contribution Ledger ── */}
+                        {contributionCredits.length > 0 && (
+                            <div className="divide-y divide-zinc-900 border-b border-zinc-900 last:border-0 border-t border-zinc-900 first:border-t-0">
+                                <div className="lg:sticky lg:top-0 z-20 h-14 bg-zinc-950/90 backdrop-blur-md px-5 border-b border-zinc-900 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-5 h-5 border-2 border-zinc-600 flex items-center justify-center">
+                                            <div className="w-2 h-2 bg-zinc-400" />
+                                        </div>
+                                        <span className="text-[10px] font-black tracking-[0.2em] text-zinc-400 uppercase">
+                                            {dict.entities.credited_works}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">COUNT //</span>
+                                        <span className="text-[10px] font-black text-zinc-300">{contributionCredits.length}</span>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+
+                                {contributionCredits.map((credit: any, i: number) => (
+                                    <CreditRow key={i} credit={credit} locale={locale} isFirst={i === 0} />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* ── Empty State ── */}
+                        {sortedCredits.length === 0 && (
+                            <div className="p-16 text-center">
+                                <Icon icon="lucide:archive" className="mx-auto text-zinc-800 mb-3" width={40} />
+                                <span className="text-[10px] font-mono font-bold text-zinc-700 uppercase tracking-widest block">
+                                    NO_CREDITS_ARCHIVED
+                                </span>
+                                <span className="text-[9px] font-mono text-zinc-800 uppercase tracking-widest block mt-1">
+                                    Works will appear here when archived
+                                </span>
+                            </div>
+                        )}
                     </div>
+
                 </div>
             </div>
         </MainLayout>

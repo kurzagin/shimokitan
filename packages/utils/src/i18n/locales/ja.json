@@ -158,7 +158,9 @@
             "social_media": "ソーシャルメディア",
             "active_links": "有効なリンク",
             "no_uplinks": "接続されたアップリンクはありません"
-        }
+        },
+        "authorized_works": "作品・公認作品",
+        "credited_works": "参加・クレジット作品"
     },
     "legal": {
         "last_updated": "最終更新日",
