@@ -1,6 +1,6 @@
 import React from "react";
 import { MainLayout } from "../../components/layout/MainLayout";
-import { getDb, schema, desc, eq, isNull, sql, and, resolveTranslation } from "@shimokitan/db";
+import { getDb, schema, desc, eq, isNull, sql, and, gt, resolveTranslation } from "@shimokitan/db";
 import HomeClient from "./HomeClient";
 import { Locale, getDictionary } from "@shimokitan/utils";
 
@@ -43,7 +43,10 @@ export default async function AppPage({
   let spotlightArtifacts: any[] = [];
   try {
     const rawArtifacts = await db.query.artifacts.findMany({
-      where: isNull(schema.artifacts.deletedAt),
+      where: and(
+        isNull(schema.artifacts.deletedAt),
+        gt(schema.artifacts.resonance, "0")
+      ),
       limit: 12, // Fetch more to allow in-memory sorting
       with: {
         media: {
@@ -83,6 +86,11 @@ export default async function AppPage({
   let videoArtifact: any = null;
   try {
     const rawPitArtifacts = await db.query.artifacts.findMany({
+      where: and(
+        isNull(schema.artifacts.deletedAt),
+        gt(schema.artifacts.resonance, "0"),
+        eq(schema.artifacts.category, "anime")
+      ),
       orderBy: desc(schema.artifacts.resonance),
       limit: 20, // Fetch more to ensure we find ones with video resources
       with: {
@@ -136,8 +144,14 @@ export default async function AppPage({
     };
 
     if (rawPitArtifacts.length > 0) {
-      // Pick the first one for the "In The Pit" card
-      featuredArtifact = processArtifact(rawPitArtifacts[0]);
+      // Find the first Anime artifact that specifically has a poster image
+      const candidates = rawPitArtifacts
+        .map(a => processArtifact(a))
+        .filter(a => !!a.posterImage);
+
+      if (candidates.length > 0) {
+        featuredArtifact = candidates[0];
+      }
 
       // Pick a different one for the "Video" card, ideally one with a videoUrl
       const artifactsWithVideo = rawPitArtifacts.filter((a, idx) => {

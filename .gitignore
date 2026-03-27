@@ -6,7 +6,7 @@ build
 
 # docs/
 # README.md
-rahura
+docs/internal
 
 # Configuration & Secrets
 .env*

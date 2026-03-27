@@ -839,7 +839,7 @@ export default function HomeClient({
           {entities.filter((entity) => entity.civilStatus === 'resident').length > 0 ? (
             entities
               .filter((entity) => entity.civilStatus === 'resident')
-              .slice(0, 3)
+              .slice(0, 2)
               .map((entity) => (
                 <Link
                   key={entity.id}
