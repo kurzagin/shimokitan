@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react';
 import { BrandIcon } from '@/components/BrandIcon';
 import { Badge, cn } from '@shimokitan/ui';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { getArtifactById, resolveTranslation, getDb } from '@shimokitan/db';
+import { getArtifactById, resolveTranslation, getDb, schema, eq } from '@shimokitan/db';
 import Link from '@/components/Link';
 import { getEntityUrl } from '@shimokitan/utils';
 import { notFound } from 'next/navigation';
@@ -13,6 +13,8 @@ import { TheaterPlayer } from './TheaterPlayer';
 import { TheaterVideo } from '@/lib/store/theater-store';
 import { StationTrack } from '@/lib/store/station-store';
 import { getDictionary, Locale, getMediaByRole } from '@shimokitan/utils';
+import { CompactPulse } from './PulseShards';
+import { ensureUserSync } from '@/app/[locale]/(pedalboard)/pedalboard/auth-helpers';
 import type { Metadata } from 'next';
 
 // Helper removed, using shared version from @shimokitan/utils
@@ -26,12 +28,13 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
     if (!artifact) return { title: s.artifact_not_found };
 
     const translation = resolveTranslation(artifact.translations, locale);
-    const title = translation?.title || s.artifact_untitled;
+    const title = translation?.title || (artifact.category === 'illustration' ? 'ILLUSTRATION' : s.artifact_untitled);
     const description = s.artifact_description.replace('{title}', title);
     
     const poster = getMediaByRole(artifact.media, 'poster');
     const thumbnail = getMediaByRole(artifact.media, 'thumbnail');
-    const imageUrl = poster?.url || thumbnail?.url || "/tokyo.jpg";
+    const gateway = getMediaByRole(artifact.media, 'NETWORK_GATEWAYS');
+    const imageUrl = gateway?.url || poster?.url || thumbnail?.url || "/tokyo.jpg";
     
     const workTitle = artifact.work ? resolveTranslation(artifact.work.translations, locale)?.title : null;
     const fullTitle = workTitle ? `${title} // ${workTitle}` : title;
@@ -67,9 +70,24 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
 
     const db = getDb();
     const platforms = db ? await db.query.externalPlatforms.findMany() : [];
+    
+    // ── REACTION FETCHING ──
+    const user = await ensureUserSync();
+    const reactions = db ? await db.query.artifactReactions.findMany({
+        where: eq(schema.artifactReactions.artifactId, id),
+    }) : [];
+    
+    const userReactionTypes = user 
+        ? reactions.filter((r: any) => r.authorId === user.id).map((r: any) => r.type)
+        : [];
+    
+    const reactionCounts = reactions.reduce((acc: any, r: any) => {
+        acc[r.type] = (acc[r.type] || 0) + 1;
+        return acc;
+    }, {});
 
     const translation = resolveTranslation(artifact.translations, locale);
-    const title = translation?.title || "Untitled";
+    const title = translation?.title || (artifact.category === 'illustration' ? 'ILLUSTRATION' : "Untitled");
     const description = translation?.description || "";
 
     const primaryResource = artifact.resources?.find((r: any) => r.isPrimary) || artifact.resources?.[0];
@@ -116,13 +134,14 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
 
     const poster = getMediaByRole(artifact.media, 'poster');
     const thumbnail = getMediaByRole(artifact.media, 'thumbnail');
+    const gateway = getMediaByRole(artifact.media, 'NETWORK_GATEWAYS');
     const vinyl = getMediaByRole(artifact.media, 'vinyl');
 
     const trackData: StationTrack | null = hostedAudio ? {
         title,
         artist: primaryArtistName,
         album: (artifact.work ? resolveTranslation(artifact.work.translations, locale)?.title : null) || artifact.category || "Single",
-        cover: vinyl?.url || thumbnail?.url || "",
+        cover: vinyl?.url || gateway?.url || thumbnail?.url || "",
         bitrate: (specs.bitrate as string) || "1411 KBPS",
         format: (specs.format as string) || "LOSSLESS",
         src: hostedAudio.value
@@ -203,27 +222,27 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                             </span>
                         </div>
 
-                        <div className="px-4 py-3 flex flex-col justify-center gap-1.5">
-                            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">Signal_Status</span>
-                            <div className="flex items-center gap-2">
-                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                                <span className="text-sm font-black italic text-emerald-400 uppercase truncate">
-                                    ACTIVE
-                                </span>
-                            </div>
+                        <div className="px-4 py-3 flex flex-col justify-center gap-1.5 overflow-hidden">
+                            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">Pulse_Field</span>
+                            <CompactPulse 
+                                artifactId={artifact.id} 
+                                userReactions={userReactionTypes as any} 
+                                counts={reactionCounts as any} 
+                                zineCount={(artifact as any).zines?.length}
+                            />
                         </div>
 
-                        <div className="px-4 py-3 flex items-center gap-3">
+                        <div className="px-4 py-3 flex items-center gap-3 overflow-hidden">
                             <div className="flex flex-col gap-0.5 shrink-0">
-                                <span className="text-[10px] text-rose-500 uppercase tracking-[0.3em]">Resonance</span>
+                                <span className="text-[10px] text-rose-500 uppercase tracking-[0.3em]">Heat</span>
                                 <span className="text-xl font-black italic text-white leading-none">
                                     {artifact.resonance || 0}
                                 </span>
                             </div>
-                            <div className="flex-1 h-2 bg-zinc-900 border border-zinc-800 overflow-hidden">
+                            <div className="flex-1 h-1.5 bg-zinc-900 border border-zinc-800 overflow-hidden">
                                 <div
                                     className="h-full bg-gradient-to-r from-rose-900 to-rose-500 shadow-[0_0_6px_rgba(225,29,72,0.4)]"
-                                    style={{ width: `${Math.min(100, Number(artifact.resonance || 0) * 1.33)}%` }}
+                                    style={{ width: `${Math.min(100, Number(artifact.resonance || 0) * 0.5)}%` }}
                                 />
                             </div>
                         </div>
@@ -404,29 +423,19 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                             )}
                         </div>
 
-                        <div className="shrink-0 relative w-full aspect-video bg-black overflow-hidden">
-                            <div className="absolute inset-0 opacity-20 filter blur-3xl saturate-200 pointer-events-none scale-110 z-0">
-                                <img src={thumbnail?.url || undefined} className="w-full h-full object-cover" />
-                            </div>
+                        <div className="shrink-0 relative w-full aspect-video bg-black overflow-hidden border-b border-zinc-900/50">
                             {/* Dynamic Theater Player managed by Client Component */}
                             <TheaterPlayer 
                                 initialVideo={initialVideo} 
-                                defaultThumbnail={thumbnail?.url} 
+                                defaultThumbnail={gateway?.url || thumbnail?.url} 
                             />
-
-                            <div className="absolute inset-0 z-20 pointer-events-none">
-                                <div className="absolute top-2 left-2 border-t border-l border-violet-500/40 w-5 h-5" />
-                                <div className="absolute top-2 right-2 border-t border-r border-violet-500/40 w-5 h-5" />
-                                <div className="absolute bottom-2 left-2 border-b border-l border-violet-500/30 w-5 h-5" />
-                                <div className="absolute bottom-2 right-2 border-b border-r border-violet-500/30 w-5 h-5" />
-                            </div>
                         </div>
 
                         {galleryItems.length > 0 && (
                             <div className="shrink-0 flex gap-2 p-2 border-b border-zinc-900 bg-zinc-950/20 overflow-x-auto scrollbar-none">
                                 {[thumbnail, poster, ...galleryItems.map((gi: any) => gi.media)].filter(Boolean).map((img: any, i: number) => (
                                     <div key={i} className="shrink-0 h-12 aspect-[2/3] md:h-16 bg-zinc-900 border border-zinc-800 overflow-hidden group/thumb cursor-pointer">
-                                        <img src={img.url} className="w-full h-full object-cover grayscale opacity-50 group-hover/thumb:grayscale-0 group-hover/thumb:opacity-100 transition-all" />
+                                        <img src={img.url} className="w-full h-full object-cover opacity-60 group-hover/thumb:opacity-100 transition-all" />
                                     </div>
                                 ))}
                             </div>
@@ -520,13 +529,11 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                     </div>
                                 )}
                                 
-                                <Link 
-                                    href={`/artifacts/${artifact.id}/zines/post`}
-                                    className="mt-4 flex items-center justify-center gap-2 py-3 bg-zinc-900 border border-zinc-800 text-[10px] font-black uppercase tracking-[0.4em] italic hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all group/init"
-                                >
-                                    <Icon icon="lucide:plus" width={12} className="group-hover/init:rotate-90 transition-transform" />
-                                    Initialize_New_Zine
-                                </Link>
+                                <div className="mt-2 flex items-center justify-between px-1">
+                                    <span className="text-[8px] text-zinc-800 uppercase font-black font-mono tracking-[0.2em]">
+                                        COMMUNITY_SIGNAL_OUTPUT // STABLE
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -661,7 +668,7 @@ function ProvenanceCreditRow({ credit, locale, color }: { credit: any; locale: s
             <div className={cn("absolute top-0 left-0 w-0.5 h-full", barColorMap[color])} />
             <div className="w-9 h-9 shrink-0 bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden">
                 {credit.entity?.avatar?.url ? (
-                    <img src={credit.entity.avatar.url} className="w-full h-full object-cover grayscale" />
+                    <img src={credit.entity.avatar.url} className="w-full h-full object-cover" />
                 ) : (
                     <Icon icon="lucide:user" width={14} className="text-zinc-700" />
                 )}

@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
             return {
                 id: a.id,
                 slug: a.slug || a.id,
-                title: translation?.title || "Untitled Shard",
+                title: translation?.title || "ILLUSTRATION",
                 artist: entityTrans?.name || primaryCredit?.entity?.name || "ANONYMOUS",
                 image: resolveImage(),
                 resonance: a.resonance || 0,

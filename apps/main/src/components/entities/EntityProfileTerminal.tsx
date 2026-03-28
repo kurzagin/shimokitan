@@ -121,11 +121,11 @@ function HeroLinkCard({ link, dict, platforms }: { link: any, dict: Dictionary, 
             className={`group relative flex items-center justify-between px-5 py-4 bg-zinc-950 border-l-2 ${accent} transition-all duration-300`}
         >
             <div className="flex items-center gap-4">
-                <div className="w-10 h-10 flex items-center justify-center border border-zinc-800 group-hover:border-zinc-600 bg-black transition-colors">
+                <div className="w-10 h-10 flex items-center justify-center border border-zinc-800 group-hover:border-zinc-500 bg-black/40 transition-colors shadow-inner">
                     <BrandIcon 
                         platform={link.platform} 
                         iconUrl={platforms.find(p => p.id === link.platform)?.iconUrl}
-                        className="w-6 h-6 text-zinc-400 group-hover:text-white transition-colors" 
+                        className={cn("w-6 h-6 transition-all grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100", labelColor)} 
                     />
                 </div>
                 <div className="space-y-0.5">
@@ -142,7 +142,13 @@ function HeroLinkCard({ link, dict, platforms }: { link: any, dict: Dictionary, 
 
 
 function CreditRow({ credit, locale, isFirst }: { credit: any, locale: string, isFirst?: boolean }) {
-    const artifactTitle = resolveTranslation(credit.artifact.translations, locale)?.title || "UNTITLED";
+    const rawTitle = resolveTranslation(credit.artifact.translations, locale)?.title;
+    const isIllustration = credit.artifact.category === 'illustration';
+    const artifactTitle = rawTitle || (isIllustration ? 'ILLUSTRATION' : "UNTITLED");
+
+    const thumbnailUrl = getMediaByRole(credit.artifact.media, 'thumbnail')?.url || 
+                        getMediaByRole(credit.artifact.media, 'NETWORK_GATEWAYS')?.url || 
+                        getMediaByRole(credit.artifact.media, 'poster')?.url;
 
     return (
         <Link
@@ -151,9 +157,9 @@ function CreditRow({ credit, locale, isFirst }: { credit: any, locale: string, i
         >
             {/* Thumbnail */}
             <div className={`flex-shrink-0 bg-zinc-900 border-2 border-zinc-800 overflow-hidden group-hover:border-zinc-500 transition-all shadow-xl ${isFirst ? 'w-28 h-20 md:w-36 md:h-24' : 'w-20 h-14 md:w-28 md:h-18'}`}>
-                {getMediaByRole(credit.artifact.media, 'thumbnail')?.url ? (
+                {thumbnailUrl ? (
                     <img
-                        src={getMediaByRole(credit.artifact.media, 'thumbnail').url}
+                        src={thumbnailUrl}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         alt=""
                     />
@@ -170,9 +176,9 @@ function CreditRow({ credit, locale, isFirst }: { credit: any, locale: string, i
                     <span className="text-[8px] font-mono font-black text-zinc-600 uppercase tracking-widest bg-zinc-900 px-1.5 py-0.5">
                         {credit.artifact.category}
                     </span>
-                    <div className="flex items-center gap-1">
-                        <Icon icon="lucide:diamond" width={8} className="text-violet-600/50 group-hover:text-violet-500 transition-colors" />
-                        <span className="text-[8px] font-mono text-zinc-600 group-hover:text-violet-400 transition-colors">
+                    <div className="flex items-center gap-1.5 px-1.5 py-0.5 bg-violet-600/5 border border-violet-500/10 rounded-sm">
+                        <Icon icon="lucide:flame" width={8} className="text-orange-500 animate-pulse" />
+                        <span className="text-[8px] font-black font-mono text-zinc-500 group-hover:text-violet-400 transition-colors">
                             {credit.artifact.resonance || 0}
                         </span>
                     </div>
@@ -295,10 +301,14 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                     <div className="relative w-full h-[400px] md:h-[580px] lg:h-[700px] overflow-hidden bg-zinc-950 border-b border-zinc-900">
 
                         {/* Background thumbnail */}
-                        {getMediaByRole(featuredCredit.artifact.media, 'thumbnail')?.url || getMediaByRole(featuredCredit.artifact.media, 'poster')?.url ? (
+                        {getMediaByRole(featuredCredit.artifact.media, 'thumbnail')?.url || 
+                         getMediaByRole(featuredCredit.artifact.media, 'NETWORK_GATEWAYS')?.url || 
+                         getMediaByRole(featuredCredit.artifact.media, 'poster')?.url ? (
                             <img
-                                src={getMediaByRole(featuredCredit.artifact.media, 'thumbnail')?.url || getMediaByRole(featuredCredit.artifact.media, 'poster')?.url}
-                                className="absolute inset-0 w-full h-full object-cover object-[center_25%] opacity-45 scale-[1.02] group-hover:scale-100 transition-transform duration-700"
+                                src={getMediaByRole(featuredCredit.artifact.media, 'thumbnail')?.url || 
+                                     getMediaByRole(featuredCredit.artifact.media, 'NETWORK_GATEWAYS')?.url || 
+                                     getMediaByRole(featuredCredit.artifact.media, 'poster')?.url}
+                                className="absolute inset-0 w-full h-full object-cover object-[center_25%] opacity-70 group-hover:opacity-100 scale-[1.02] group-hover:scale-100 transition-all duration-1000"
                                 alt=""
                             />
                         ) : (
@@ -341,7 +351,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                         className="font-black italic uppercase text-white leading-[0.88] group-hover/feat:text-violet-100 transition-colors"
                                         style={{ fontSize: 'clamp(1.8rem, 6vw, 3rem)', letterSpacing: '-0.02em' }}
                                     >
-                                        {resolveTranslation(featuredCredit.artifact.translations, locale)?.title || "UNTITLED"}
+                                        {resolveTranslation(featuredCredit.artifact.translations, locale)?.title || (featuredCredit.artifact.category === 'illustration' ? 'ILLUSTRATION' : "UNTITLED")}
                                     </h2>
 
                                     {/* Role */}

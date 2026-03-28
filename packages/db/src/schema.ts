@@ -57,6 +57,7 @@ export const verificationStatusEnum = pgEnum("verification_status", ["pending", 
 export const artifactMediaRoleEnum = pgEnum("artifact_media_role", ["cover", "poster", "background", "logo", "gallery", "thumbnail", "vinyl", "audio", "video", "source", "NETWORK_GATEWAYS"]);
 export const workMediaRoleEnum = pgEnum("work_media_role", ["poster", "thumbnail", "background", "logo", "gallery"]);
 export const registryApplicationStatusEnum = pgEnum("registry_application_status", ["pending", "reviewed", "approved", "rejected"]);
+export const artifactReactionTypeEnum = pgEnum("artifact_reaction_type", ["core", "flux", "void", "glitch", "spark", "pulse"]);
 
 // ==================================================================
 // 1.5. MEDIA REGISTRY
@@ -455,6 +456,19 @@ export const zines = pgTable("zines", {
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
+export const artifactReactions = pgTable("artifact_reactions", {
+    id: text("id").primaryKey(),
+    artifactId: text("artifact_id").references(() => artifacts.id, { onDelete: "cascade" }).notNull(),
+    authorId: text("author_id").references(() => users.id).notNull(),
+    type: artifactReactionTypeEnum("type").default("spark").notNull(),
+    energy: numeric("energy", { precision: 12, scale: 4 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (t) => ({
+    artifactIdx: index("idx_artifact_reactions_artifact").on(t.artifactId),
+    authorIdx: index("idx_artifact_reactions_author").on(t.authorId),
+    uniqueReaction: uniqueIndex("idx_artifact_reactions_unique").on(t.artifactId, t.authorId, t.type),
+}));
+
 export const zinesI18n = pgTable("zines_i18n", {
     zineId: text("zine_id").references(() => zines.id, { onDelete: "cascade" }).notNull(),
     locale: localeEnum("locale").notNull(),
@@ -624,6 +638,7 @@ export const artifactsRelations = relations(artifacts, ({ one, many }) => ({
     resources: many(artifactResources),
     media: many(artifactMedia),
     zines: many(zines),
+    reactions: many(artifactReactions),
     exhibits: many(exhibits),
     collections: many(collectionArtifacts),
     tags: many(artifactTags),
@@ -748,6 +763,7 @@ export const mediaRelations = relations(media, ({ one }) => ({
 export const usersRelations = relations(users, ({ many }) => ({
     managedEntities: many(entityManagers),
     zines: many(zines),
+    reactions: many(artifactReactions),
 
 }));
 
@@ -784,6 +800,11 @@ export const zinesRelations = relations(zines, ({ one, many }) => ({
 
 export const zinesI18nRelations = relations(zinesI18n, ({ one }) => ({
     zine: one(zines, { fields: [zinesI18n.zineId], references: [zines.id] }),
+}));
+
+export const artifactReactionsRelations = relations(artifactReactions, ({ one }) => ({
+    artifact: one(artifacts, { fields: [artifactReactions.artifactId], references: [artifacts.id] }),
+    author: one(users, { fields: [artifactReactions.authorId], references: [users.id] }),
 }));
 
 export const tagsRelations = relations(tags, ({ many }) => ({

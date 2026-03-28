@@ -41,40 +41,21 @@ export default function GalleryBrowser({
   const locale = (params?.locale as string) || "en";
 
   /** ── Stage vs Echo split ──────────────────────────────── */
-  const stageItems = illustrations.slice(0, 6);
+  // Only items with positive resonance reach the Bento Stage
+  const stageItems = (illustrations || []).filter(i => (i.resonance || 0) > 0).slice(0, 6);
 
   /** ── Echo Field (infinite scroll) ─────────────────────── */
-  const [echoItems, setEchoItems] = useState<Illustration[]>([]);
-  const [nextCursor, setNextCursor] = useState<number | null>(0);
+  // Initial echo items are everything not in the stage
+  const [echoItems, setEchoItems] = useState<Illustration[]>(
+    (illustrations || []).filter(i => !stageItems.some(s => s.id === i.id))
+  );
+
+  const [nextCursor, setNextCursor] = useState<number | null>(illustrations.length);
   const [isLoading, setIsLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const mockEcho: Illustration[] = [
-    { id: "e1", slug: "e1", title: "NEON_HEART_OVERLOAD", artist: "X_RAY", image: "https://images.unsplash.com/photo-1605142859862-978be7eba909?q=80&w=800", resonance: 0.98, description: "", category: "art", width: 800, height: 1200 },
-    { id: "e2", slug: "e2", title: "STATION_SIDE_RAIN", artist: "CYBER", image: "https://images.unsplash.com/photo-1514565131-fce0801e5785?q=80&w=800", resonance: 0.94, description: "", category: "art", width: 800, height: 530 },
-    { id: "e3", slug: "e3", title: "SIGNAL_GHOST", artist: "GHOST", image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800", resonance: 0.88, description: "", category: "art", width: 800, height: 800 },
-    { id: "e4", slug: "e4", title: "GLITCH_GARDEN", artist: "BOTANIC", image: "https://images.unsplash.com/photo-1542641728-6ca359b085f4?q=80&w=800", resonance: 0.92, description: "", category: "art", width: 800, height: 1100 },
-    { id: "e5", slug: "e5", title: "VOICE_ALLEY", artist: "SILENT", image: "https://images.unsplash.com/photo-1515191107209-c28698631303?q=80&w=800", resonance: 0.85, description: "", category: "art", width: 800, height: 600 },
-    { id: "e6", slug: "e6", title: "DATA_STRATA", artist: "ARCHITECT", image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=800", resonance: 0.99, description: "", category: "art", width: 800, height: 1200 },
-    { id: "e7", slug: "e7", title: "CYBER_NOMAD_01", artist: "NOMAD", image: "https://images.unsplash.com/photo-1533900298358-e419f511addc?q=80&w=800", resonance: 0.91, description: "", category: "art", width: 800, height: 530 },
-    { id: "e8", slug: "e8", title: "VOID_WALKER", artist: "WALKER", image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=800", resonance: 0.95, description: "", category: "art", width: 800, height: 800 },
-    { id: "e9", slug: "e9", title: "TOKYO_PULSE", artist: "PULSE", image: "https://images.unsplash.com/photo-1540959733332-e94e270b4d82?q=80&w=800", resonance: 0.89, description: "", category: "art", width: 800, height: 450 },
-    { id: "e10", slug: "e10", title: "NEON_DREAMS", artist: "DREAMER", image: "https://images.unsplash.com/photo-1493246507139-91e8bef99c02?q=80&w=800", resonance: 0.93, description: "", category: "art", width: 800, height: 1000 },
-    { id: "e11", slug: "e11", title: "STATION_EXIT_5", artist: "EXIT", image: "https://images.unsplash.com/photo-1444723121867-7a241cacace9?q=80&w=800", resonance: 0.82, description: "", category: "art", width: 800, height: 534 },
-    { id: "e12", slug: "e12", title: "ROOF_TOP_SIGNAL", artist: "SIGNAL", image: "https://images.unsplash.com/photo-1495562569060-2eec283d3391?q=80&w=800", resonance: 0.87, description: "", category: "art", width: 800, height: 1200 },
-    { id: "e13", slug: "e13", title: "CYBER_PUNK_2024", artist: "FUTURE", image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800", resonance: 0.97, description: "", category: "art", width: 800, height: 600 },
-    { id: "e14", slug: "e14", title: "DIGITAL_RAIN", artist: "CODE", image: "https://images.unsplash.com/photo-1504333638930-c8787321eba0?q=80&w=800", resonance: 0.96, description: "", category: "art", width: 800, height: 1067 },
-    { id: "e15", slug: "e15", title: "STREET_LOGIC", artist: "LOGIC", image: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=800", resonance: 0.84, description: "", category: "art", width: 800, height: 534 },
-    { id: "e16", slug: "e16", title: "VIRTUAL_REALITY", artist: "VR_MASTER", image: "https://images.unsplash.com/photo-1478416272538-5f7e51dc5400?q=80&w=800", resonance: 0.90, description: "", category: "art", width: 800, height: 1200 },
-    { id: "e17", slug: "e17", title: "SYST_ERROR_0x", artist: "GLITCH", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800", resonance: 0.77, description: "", category: "art", width: 800, height: 534 },
-    { id: "e18", slug: "e18", title: "DATA_PORTAL", artist: "GATE", image: "https://images.unsplash.com/photo-1510511459019-5dee19ff018b?q=80&w=800", resonance: 0.99, description: "", category: "art", width: 800, height: 800 },
-    { id: "e19", slug: "e19", title: "SHIMOKITA_GLOW", artist: "GLOW", image: "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?q=80&w=800", resonance: 0.92, description: "", category: "art", width: 800, height: 534 },
-    { id: "e20", slug: "e20", title: "ABSTRACT_WAVE", artist: "WAVE", image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800", resonance: 0.90, description: "", category: "art", width: 800, height: 450 },
-  ];
-
   /**
    * Fetches the next page of illustrations from the API.
-   * Falls back to mock data if the API returns nothing.
    */
   const fetchMore = useCallback(async () => {
     if (isLoading || nextCursor === null) return;
@@ -87,25 +68,21 @@ export default function GalleryBrowser({
       const data = await res.json();
 
       if (data.items && data.items.length > 0) {
-        setEchoItems((prev) => [...prev, ...data.items]);
+        setEchoItems((prev) => {
+          // Strict deduplication by ID
+          const existingIds = new Set(stageItems.map(i => i.id));
+          const newItems = data.items.filter((item: Illustration) => !existingIds.has(item.id));
+          return [...prev, ...newItems];
+        });
         setNextCursor(data.nextCursor);
       } else {
-        // No DB data — seed with mock once
-        if (echoItems.length === 0) {
-          setEchoItems(mockEcho);
-        }
         setNextCursor(null);
       }
     } catch {
-      // API error — seed with mock once
-      if (echoItems.length === 0) {
-        setEchoItems(mockEcho);
-      }
       setNextCursor(null);
     }
-
     setIsLoading(false);
-  }, [isLoading, nextCursor, locale, echoItems.length]);
+  }, [isLoading, nextCursor, locale, stageItems, echoItems.length]);
 
   /** Intersection Observer for infinite scroll */
   useEffect(() => {
@@ -131,71 +108,84 @@ export default function GalleryBrowser({
   }, []);
 
   /** Safe getter for stage items */
-  const get = (i: number) =>
-    stageItems[i] || mockEcho[i] || mockEcho[0];
+  const get = (i: number) => stageItems[i] || null;
 
   return (
     <div className="space-y-4">
       {/* ════════════════════════════════════════════════════════════════
           SECTION 1: GALLERY STAGE (Curated Bento)
          ════════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 auto-rows-[200px] md:auto-rows-[260px]">
-        {/* Hero — col-span-2, row-span-2 */}
-        <div className="col-span-2 row-span-2 relative group rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
-          <img
-            src={get(0).image || ""}
-            alt={get(0).title}
-            className="absolute inset-0 w-full h-full object-cover opacity-40 grayscale group-hover:grayscale-0 group-hover:opacity-70 transition-all duration-1000"
-          />
-          <div className="absolute inset-0 bg-zinc-950/50" />
-          <div className="absolute inset-0 pointer-events-none opacity-[0.06] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,1)_2px,rgba(0,0,0,1)_3px)]" />
+      {stageItems.length > 0 && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 auto-rows-[200px] md:auto-rows-[260px]">
+            {/* Hero — col-span-2, row-span-2 */}
+            {get(0) && (
+              <div className="col-span-2 row-span-2 relative group rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
+                <img
+                  src={get(0)!.image || ""}
+                  alt={get(0)!.title}
+                  className="absolute inset-0 w-full h-full object-cover opacity-40 grayscale group-hover:grayscale-0 group-hover:opacity-70 transition-all duration-1000"
+                />
+                <div className="absolute inset-0 bg-zinc-950/50" />
+                <div className="absolute inset-0 pointer-events-none opacity-[0.06] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,1)_2px,rgba(0,0,0,1)_3px)]" />
 
-          <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-10">
-            <span className="text-[10px] font-black text-rose-500 uppercase tracking-[0.4em] italic mb-1">
-              GALLERY _ PROTOCOLS
-            </span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-none mb-3">
-              VISUAL<span className="text-rose-500">_SHARDS</span>
-            </h1>
-            <div className="p-3 border-l-2 border-rose-500/50 bg-zinc-950/80 backdrop-blur-md max-w-xs">
-              <p className="text-[11px] font-bold text-zinc-300 italic leading-snug">
-                {get(0).description || "Explore the visual signals captured within the district boundaries."}
-              </p>
+                <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-10">
+                  <span className="text-[10px] font-black text-rose-500 uppercase tracking-[0.4em] italic mb-1">
+                    GALLERY _ PROTOCOLS
+                  </span>
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-none mb-3">
+                    VISUAL<span className="text-rose-500">_SHARDS</span>
+                  </h1>
+                  <div className="p-3 border-l-2 border-rose-500/50 bg-zinc-950/80 backdrop-blur-md max-w-xs">
+                    <p className="text-[11px] font-bold text-zinc-300 italic leading-snug">
+                      {get(0)!.description || "Explore the visual signals captured within the district boundaries."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tall portrait shard */}
+            {get(1) && (
+              <StageShard item={get(1)!} label="SIGNAL_01" accent="rose" className="row-span-2" />
+            )}
+
+            {/* Two stacked squares */}
+            <div className="flex flex-col gap-3 h-full">
+              {get(2) && <StageShard item={get(2)!} label="SIGNAL_02" accent="violet" className="flex-1" />}
+              {get(3) && <StageShard item={get(3)!} label="SIGNAL_03" accent="rose" className="flex-1" />}
             </div>
           </div>
-        </div>
 
-        {/* Tall portrait shard */}
-        <StageShard item={get(1)} label="SIGNAL_01" accent="rose" className="row-span-2" />
-
-        {/* Two stacked squares */}
-        <StageShard item={get(2)} label="SIGNAL_02" accent="violet" />
-        <StageShard item={get(3)} label="SIGNAL_03" accent="rose" />
-      </div>
-
-      {/* Second stage row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 auto-rows-[200px] md:auto-rows-[240px]">
-        <StageShard item={get(4)} label="ECHO_04" accent="violet" />
-        <StageShard item={get(5)} label="ECHO_05" accent="rose" />
-
-        {/* Wide landscape shard — col-span-2 */}
-        <div className="col-span-2 relative group rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
-          <img
-            src={mockEcho[1]?.image || ""}
-            alt={mockEcho[1]?.title || ""}
-            className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-80 transition-all duration-700"
-          />
-          <div className="absolute inset-0 bg-zinc-950/30" />
-          <div className="absolute bottom-4 left-4 right-4 z-10">
-            <div className="text-[9px] font-black text-violet-500 uppercase tracking-widest italic mb-1 bg-violet-500/10 border-l-2 border-violet-500 px-2 py-0.5 inline-block">
-              FEATURED_LANDSCAPE
+          {/* Second stage row */}
+          {get(4) && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {get(4) && <StageShard item={get(4)!} label="ECHO_04" accent="violet" className="h-[200px] md:h-[240px]" />}
+              {get(5) && <StageShard item={get(5)!} label="ECHO_05" accent="rose" className="h-[200px] md:h-[240px]" />}
+              
+              {/* Dynamic landscape shard — col-span-2 if available */}
+              {get(6) && (
+                <div className="col-span-2 relative group rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
+                  <img
+                    src={get(6)!.image || ""}
+                    alt={get(6)!.title}
+                    className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-80 transition-all duration-700"
+                  />
+                  <div className="absolute inset-0 bg-zinc-950/30" />
+                  <div className="absolute bottom-4 left-4 right-4 z-10">
+                    <div className="text-[9px] font-black text-violet-500 uppercase tracking-widest italic mb-1 bg-violet-500/10 border-l-2 border-violet-500 px-2 py-0.5 inline-block">
+                      FEATURED_LANDSCAPE
+                    </div>
+                    <h4 className="text-sm font-black text-white italic truncate uppercase">
+                      {get(6)!.title}
+                    </h4>
+                  </div>
+                </div>
+              )}
             </div>
-            <h4 className="text-sm font-black text-white italic truncate uppercase">
-              {mockEcho[1]?.title || "SHARD_VOID"}
-            </h4>
-          </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* ════════════════════════════════════════════════════════════════
           DIVIDER: Signal HUD
