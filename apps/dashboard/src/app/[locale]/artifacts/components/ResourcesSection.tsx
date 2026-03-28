@@ -24,7 +24,7 @@ interface ResourcesSectionProps {
     resources: Resource[];
     setResources: (resources: Resource[]) => void;
     updateResource: (idx: number, field: keyof Resource, value: any) => void;
-    addResource: () => void;
+    addResource: (role?: typeof RESOURCE_ROLES[number], type?: string) => void;
     removeResource: (idx: number) => void;
     platforms?: Platform[]; // Optional dynamic platforms from DB
 }
@@ -188,7 +188,7 @@ export default function ResourcesSection({
                 </div>
                 <button
                     type="button"
-                    onClick={addResource}
+                    onClick={() => addResource()}
                     className="text-[9px] uppercase font-black text-zinc-500 hover:text-rose-500 flex items-center gap-2 transition-all px-3 py-1 bg-zinc-950 border border-zinc-900 rounded-md hover:border-rose-900/50"
                 >
                     <Icon icon="lucide:plus" width={10} /> INITIALIZE_UPLINK
@@ -218,6 +218,13 @@ export default function ResourcesSection({
                         <div className="w-1 h-3 bg-zinc-600"></div>
                         <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest font-mono">Outbound_Uplinks</span>
                         <span className="text-[7px] text-zinc-600 uppercase font-mono">(Social / Commerce / References)</span>
+                        <button
+                            type="button"
+                            onClick={() => addResource('social', 'social')}
+                            className="ml-auto text-[8px] uppercase font-bold text-zinc-600 hover:text-white transition-all flex items-center gap-1.5"
+                        >
+                            <Icon icon="lucide:plus" width={8} /> ADD_JUNCTION
+                        </button>
                     </div>
                     {linkResources.length > 0 ? (
                         linkResources.map(res => renderResource(res, resources.indexOf(res)))
@@ -234,7 +241,7 @@ export default function ResourcesSection({
                         <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">No active network uplinks detected.</p>
                         <button
                             type="button"
-                            onClick={addResource}
+                            onClick={() => addResource('social', 'social')}
                             className="text-[9px] font-black uppercase text-rose-600 hover:text-white transition-all underline decoration-rose-900 underline-offset-4"
                         >
                             Establish_Connection

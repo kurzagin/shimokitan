@@ -5,7 +5,16 @@ const nextConfig: NextConfig = {
   output: "standalone",
   transpilePackages: ["@shimokitan/db", "@shimokitan/ui", "@shimokitan/auth"],
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.shimokitan.live',
+      }
+    ],
   },
 };
 

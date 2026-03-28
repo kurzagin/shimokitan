@@ -510,7 +510,8 @@
         "contact": "Contact Protocol",
         "about": "About District",
         "mixtapes": "Mixtapes",
-        "back_alley": "Back-Alley"
+        "back_alley": "Back-Alley",
+        "gallery": "Gallery"
     },
     "registry": {
         "title": "ARTIST_REGISTRY_PROTOCOLS",

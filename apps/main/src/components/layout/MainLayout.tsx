@@ -22,6 +22,7 @@ export function MainLayout({ children, noScroll = false }: { children: React.Rea
     const isArtifactsActive = pathname?.startsWith("/artifacts");
     const isZinesActive = pathname?.startsWith("/zines");
     const isPedalboardActive = pathname?.startsWith("/pedalboard");
+    const isGalleryActive = pathname?.startsWith("/gallery");
 
 
     return (
@@ -46,6 +47,7 @@ export function MainLayout({ children, noScroll = false }: { children: React.Rea
                             <NavigationLink icon="lucide:radio" label={navDict.home} href="/" active={isHomeActive} />
                             <NavigationLink icon="lucide:disc" label={navDict.artifacts} href="/artifacts" active={isArtifactsActive} />
                             <NavigationLink icon="lucide:users" label={navDict.artists} href="/artists" active={pathname?.startsWith("/artists")} />
+                            <NavigationLink icon="lucide:image" label={navDict.gallery} href="/gallery" active={isGalleryActive} />
 
                             <NavigationLink icon="lucide:signal" label="Signal" href="https://signal.shimokitan.live" target="_blank" rel="noopener noreferrer" />
 

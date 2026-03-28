@@ -350,7 +350,15 @@ export default function ArtifactForm({
         toast.success(`Synced metadata for: ${data.title.english || data.title.romaji}`);
     }, [thumbnailUrl]);
 
-    const addResource = () => setResources([...resources, { type: 'video', platform: 'youtube', url: '', role: 'video', isPrimary: false }]);
+    const addResource = (role: typeof RESOURCE_ROLES[number] = 'video', type = 'video') => {
+        setResources([...resources, { 
+            type, 
+            platform: type === 'social' ? 'x' : (type === 'commerce' ? 'booth' : 'youtube'), 
+            url: '', 
+            role, 
+            isPrimary: false 
+        }]);
+    };
     const removeResource = (idx: number) => setResources(resources.filter((_, i) => i !== idx));
     const updateResource = (idx: number, field: keyof Resource, value: any) => {
         const newResources = [...resources];

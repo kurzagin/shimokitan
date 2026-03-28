@@ -117,7 +117,19 @@ export function Navbar() {
                 </div>
 
                 <div className="hidden sm:flex items-center gap-4">
-                    <Link href="/about" className="text-zinc-500 hover:text-white transition-colors">
+                    <Link href="/artifacts" className="text-zinc-500 hover:text-white transition-colors" title={navDict.artifacts}>
+                        <Icon icon="lucide:disc" width={18} height={18} />
+                    </Link>
+                    <Link href="/artists" className="text-zinc-500 hover:text-white transition-colors" title={navDict.artists}>
+                        <Icon icon="lucide:users" width={18} height={18} />
+                    </Link>
+                    <Link href="/gallery" className="text-zinc-500 hover:text-rose-400 transition-colors" title={navDict.gallery}>
+                        <Icon icon="lucide:image" width={18} height={18} />
+                    </Link>
+
+                    <div className="h-4 w-px bg-zinc-800 mx-1" />
+
+                    <Link href="/about" className="text-zinc-500 hover:text-white transition-colors" title={navDict.about}>
                         <Icon icon="lucide:info" width={18} height={18} />
                     </Link>
 
@@ -204,6 +216,7 @@ export function Navbar() {
                                     <MobileNavLink icon="lucide:radio" label={navDict.home} href="/" active={pathname === "/" || pathname === `/${currentLocale}`} onClick={() => setIsOpen(false)} />
                                     <MobileNavLink icon="lucide:disc" label={navDict.artifacts} href="/artifacts" active={pathname?.startsWith("/artifacts")} onClick={() => setIsOpen(false)} />
                                     <MobileNavLink icon="lucide:users" label={navDict.artists} href="/artists" active={pathname?.startsWith("/artists")} onClick={() => setIsOpen(false)} />
+                                    <MobileNavLink icon="lucide:image" label={navDict.gallery} href="/gallery" active={pathname?.startsWith("/gallery")} onClick={() => setIsOpen(false)} />
                                     <MobileNavLink icon="lucide:signal" label="Signal" href="https://signal.shimokitan.live" target="_blank" rel="noopener noreferrer" active={false} onClick={() => setIsOpen(false)} />
                                     <MobileNavLink icon="lucide:ghost" label={navDict.back_alley} href="/back-alley" active={pathname?.startsWith("/back-alley")} onClick={() => setIsOpen(false)} />
                                 </nav>

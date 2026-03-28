@@ -510,7 +510,8 @@
         "contact": "Protokol Kontak",
         "about": "Tentang Distrik",
         "mixtapes": "Mixtapes",
-        "back_alley": "Gang Gelap"
+        "back_alley": "Gang Gelap",
+        "gallery": "Galeri"
     },
     "registry": {
         "title": "ARTIST_REGISTRY_PROTOCOLS",

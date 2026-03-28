@@ -510,7 +510,8 @@
         "contact": "通信プロトコル",
         "about": "ディストリクトについて",
         "mixtapes": "ミックステープ",
-        "back_alley": "裏路地"
+        "back_alley": "裏路地",
+        "gallery": "ギャラリー"
     },
     "registry": {
         "title": "アーティスト登録プロトコル",
