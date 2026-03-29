@@ -43,11 +43,11 @@ export default function ArtifactsBrowser({ initialArtifacts }: { initialArtifact
                 <div className="flex items-center gap-3">
                     <div className="w-1.5 h-12 bg-violet-600 shadow-[0_0_20px_rgba(139,92,246,0.5)]" />
                     <h1 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter uppercase italic leading-none py-1">
-                        CRATE_<span className="text-violet-600">DIGGING</span>
+                        THE_<span className="text-violet-600">CINEMA</span>
                     </h1>
                 </div>
                 <p className="max-w-2xl font-mono text-zinc-500 text-xs uppercase tracking-widest leading-relaxed">
-                    Consult the artifacts of the district. Sift through the analog noise to find the resonance that fits your frequency.
+                    A curated archive of the district's cinematography. Sift through music videos, animations, and visual frequencies that define the Shimokitan atmosphere.
                 </p>
             </header>
 

@@ -18,11 +18,14 @@ export function MainLayout({ children, noScroll = false }: { children: React.Rea
     const currentLocale = useLocale() as Locale;
     const navDict = getDictionary(currentLocale).navigation;
 
-    const isHomeActive = pathname === "/" || pathname === `/${currentLocale}`;
-    const isArtifactsActive = pathname?.startsWith("/artifacts");
-    const isZinesActive = pathname?.startsWith("/zines");
-    const isPedalboardActive = pathname?.startsWith("/pedalboard");
-    const isGalleryActive = pathname?.startsWith("/gallery");
+    // Clean pathname to remove locale prefix for accurate active state detection
+    const cleanPathname = pathname?.replace(new RegExp(`^\\/(${['en', 'id', 'ja'].join('|')})(\\/|$)`), '/') || '/';
+
+    const isHomeActive = cleanPathname === "/";
+    const isArtifactsActive = cleanPathname.startsWith("/artifacts");
+    const isArtistsActive = cleanPathname.startsWith("/artists");
+    const isGalleryActive = cleanPathname.startsWith("/gallery");
+    const isBackAlleyActive = cleanPathname.startsWith("/back-alley");
 
 
     return (
@@ -45,14 +48,17 @@ export function MainLayout({ children, noScroll = false }: { children: React.Rea
                     <nav className="hidden md:flex flex-col gap-4 shrink-0 justify-center z-50">
                         <div className="bg-zinc-950/40 border border-zinc-800/80 p-2.5 rounded-3xl backdrop-blur-2xl flex flex-col items-center gap-3.5 shadow-2xl relative w-16">
                             <NavigationLink icon="lucide:radio" label={navDict.home} href="/" active={isHomeActive} />
-                            <NavigationLink icon="lucide:disc" label={navDict.artifacts} href="/artifacts" active={isArtifactsActive} />
-                            <NavigationLink icon="lucide:users" label={navDict.artists} href="/artists" active={pathname?.startsWith("/artists")} />
                             <NavigationLink icon="lucide:image" label={navDict.gallery} href="/gallery" active={isGalleryActive} />
+                            <NavigationLink icon="lucide:ghost" label={navDict.back_alley} href="/back-alley" active={isBackAlleyActive} />
+                            <NavigationLink icon="lucide:disc" label={navDict.artifacts} href="/artifacts" active={isArtifactsActive} />
+                            
+                            <div className="h-px bg-zinc-800/80 w-full my-1" />
 
-                            <NavigationLink icon="lucide:signal" label="Signal" href="https://signal.shimokitan.live" target="_blank" rel="noopener noreferrer" />
+                            <NavigationLink icon="lucide:users" label={navDict.artists} href="/artists" active={isArtistsActive} />
 
                             <div className="h-px bg-zinc-800/80 w-full my-1" />
-                            <NavigationLink icon="lucide:ghost" label={navDict.back_alley} href="/back-alley" active={pathname?.startsWith("/back-alley")} />
+
+                            <NavigationLink icon="lucide:signal" label="Signal" href="https://signal.shimokitan.live" target="_blank" rel="noopener noreferrer" />
                         </div>
                     </nav>
 

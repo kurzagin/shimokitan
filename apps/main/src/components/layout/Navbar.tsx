@@ -23,6 +23,8 @@ export function Navbar() {
     const time = useTime();
     const currentLocale = useLocale() as Locale;
     const pathname = usePathname();
+    const cleanPathname = pathname?.replace(new RegExp(`^\\/(${['en', 'id', 'ja'].join('|')})(\\/|$)`), '/') || '/';
+    
     const dict = getDictionary(currentLocale).navbar;
     const navDict = getDictionary(currentLocale).navigation;
 
@@ -117,14 +119,14 @@ export function Navbar() {
                 </div>
 
                 <div className="hidden sm:flex items-center gap-4">
+                    <Link href="/gallery" className="text-zinc-500 hover:text-rose-400 transition-colors" title={navDict.gallery}>
+                        <Icon icon="lucide:image" width={18} height={18} />
+                    </Link>
                     <Link href="/artifacts" className="text-zinc-500 hover:text-white transition-colors" title={navDict.artifacts}>
                         <Icon icon="lucide:disc" width={18} height={18} />
                     </Link>
                     <Link href="/artists" className="text-zinc-500 hover:text-white transition-colors" title={navDict.artists}>
                         <Icon icon="lucide:users" width={18} height={18} />
-                    </Link>
-                    <Link href="/gallery" className="text-zinc-500 hover:text-rose-400 transition-colors" title={navDict.gallery}>
-                        <Icon icon="lucide:image" width={18} height={18} />
                     </Link>
 
                     <div className="h-4 w-px bg-zinc-800 mx-1" />
@@ -213,12 +215,22 @@ export function Navbar() {
 
                             <div className="flex-1 overflow-y-auto custom-scroll overflow-x-hidden">
                                 <nav className="p-4 grid gap-2">
-                                    <MobileNavLink icon="lucide:radio" label={navDict.home} href="/" active={pathname === "/" || pathname === `/${currentLocale}`} onClick={() => setIsOpen(false)} />
-                                    <MobileNavLink icon="lucide:disc" label={navDict.artifacts} href="/artifacts" active={pathname?.startsWith("/artifacts")} onClick={() => setIsOpen(false)} />
-                                    <MobileNavLink icon="lucide:users" label={navDict.artists} href="/artists" active={pathname?.startsWith("/artists")} onClick={() => setIsOpen(false)} />
-                                    <MobileNavLink icon="lucide:image" label={navDict.gallery} href="/gallery" active={pathname?.startsWith("/gallery")} onClick={() => setIsOpen(false)} />
+                                    <MobileNavLink icon="lucide:radio" label={navDict.home} href="/" active={cleanPathname === "/"} onClick={() => setIsOpen(false)} />
+                                    <MobileNavLink icon="lucide:image" label={navDict.gallery} href="/gallery" active={cleanPathname.startsWith("/gallery")} onClick={() => setIsOpen(false)} />
+                                    <MobileNavLink icon="lucide:ghost" label={navDict.back_alley} href="/back-alley" active={cleanPathname.startsWith("/back-alley")} onClick={() => setIsOpen(false)} />
+                                    <MobileNavLink icon="lucide:disc" label={navDict.artifacts} href="/artifacts" active={cleanPathname.startsWith("/artifacts")} onClick={() => setIsOpen(false)} />
+                                    
+                                    <div className="py-1 px-1">
+                                        <div className="h-px bg-zinc-900/50 w-full" />
+                                    </div>
+
+                                    <MobileNavLink icon="lucide:users" label={navDict.artists} href="/artists" active={cleanPathname.startsWith("/artists")} onClick={() => setIsOpen(false)} />
+                                    
+                                    <div className="py-1 px-1">
+                                        <div className="h-px bg-zinc-900/50 w-full" />
+                                    </div>
+
                                     <MobileNavLink icon="lucide:signal" label="Signal" href="https://signal.shimokitan.live" target="_blank" rel="noopener noreferrer" active={false} onClick={() => setIsOpen(false)} />
-                                    <MobileNavLink icon="lucide:ghost" label={navDict.back_alley} href="/back-alley" active={pathname?.startsWith("/back-alley")} onClick={() => setIsOpen(false)} />
                                 </nav>
 
                                 <div className="px-4 py-2">
@@ -226,8 +238,8 @@ export function Navbar() {
                                 </div>
 
                                 <nav className="p-4 grid gap-2 pt-0">
-                                    <MobileNavLink icon="lucide:mail" label={navDict.contact} href="/contact" active={pathname === "/contact"} onClick={() => setIsOpen(false)} />
-                                    <MobileNavLink icon="lucide:info" label={navDict.about} href="/about" active={pathname === "/about"} onClick={() => setIsOpen(false)} />
+                                    <MobileNavLink icon="lucide:mail" label={navDict.contact} href="/contact" active={cleanPathname === "/contact"} onClick={() => setIsOpen(false)} />
+                                    <MobileNavLink icon="lucide:info" label={navDict.about} href="/about" active={cleanPathname === "/about"} onClick={() => setIsOpen(false)} />
                                 </nav>
 
                                 <div className="p-6 space-y-8 pb-10">
