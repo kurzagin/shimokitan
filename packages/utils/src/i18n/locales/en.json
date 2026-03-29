@@ -513,6 +513,39 @@
         "back_alley": "Back-Alley",
         "gallery": "Gallery"
     },
+    "cinema": {
+        "title": "Cinema // District Discovery",
+        "description": "The high-energy discovery feed. Encounter trailers, compilations, and the core manifestations of our artifacts.",
+        "immersion_shard": "IMMERSION_SHARD",
+        "pit": "PIT",
+        "alley": "ALLEY",
+        "origin": "Origin //",
+        "view_shard": "VIEW_SHARD",
+        "no_results": "SCANNING_EMPTY // No frequencies found.",
+        "resonance": "RESONANCE",
+        "return_to_fragment": "Return to Fragment"
+    },
+    "discovery": {
+        "nature": "NATURE",
+        "classification": "CLASSIFICATION",
+        "pulse_field": "PULSE_FIELD",
+        "tags": "TAGS",
+        "heat": "HEAT",
+        "record_panel": "RECORD_PANEL",
+        "master_ip_anchor": "MASTER_IP_ANCHOR",
+        "canonical_identity": "CANONICAL_IDENTITY",
+        "media_hub": "MEDIA_HUB_FRAGMENT",
+        "editorial_analysis": "EDITORIAL_ANALYSIS",
+        "echo_flux": "ECHO_FLUX (ZINES)",
+        "active_signals": "ACTIVE_SIGNALS //",
+        "gateway_uplinks": "GATEWAY_UPLINKS",
+        "no_echoes_yet": "NO_ECHOES_YET // Be the first to resonate.",
+        "write_memory": "WRITE_MEMORY",
+        "posted_at": "POSTED AT",
+        "analysis_pending": "ANALYSIS_PENDING",
+        "core_authority": "CORE_AUTHORITY",
+        "collaborative_flux": "COLLABORATIVE_FLUX"
+    },
     "registry": {
         "title": "ARTIST_REGISTRY_PROTOCOLS",
         "description": "Establish your residency in the Shimokitan district. We manually curate every Signal to ensure high-resonance artifacts.",
@@ -539,7 +572,12 @@
         "success_desc": "Your residency application has been successfully encrypted and queued for manual curation by the architects.",
         "reference_id": "REFERENCE_ID",
         "wait_period": "Please allow 7-14 solar cycles for manual frequency alignment.",
-        "error_rate_limit": "SIGNAL_OVERLOAD: Transmission window locked for 24h. Your frequency has already been recorded."
+        "error_rate_limit": "SIGNAL_OVERLOAD: Transmission window locked for 24h. Your frequency has already been recorded.",
+        "categories": {
+            "anime": "ANIME",
+            "game": "GAME",
+            "music": "MUSIC"
+        }
     },
     "not_found": {
         "title": "404 // SIGNAL_LOST",

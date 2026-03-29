@@ -513,6 +513,39 @@
         "back_alley": "Gang Gelap",
         "gallery": "Galeri"
     },
+    "cinema": {
+        "title": "Sinema // Penemuan Distrik",
+        "description": "Feed penemuan berenergi tinggi. Temukan trailer, kompilasi, dan manifestasi utama dari artefak kami.",
+        "immersion_shard": "IMMERSION_SHARD",
+        "pit": "THE_PIT",
+        "alley": "GANG",
+        "origin": "Asal //",
+        "view_shard": "LIHAT_SHARD",
+        "no_results": "SCANNING_EMPTY // Frekuensi tidak ditemukan.",
+        "resonance": "RESONANSI",
+        "return_to_fragment": "Kembali ke Fragmen"
+    },
+    "discovery": {
+        "nature": "NATUR_ARTEFAK",
+        "classification": "KLASIFIKASI",
+        "pulse_field": "BIDANG_PULSA",
+        "tags": "TAG",
+        "heat": "PANAS_SINYAL",
+        "record_panel": "PANEL_REKAMAN",
+        "master_ip_anchor": "JANGKAR_IP_UTAMA",
+        "canonical_identity": "IDENTITAS_KANONIK",
+        "media_hub": "HUB_MEDIA_FRAGMEN",
+        "editorial_analysis": "ANALISIS_EDITORIAL",
+        "echo_flux": "ALIRAN_GEMA (ZINES)",
+        "active_signals": "SINYAL_AKTIF //",
+        "gateway_uplinks": "GATEWAY_UPLINKS",
+        "no_echoes_yet": "BELUM_ADA_GEMA // Jadilah yang pertama beresonansi.",
+        "write_memory": "TULIS_MEMORI",
+        "posted_at": "DIPOSTING",
+        "analysis_pending": "ANALISIS_PENDING",
+        "core_authority": "OTORITAS_INTI",
+        "collaborative_flux": "FLUX_KOLABORATIF"
+    },
     "registry": {
         "title": "ARTIST_REGISTRY_PROTOCOLS",
         "description": "Bangun residensi Anda di Distrik Shimokitan. Kami mengkurasi setiap sinyal secara manual untuk menjaga artefak dengan resonansi tinggi.",
@@ -539,7 +572,12 @@
         "success_desc": "Aplikasi residensi Anda telah berhasil dienkripsi dan ditambahkan ke antrean kurasi manual oleh Arsitek.",
         "reference_id": "ID Referensi",
         "wait_period": "Mohon tunggu 7-14 siklus (hari) untuk sinkronisasi frekuensi manual.",
-        "error_rate_limit": "Signal Overload: Jendela transmisi terkunci selama 24 jam. Frekuensi Anda sudah tercatat."
+        "error_rate_limit": "Signal Overload: Jendela transmisi terkunci selama 24 jam. Frekuensi Anda sudah tercatat.",
+        "categories": {
+            "anime": "ANIME",
+            "game": "GIM",
+            "music": "MUSIK"
+        }
     },
     "not_found": {
         "title": "404 // SINYAL_HILANG",

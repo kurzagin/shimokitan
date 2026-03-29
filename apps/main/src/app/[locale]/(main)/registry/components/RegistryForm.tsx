@@ -200,10 +200,10 @@ export function RegistryForm() {
       <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
         <div className="space-y-1 text-center">
           <h3 className="text-xl font-black italic tracking-tighter text-white uppercase">
-            {dict.registry[`step_0${step}_title` as keyof typeof dict.registry]}
+            {dict.registry[`step_0${step}_title` as keyof typeof dict.registry] as string}
           </h3>
           <p className="text-sm text-center px-4 py-2 bg-violet-500/10 border border-violet-500/20 rounded text-violet-300 font-medium inline-block mx-auto">
-            {dict.registry[`step_0${step}_desc` as keyof typeof dict.registry]}
+            {dict.registry[`step_0${step}_desc` as keyof typeof dict.registry] as string}
           </p>
         </div>
 

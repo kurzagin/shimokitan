@@ -513,6 +513,39 @@
         "back_alley": "裏路地",
         "gallery": "ギャラリー"
     },
+    "cinema": {
+        "title": "シネマ // 地区の発見",
+        "description": "高エネルギーのディスカバリー・フィード。予告編、コンピレーション、そしてアーティファクトの主要な現れに出会います。",
+        "immersion_shard": "IMMERSION_SHARD",
+        "pit": "THE_PIT",
+        "alley": "路地",
+        "origin": "オリジン //",
+        "view_shard": "を表示",
+        "no_results": "SCANNING_EMPTY // 周波数が見つかりませんでした。",
+        "resonance": "共鳴",
+        "return_to_fragment": "断片へ戻る"
+    },
+    "discovery": {
+        "nature": "アーカイブ形態",
+        "classification": "分類",
+        "pulse_field": "パルス・フィールド",
+        "tags": "タグ",
+        "heat": "共鳴熱",
+        "record_panel": "記録パネル",
+        "master_ip_anchor": "マスターIPアンカー",
+        "canonical_identity": "カノニカル・アイデンティティ",
+        "media_hub": "メディア・ハブ (FRAGMENT)",
+        "editorial_analysis": "エディトリアル・アナリシス",
+        "echo_flux": "共鳴の奔流 (ZINES)",
+        "active_signals": "アクティブ・シグナル //",
+        "gateway_uplinks": "GATEWAY_UPLINKS",
+        "no_echoes_yet": "エコーなし // 最初の共鳴者になりましょう。",
+        "write_memory": "記憶を刻む",
+        "posted_at": "記録日",
+        "analysis_pending": "解析待機中",
+        "core_authority": "コア・オーソリティ",
+        "collaborative_flux": "コラボレーティブ・フラックス"
+    },
     "registry": {
         "title": "アーティスト登録プロトコル",
         "description": "下北んディストリクトへの居住権を確立してください。高共鳴なアーティファクトを維持するため、すべてのシグナルを手動でキュレーションしています。",
@@ -539,7 +572,12 @@
         "success_desc": "居住申請は正常に暗号化され、建築家による手動キュレーションのキューに追加されました。",
         "reference_id": "参照ID",
         "wait_period": "手動の周波数調整のため、7〜14サイクル（日）ほどお待ちください。",
-        "error_rate_limit": "シグナル過負荷：24時間は送信ウィンドウがロックされています。あなたの周波数は既に記録されています。"
+        "error_rate_limit": "シグナル過負荷：24時間は送信ウィンドウがロックされています。あなたの周波数は既に記録されています。",
+        "categories": {
+            "anime": "アニメ",
+            "game": "ゲーム",
+            "music": "音楽"
+        }
     },
     "not_found": {
         "title": "404 // 信号消失",
