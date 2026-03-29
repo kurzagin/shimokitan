@@ -520,7 +520,7 @@ export default async function ArtifactPage(props: {
                                                             </span>
                                                             <div className="flex items-center gap-1.5">
                                                                 <Icon icon="lucide:zap" width={10} className="text-rose-500" />
-                                                                <span className="text-[10px] font-black text-rose-500 italic">{zine.resonance || 0}</span>
+                                                                <span className="text-[10px] font-black text-rose-500 italic">{Number(zine.resonance || 0)}</span>
                                                             </div>
                                                         </div>
                                                         

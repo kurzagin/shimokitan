@@ -516,7 +516,6 @@
     "cinema": {
         "title": "Cinema // District Discovery",
         "description": "The high-energy discovery feed. Encounter trailers, compilations, and the core manifestations of our artifacts.",
-        "immersion_shard": "IMMERSION_SHARD",
         "pit": "PIT",
         "alley": "ALLEY",
         "origin": "Origin //",

@@ -21,13 +21,6 @@ type Artifact = {
     aspectRatio: 'vertical' | 'video' | 'square';
 };
 
-const getCategories = (dict: any) => [
-    { label: 'ALL_SIGNAL', value: 'all' },
-    { label: dict.navigation.artifacts.toUpperCase(), value: 'all_artifacts' }, // Generic
-    { label: 'ANIME', value: 'anime' },
-    { label: 'GAME', value: 'game' },
-    { label: 'MUSIC', value: 'music' },
-];
 
 export default function ArtifactsBrowser({ 
     initialArtifacts, 
@@ -36,13 +29,10 @@ export default function ArtifactsBrowser({
     initialArtifacts: Artifact[],
     dict: any
 }) {
-    const [activeCategory, setActiveCategory] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredArtifacts = initialArtifacts.filter(a => {
-        const matchesCategory = activeCategory === 'all' || a.category === activeCategory;
-        const matchesSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+        return a.title.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
     return (
@@ -60,20 +50,7 @@ export default function ArtifactsBrowser({
                 </p>
             </header>
 
-            {/* Filter Bar */}
-            <div className="flex flex-wrap gap-3 sticky top-0 z-40 bg-black/90 backdrop-blur-xl py-4 border-b border-zinc-900 shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
-                {getCategories(dict).map((cat: { label: string; value: string }) => (
-                    <button
-                        key={cat.value}
-                        onClick={() => setActiveCategory(cat.value)}
-                        className={`px-4 py-2 text-[10px] font-black tracking-[0.2em] uppercase transition-all border-l-2 ${activeCategory === cat.value
-                            ? 'bg-violet-600/10 border-violet-500 text-violet-400'
-                            : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-300'
-                            }`}
-                    >
-                        {cat.label}
-                    </button>
-                ))}
+            <div className="flex items-center gap-3 sticky top-0 z-40 bg-black/90 backdrop-blur-xl py-4 border-b border-zinc-900 shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
                 <div className="flex-1" />
                 <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-zinc-950 border-l-2 border-zinc-800 focus-within:border-violet-500 transition-colors">
                     <Icon icon="lucide:search" width={12} height={12} className="text-zinc-500" />
@@ -131,15 +108,7 @@ export default function ArtifactsBrowser({
                                             </Badge>
                                         </div>
 
-                                        {/* Exhibit Indicator */}
-                                        {artifact.type === 'exhibit' && (
-                                             <div className="absolute bottom-2 left-2 flex items-center gap-1 px-1.5 py-0.5 bg-violet-600/80 backdrop-blur-sm rounded-sm">
-                                                <Icon icon="lucide:play" width={8} className="text-white fill-white" />
-                                                <span className="text-[8px] font-black text-white uppercase tracking-tighter">
-                                                    {dict.cinema.immersion_shard}
-                                                </span>
-                                             </div>
-                                        )}
+
                                     </div>
 
                                     {/* Registry Entry Data */}

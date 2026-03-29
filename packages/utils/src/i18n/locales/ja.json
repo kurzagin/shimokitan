@@ -516,7 +516,6 @@
     "cinema": {
         "title": "シネマ // 地区の発見",
         "description": "高エネルギーのディスカバリー・フィード。予告編、コンピレーション、そしてアーティファクトの主要な現れに出会います。",
-        "immersion_shard": "IMMERSION_SHARD",
         "pit": "THE_PIT",
         "alley": "路地",
         "origin": "オリジン //",

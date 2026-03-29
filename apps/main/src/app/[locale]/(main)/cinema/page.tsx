@@ -30,9 +30,9 @@ export default async function CinemaBrowsePage(props: { params: Promise<{ locale
         
         // Use Work credits first, then Artifact credits
         const sourceWork = a.work;
-        const primaryCredit = sourceWork 
-            ? sourceWork.credits?.find((c: any) => c.isPrimary) || sourceWork.credits?.[0]
-            : a.credits?.find((c: any) => c.isPrimary) || a.credits?.[0];
+        const primaryCredit = 
+            (sourceWork?.credits?.find((c: any) => c.isPrimary) || sourceWork?.credits?.[0]) || 
+            (a.credits?.find((c: any) => c.isPrimary) || a.credits?.[0]);
             
         const artistName = resolveTranslation(primaryCredit?.entity?.translations, locale)?.name;
 
@@ -46,7 +46,7 @@ export default async function CinemaBrowsePage(props: { params: Promise<{ locale
             category: a.category,
             coverImage: thumbnail?.url || poster?.url || null,
             status: a.status,
-            resonance: a.resonance || 0,
+            resonance: Number(a.resonance || 0),
             isMajor: (Number(a.resonance) || 0) > 10,
             isVerified: a.isVerified ?? false,
             artist: artistName || "ANONYMOUS_SOURCE",
@@ -61,9 +61,9 @@ export default async function CinemaBrowsePage(props: { params: Promise<{ locale
         const parentTrans = resolveTranslation(e.artifact?.translations, locale);
         
         const sourceWork = e.artifact?.work;
-        const primaryCredit = sourceWork 
-            ? sourceWork.credits?.find((c: any) => c.isPrimary) || sourceWork.credits?.[0]
-            : e.artifact?.credits?.find((c: any) => c.isPrimary) || e.artifact?.credits?.[0];
+        const primaryCredit = 
+            (sourceWork?.credits?.find((c: any) => c.isPrimary) || sourceWork?.credits?.[0]) || 
+            (e.artifact?.credits?.find((c: any) => c.isPrimary) || e.artifact?.credits?.[0]);
 
         const artistName = resolveTranslation(primaryCredit?.entity?.translations, locale)?.name;
 
@@ -75,7 +75,7 @@ export default async function CinemaBrowsePage(props: { params: Promise<{ locale
             category: e.artifact?.category,
             coverImage: e.media?.url || null,
             status: e.artifact?.status,
-            resonance: e.artifact?.resonance || 0,
+            resonance: Number(e.artifact?.resonance || 0),
             isMajor: (Number(e.artifact?.resonance) || 0) > 20,
             isVerified: e.artifact?.isVerified ?? false,
             artist: artistName || "ANONYMOUS",
