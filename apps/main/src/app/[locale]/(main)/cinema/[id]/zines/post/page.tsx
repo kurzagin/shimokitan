@@ -6,9 +6,15 @@ import { Badge } from '@shimokitan/ui';
 import { getArtifactById, resolveTranslation } from '@shimokitan/db';
 import { notFound } from 'next/navigation';
 import ZineCreateForm from '@/components/zines/ZineCreateForm';
+import { getDictionary, Locale } from "@shimokitan/utils";
 
-export default async function PostZinePage(props: { params: Promise<{ locale: string; id: string }> }) {
+export default async function PostZinePage(props: { 
+    params: Promise<{ locale: string; id: string }>;
+    searchParams: Promise<{ exhibit?: string }>;
+}) {
     const { locale, id } = await props.params;
+    const { exhibit: exhibitId } = await props.searchParams;
+    const dict = getDictionary(locale as Locale);
     const artifact = await getArtifactById(id);
 
     if (!artifact) {
@@ -24,9 +30,9 @@ export default async function PostZinePage(props: { params: Promise<{ locale: st
                 {/* Protocol Header */}
                 <div className="flex flex-col gap-6 mb-20">
                     <div className="flex items-center justify-between">
-                        <Link href={`/artifacts/${id}`} className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-colors group">
+                        <Link href={`/cinema/${id}${exhibitId ? `?exhibit=${exhibitId}` : ''}`} className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-colors group">
                             <Icon icon="lucide:arrow-left" width={14} height={14} className="group-hover:-translate-x-1 transition-transform" />
-                            Return to Fragment
+                            {dict.cinema.return_to_fragment}
                         </Link>
                         <div className="flex items-center gap-2 font-mono text-[11px] text-rose-600 animate-pulse">
                             <div className="w-2 h-2 rounded-full bg-rose-600" />
@@ -55,7 +61,7 @@ export default async function PostZinePage(props: { params: Promise<{ locale: st
                 </div>
 
                 {/* Client Form */}
-                <ZineCreateForm artifactId={artifact.id} />
+                <ZineCreateForm artifactId={artifact.id} exhibitId={exhibitId} />
 
                 {/* Footer Decor */}
                 <div className="mt-32 opacity-[0.05] pointer-events-none select-none overflow-hidden">
@@ -66,3 +72,4 @@ export default async function PostZinePage(props: { params: Promise<{ locale: st
         </MainLayout>
     );
 }
+

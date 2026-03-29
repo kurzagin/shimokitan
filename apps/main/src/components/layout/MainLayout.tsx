@@ -22,7 +22,7 @@ export function MainLayout({ children, noScroll = false }: { children: React.Rea
     const cleanPathname = pathname?.replace(new RegExp(`^\\/(${['en', 'id', 'ja'].join('|')})(\\/|$)`), '/') || '/';
 
     const isHomeActive = cleanPathname === "/";
-    const isArtifactsActive = cleanPathname.startsWith("/artifacts");
+    const isCinemaActive = cleanPathname.startsWith("/cinema");
     const isArtistsActive = cleanPathname.startsWith("/artists");
     const isGalleryActive = cleanPathname.startsWith("/gallery");
     const isBackAlleyActive = cleanPathname.startsWith("/back-alley");
@@ -50,7 +50,7 @@ export function MainLayout({ children, noScroll = false }: { children: React.Rea
                             <NavigationLink icon="lucide:radio" label={navDict.home} href="/" active={isHomeActive} />
                             <NavigationLink icon="lucide:image" label={navDict.gallery} href="/gallery" active={isGalleryActive} />
                             <NavigationLink icon="lucide:ghost" label={navDict.back_alley} href="/back-alley" active={isBackAlleyActive} />
-                            <NavigationLink icon="lucide:disc" label={navDict.artifacts} href="/artifacts" active={isArtifactsActive} />
+                            <NavigationLink icon="lucide:disc" label={navDict.artifacts} href="/cinema" active={isCinemaActive} />
                             
                             <div className="h-px bg-zinc-800/80 w-full my-1" />
 

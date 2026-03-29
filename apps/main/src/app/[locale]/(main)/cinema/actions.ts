@@ -100,8 +100,8 @@ export async function toggleArtifactReaction(data: {
 }
 
 function revalidateArtifact(id: string) {
-    revalidatePath(`/[locale]/artifacts/${id}`, 'page');
-    revalidatePath(`/[locale]/artifacts`, 'page');
+    revalidatePath(`/[locale]/cinema/${id}`, 'page');
+    revalidatePath(`/[locale]/cinema`, 'page');
     revalidatePath(`/[locale]`, 'layout');
 }
 
@@ -114,3 +114,4 @@ function getResonanceRatio(artifact: { nature: string, animeType?: string | null
     if (artifact.nature === 'live' || artifact.nature === 'compilation') return 0.2;
     return 1.0;
 }
+

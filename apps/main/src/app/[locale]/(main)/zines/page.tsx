@@ -53,7 +53,7 @@ export default async function PublicZinesPage({ params }: { params: Promise<{ lo
                                 {/* Artifact Reference */}
                                 <div className="flex flex-col gap-2">
                                     <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Resonating With //</span>
-                                    <Link href={`/artifacts/${zine.artifactId}`} className="text-xl font-black uppercase italic group-hover:text-rose-500 transition-colors truncate">
+                                    <Link href={`/cinema/${zine.artifactId}`} className="text-xl font-black uppercase italic group-hover:text-rose-500 transition-colors truncate">
                                         {zine.artifact?.title || "Unknown Shard"}
                                     </Link>
                                 </div>
@@ -104,7 +104,7 @@ export default async function PublicZinesPage({ params }: { params: Promise<{ lo
                             Find an artifact in the district and answer the call. Zines are the exclusive response to the prompt of lived experience.
                         </p>
                     </div>
-                    <Link href="/artifacts" className="relative z-10 bg-white text-black font-black italic text-xl px-12 py-4 shadow-[8px_8px_0px_rgba(225,29,72,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-tighter">
+                    <Link href="/cinema" className="relative z-10 bg-white text-black font-black italic text-xl px-12 py-4 shadow-[8px_8px_0px_rgba(225,29,72,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-tighter">
                         Find Artifact
                     </Link>
                 </div>
@@ -113,3 +113,4 @@ export default async function PublicZinesPage({ params }: { params: Promise<{ lo
         </MainLayout>
     );
 }
+

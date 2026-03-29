@@ -1,7 +1,7 @@
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle, NeonDatabase } from 'drizzle-orm/neon-serverless';
 import * as schema from './schema';
-import { eq, desc, sql, isNull } from 'drizzle-orm';
+import { eq, desc, sql, isNull, and } from 'drizzle-orm';
 
 // Required for environments where global WebSocket is not available (like local Node)
 // In Bun or Cloudflare, WebSocket is globally defined.
@@ -327,4 +327,89 @@ export async function getEntityBySlug(slug: string) {
       }
     }
   });
+}
+export async function getCinemaData() {
+  const db = getDb();
+  if (!db) return { artifacts: [], exhibits: [] };
+
+  const [artifacts, exhibits] = await Promise.all([
+    db.query.artifacts.findMany({
+      where: and(
+        isNull(schema.artifacts.deletedAt),
+        eq(schema.artifacts.category, "music"),
+      ),
+      with: {
+        translations: true,
+        media: {
+          with: {
+            media: true,
+          },
+        },
+        work: {
+          with: {
+            credits: {
+              with: {
+                entity: {
+                  with: {
+                    translations: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        credits: {
+          with: {
+            entity: {
+              with: {
+                translations: true,
+              },
+            },
+          },
+        },
+      },
+    }),
+    db.query.exhibits.findMany({
+      with: {
+        translations: true,
+        media: true,
+        artifact: {
+          with: {
+            translations: true,
+            work: {
+              with: {
+                translations: true,
+                credits: {
+                  with: {
+                    entity: {
+                      with: {
+                        translations: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            credits: {
+              with: {
+                entity: {
+                  with: {
+                    translations: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  // Filter exhibits to only those from anime/game artifacts
+  const filteredExhibits = exhibits.filter(
+    (e) =>
+      e.artifact?.category === "anime" || e.artifact?.category === "game",
+  );
+
+  return { artifacts, exhibits: filteredExhibits };
 }

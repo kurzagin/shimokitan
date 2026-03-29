@@ -260,7 +260,7 @@ function StageShard({
 
   return (
     <Link
-      href={`/artifacts/${item.id}`}
+      href={`/cinema/${item.id}`}
       className={cn(
         "relative group/shard rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950 transition-all duration-500",
         isRose ? "hover:border-rose-500/50" : "hover:border-violet-500/50",
@@ -325,7 +325,7 @@ function MasonryShard({ item, index }: { item: Illustration; index: number }) {
 
   return (
     <Link
-      href={`/artifacts/${item.id}`}
+      href={`/cinema/${item.id}`}
       className={cn(
         "block mb-3 break-inside-avoid rounded-xl overflow-hidden border bg-zinc-950 transition-all duration-500 group/card relative",
         isHighRes ? "border-zinc-700" : "border-zinc-800",
@@ -381,3 +381,4 @@ function MasonryShard({ item, index }: { item: Illustration; index: number }) {
     </Link>
   );
 }
+

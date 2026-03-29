@@ -19,8 +19,12 @@ import type { Metadata } from 'next';
 
 // Helper removed, using shared version from @shimokitan/utils
 
-export async function generateMetadata(props: { params: Promise<{ locale: string, id: string }> }): Promise<Metadata> {
+export async function generateMetadata(props: { 
+    params: Promise<{ locale: string, id: string }>,
+    searchParams: Promise<{ exhibit?: string }>
+}): Promise<Metadata> {
     const { locale, id } = await props.params;
+    const { exhibit: exhibitId } = await props.searchParams;
     const artifact = await getArtifactById(id);
     const dict = getDictionary(locale as Locale);
     const s = dict.common.seo;
@@ -37,16 +41,26 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
     const imageUrl = gateway?.url || poster?.url || thumbnail?.url || "/tokyo.jpg";
     
     const workTitle = artifact.work ? resolveTranslation(artifact.work.translations, locale)?.title : null;
-    const fullTitle = workTitle ? `${title} // ${workTitle}` : title;
+    let fullTitle = workTitle ? `${title} // ${workTitle}` : title;
+
+    if (exhibitId) {
+        const exhibit = artifact.exhibits?.find(e => e.id === exhibitId);
+        if (exhibit) {
+            const exTrans = resolveTranslation(exhibit.translations, locale);
+            if (exTrans) {
+                fullTitle = `${exTrans.title} _ [ ${fullTitle} ]`;
+            }
+        }
+    }
 
     return {
         title: fullTitle,
         description,
         alternates: {
             languages: {
-                'en': `/en/artifacts/${artifact.id}`,
-                'ja': `/ja/artifacts/${artifact.id}`,
-                'id': `/id/id/artifacts/${artifact.id}`,
+                'en': `/en/cinema/${artifact.id}`,
+                'ja': `/ja/cinema/${artifact.id}`,
+                'id': `/id/id/cinema/${artifact.id}`,
             }
         },
         openGraph: {
@@ -62,8 +76,13 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
     };
 }
 
-export default async function ArtifactPage(props: { params: Promise<{ locale: string, id: string }> }) {
+export default async function ArtifactPage(props: { 
+    params: Promise<{ locale: string, id: string }>,
+    searchParams: Promise<{ exhibit?: string }>
+}) {
     const { locale, id } = await props.params;
+    const { exhibit: exhibitId } = await props.searchParams;
+    const dict = getDictionary(locale as Locale);
 
     const artifact = await getArtifactById(id);
     if (!artifact) notFound();
@@ -176,10 +195,16 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
     };
 
     let initialVideo: TheaterVideo | null = null;
-    const primaryExhibit = artifact.exhibits?.find((e: any) => e.isPrimary);
+    const primaryExhibit = exhibitId 
+        ? artifact.exhibits?.find(e => e.id === exhibitId)
+        : artifact.exhibits?.find((e: any) => e.isPrimary);
     
-    // Fallback logic for the Theater Player if there's no primary gateway
-    if (primaryResource?.platform === 'youtube') {
+    // Initial Video logic - prioritized selection if exhibitId exists
+    if (exhibitId && primaryExhibit?.url) {
+        let platform: 'youtube' | 'local' | 'unknown' = 'unknown';
+        if (primaryExhibit.url.includes('youtube') || primaryExhibit.url.includes('youtu.be')) platform = 'youtube';
+        initialVideo = { id: primaryExhibit.id, url: primaryExhibit.url, platform, thumbnailUrl: primaryExhibit.media?.url || thumbnail?.url };
+    } else if (primaryResource?.platform === 'youtube') {
         initialVideo = { id: primaryResource.id, url: primaryResource.value, platform: 'youtube', thumbnailUrl: thumbnail?.url };
     } else if (primaryExhibit?.url) {
         let platform: 'youtube' | 'local' | 'unknown' = 'unknown';
@@ -205,7 +230,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                 <div className="shrink-0 border-b border-zinc-800 bg-zinc-950">
                     <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-zinc-900">
                         <div className="px-4 py-3 flex flex-col justify-center gap-1.5">
-                            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">Nature</span>
+                            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">{dict.discovery.nature}</span>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-0.5 h-4 bg-violet-600 shrink-0" />
                                 <span className="text-sm font-black italic text-violet-400 uppercase truncate">
@@ -215,7 +240,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                         </div>
 
                         <div className="px-4 py-3 flex flex-col justify-center gap-1.5">
-                            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">Classification</span>
+                            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">{dict.discovery.classification}</span>
                             <span className="text-sm font-black italic text-white uppercase truncate">
                                 {artifact.category || 'music'}
                                 {artifact.animeType && ` // ${artifact.animeType}`}
@@ -223,7 +248,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                         </div>
 
                         <div className="px-4 py-3 flex flex-col justify-center gap-1.5 overflow-hidden">
-                            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">Pulse_Field</span>
+                            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">{dict.discovery.pulse_field}</span>
                             <CompactPulse 
                                 artifactId={artifact.id} 
                                 userReactions={userReactionTypes as any} 
@@ -234,7 +259,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
 
                         <div className="px-4 py-3 flex items-center gap-3 overflow-hidden">
                             <div className="flex flex-col gap-0.5 shrink-0">
-                                <span className="text-[10px] text-rose-500 uppercase tracking-[0.3em]">Heat</span>
+                                <span className="text-[10px] text-rose-500 uppercase tracking-[0.3em]">{dict.discovery.heat}</span>
                                 <span className="text-xl font-black italic text-white leading-none">
                                     {artifact.resonance || 0}
                                 </span>
@@ -251,20 +276,20 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
 
                 <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:divide-x lg:divide-zinc-900">
                     <div className="order-3 lg:order-none lg:col-span-3 flex flex-col border-t lg:border-t-0 border-zinc-900">
-                        <PanelHeader label="Record_Panel" dot />
+                        <PanelHeader label={dict.discovery.record_panel} dot />
                         <div className="flex flex-col divide-y divide-zinc-900">
                             {artifact.work && (
                                 <div className="flex flex-col shrink-0 overflow-hidden border-b border-zinc-900">
                                     <div className="bg-violet-600 px-4 py-2.5 flex items-center gap-2">
                                         <Icon icon="lucide:anchor" width={14} className="text-violet-950" />
-                                        <span className="text-[10px] text-violet-950 font-black uppercase tracking-[0.2em]">Master_IP_Anchor</span>
+                                        <span className="text-[10px] text-violet-950 font-black uppercase tracking-[0.2em]">{dict.discovery.master_ip_anchor}</span>
                                     </div>
                                     <div className="bg-zinc-950/40 p-4 py-6 flex flex-col gap-5 relative">
                                         <div className="flex flex-col gap-1">
                                             <span className="text-2xl font-black italic text-white uppercase leading-none tracking-tighter">
                                                 {workTranslation?.title}
                                             </span>
-                                            <span className="text-[9px] text-violet-500 font-bold uppercase tracking-[0.3em] opacity-80">Canonical_Identity</span>
+                                            <span className="text-[9px] text-violet-500 font-bold uppercase tracking-[0.3em] opacity-80">{dict.discovery.canonical_identity}</span>
                                         </div>
 
                                         {heritageCredits.length > 0 && (
@@ -326,7 +351,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                 <div className="px-4 py-4 flex flex-col gap-3 shrink-0">
                                     <div className="flex items-center gap-1.5">
                                         <Icon icon="lucide:tag" width={12} className="text-zinc-600 shrink-0" />
-                                        <span className="text-[10px] text-zinc-500 uppercase tracking-[0.35em] font-black">Tags</span>
+                                        <span className="text-[10px] text-zinc-500 uppercase tracking-[0.35em] font-black">{dict.discovery.tags}</span>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
                                         {artifact.tags.map((at: any, i: number) => (
@@ -346,7 +371,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-1.5">
                                             <Icon icon="lucide:link" width={12} className="text-zinc-600 shrink-0" />
-                                            <span className="text-[10px] text-zinc-500 uppercase tracking-[0.35em] font-black">Gateway_Uplinks</span>
+                                            <span className="text-[10px] text-zinc-500 uppercase tracking-[0.35em] font-black">{dict.discovery.gateway_uplinks}</span>
                                         </div>
                                     </div>
                                     {sortedCategories.map(category => (
@@ -359,7 +384,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                                                     category === 'social' ? "bg-emerald-500" :
                                                     category === 'commerce' ? "bg-amber-500" : "bg-zinc-700"
                                                 )} />
-                                                {category}_Portals
+                                                {category.toUpperCase()}_PORTALS
                                             </h3>
                                             <div className="flex flex-col gap-1.5">
                                                 {groupedResources[category].map((res: any, i: number) => {
@@ -398,7 +423,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
 
                     <div className="order-1 lg:order-none lg:col-span-5 flex flex-col">
                         <PanelHeader
-                            label="Media_Hub"
+                            label={dict.discovery.media_hub}
                             right={
                                 <div className="flex items-center gap-4">
                                     {trackData && (
@@ -444,14 +469,14 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                         <div className="shrink-0 border-t border-zinc-900 px-4 pt-4 pb-8 flex flex-col gap-3">
                             <div className="flex items-center gap-2 shrink-0">
                                 <div className="w-0.5 h-4 bg-violet-600 shrink-0" />
-                                <span className="text-xs text-violet-500 uppercase tracking-[0.35em] font-black">Editorial_Analysis</span>
+                                <span className="text-xs text-violet-500 uppercase tracking-[0.35em] font-black">{dict.discovery.editorial_analysis}</span>
                             </div>
                             {description ? (
                                 <p className="text-sm md:text-base text-zinc-200 italic leading-relaxed tracking-tight whitespace-pre-wrap">
                                     {description}
                                 </p>
                             ) : (
-                                <span className="text-[10px] text-zinc-700 uppercase tracking-widest italic">ANALYSIS_PENDING</span>
+                                <span className="text-[10px] text-zinc-700 uppercase tracking-widest italic">{dict.discovery.analysis_pending}</span>
                             )}
                         </div>
 
@@ -460,10 +485,10 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 shrink-0">
                                     <div className="w-1.5 h-4 bg-rose-600 shadow-[0_0_10px_rgba(225,29,72,0.5)] shrink-0" />
-                                    <span className="text-xs text-rose-500 uppercase tracking-[0.35em] font-black">Echo_Flux</span>
+                                    <span className="text-xs text-rose-500 uppercase tracking-[0.35em] font-black">{dict.discovery.echo_flux}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Active_Signals //</span>
+                                    <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">{dict.discovery.active_signals}</span>
                                     <span className="text-[10px] font-black text-rose-500 italic bg-rose-500/10 px-1.5 py-0.5 border border-rose-500/20">
                                         {(artifact as any).zines?.length || 0}
                                     </span>
@@ -560,7 +585,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
 
                             {stationAuthorCredits.length > 0 && (
                                 <ProvenanceGroup
-                                    label="Core_Authority"
+                                    label={dict.discovery.core_authority}
                                     icon="lucide:star"
                                     color="violet"
                                     credits={stationAuthorCredits}
@@ -570,7 +595,7 @@ export default async function ArtifactPage(props: { params: Promise<{ locale: st
 
                             {(stationCollaboratorCredits.length > 0 || stationStaffCredits.length > 0) && (
                                 <ProvenanceGroup
-                                    label="Collaborative_Flux"
+                                    label={dict.discovery.collaborative_flux}
                                     icon="lucide:users"
                                     color="zinc"
                                     credits={[...stationCollaboratorCredits, ...stationStaffCredits]}

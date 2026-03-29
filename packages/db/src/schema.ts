@@ -449,6 +449,7 @@ export const collectionArtifacts = pgTable("collection_artifacts", {
 export const zines = pgTable("zines", {
     id: text("id").primaryKey(),
     artifactId: text("artifact_id").references(() => artifacts.id, { onDelete: "cascade" }),
+    exhibitId: text("exhibit_id").references(() => exhibits.id, { onDelete: "set null" }),
     authorId: text("author_id").references(() => users.id).notNull(),
     resonance: numeric("resonance", { precision: 12, scale: 4 }).default("0.0000"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -459,6 +460,7 @@ export const zines = pgTable("zines", {
 export const artifactReactions = pgTable("artifact_reactions", {
     id: text("id").primaryKey(),
     artifactId: text("artifact_id").references(() => artifacts.id, { onDelete: "cascade" }).notNull(),
+    exhibitId: text("exhibit_id").references(() => exhibits.id, { onDelete: "set null" }),
     authorId: text("author_id").references(() => users.id).notNull(),
     type: artifactReactionTypeEnum("type").default("spark").notNull(),
     energy: numeric("energy", { precision: 12, scale: 4 }).notNull(),

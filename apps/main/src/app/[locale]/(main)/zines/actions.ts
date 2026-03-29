@@ -9,7 +9,7 @@ import { ensureUserSync } from '../../(pedalboard)/pedalboard/auth-helpers';
 /**
  * Public action for residents to broadcast echoes (zines).
  */
-export async function broadcastZineAction(data: { artifactId: string; content: string }) {
+export async function broadcastZineAction(data: { artifactId: string; exhibitId?: string; content: string }) {
     const user = await ensureUserSync();
     if (!user) throw new Error('Unauthorized_Signal: Identity_Lost');
 
@@ -39,6 +39,7 @@ export async function broadcastZineAction(data: { artifactId: string; content: s
         await tx.insert(schema.zines).values({
             id: zineId,
             artifactId: data.artifactId,
+            exhibitId: data.exhibitId,
             authorId: user.id,
             resonance: initialResonance.toFixed(4),
         });
@@ -69,10 +70,10 @@ export async function broadcastZineAction(data: { artifactId: string; content: s
         }
     });
 
-    revalidatePath(`/[locale]/artifacts/${data.artifactId}`, 'page');
-    revalidatePath(`/[locale]/artifacts`, 'page');
+    revalidatePath(`/[locale]/cinema/${data.artifactId}`, 'page');
+    revalidatePath(`/[locale]/cinema`, 'page');
     revalidatePath(`/[locale]`, 'layout');
-    revalidatePath(`/[locale]/artifacts/${data.artifactId}/zines`, 'page');
+    revalidatePath(`/[locale]/cinema/${data.artifactId}/zines`, 'page');
     
     return { success: true, id: zineId };
 }
@@ -102,3 +103,4 @@ function getResonanceRatio(artifact: { nature: string, animeType?: string | null
     // Originals (Primary manifestations)
     return 1.0;
 }
+

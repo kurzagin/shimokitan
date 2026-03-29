@@ -10,10 +10,11 @@ import { authClient } from '@shimokitan/auth';
 
 interface ZineCreateFormProps {
     artifactId: string;
+    exhibitId?: string;
     onSuccess?: () => void;
 }
 
-export default function ZineCreateForm({ artifactId, onSuccess }: ZineCreateFormProps) {
+export default function ZineCreateForm({ artifactId, exhibitId, onSuccess }: ZineCreateFormProps) {
     const { data: session } = authClient.useSession();
     const user = session?.user;
     const [content, setContent] = useState('');
@@ -38,6 +39,7 @@ export default function ZineCreateForm({ artifactId, onSuccess }: ZineCreateForm
         try {
             const result = await broadcastZineAction({
                 artifactId,
+                exhibitId,
                 content: content.trim()
             });
 

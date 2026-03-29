@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Icon } from "@iconify/react";
+import { useSearchParams } from "next/navigation";
 import { cn } from "@shimokitan/ui";
 import { useTheaterStore } from "@/lib/store/theater-store";
 
@@ -113,6 +114,33 @@ export function ExhibitGallery({
   const [lightboxExhibit, setLightboxExhibit] = useState<ExhibitItem | null>(
     null
   );
+  const searchParams = useSearchParams();
+  const exhibitIdParam = searchParams.get("exhibit");
+
+  // Handle auto-selection of exhibit from URL
+  useEffect(() => {
+    if (exhibitIdParam) {
+      const targetExhibit = exhibits.find(e => e.id === exhibitIdParam);
+      if (targetExhibit) {
+        // If it's a video, select it for the theater player
+        if (isVideoType(targetExhibit.type) && targetExhibit.url) {
+           let platform: 'youtube' | 'local' | 'unknown' = 'unknown';
+           if (targetExhibit.url.includes('youtube') || targetExhibit.url.includes('youtu.be')) platform = 'youtube';
+           
+           const { setActiveVideo } = useTheaterStore.getState();
+           setActiveVideo({
+             id: targetExhibit.id,
+             url: targetExhibit.url,
+             platform,
+             thumbnailUrl: targetExhibit.media?.url
+           });
+        } else {
+           // If it's an image, open the lightbox
+           setLightboxExhibit(targetExhibit);
+        }
+      }
+    }
+  }, [exhibitIdParam, exhibits]);
 
   /** Determine which tabs to show based on available exhibit types. */
   const availableTabs = useMemo(() => {

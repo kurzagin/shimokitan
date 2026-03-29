@@ -315,7 +315,7 @@ export async function createFullZine(data: z.infer<typeof zineSchema>) {
     });
 
     revalidatePath('/[locale]/pedalboard/zines', 'page');
-    revalidatePath(`/[locale]/artifacts/${validated.artifactId}`, 'page');
+    revalidatePath(`/[locale]/cinema/${validated.artifactId}`, 'page');
     return { id: zineId };
 }
 
@@ -370,3 +370,4 @@ export async function purgeZine(id: string) {
     if (db) await db.delete(schema.zines).where(eq(schema.zines.id, id));
     revalidatePath('/[locale]/pedalboard/zines', 'page');
 }
+

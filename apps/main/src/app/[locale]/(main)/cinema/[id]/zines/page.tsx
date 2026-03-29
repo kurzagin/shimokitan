@@ -28,7 +28,7 @@ export default function ArtifactZinesPage() {
             <div className="flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
 
                 {/* Back Link */}
-                <Link href={`/artifacts/${id}`} className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-zinc-600 hover:text-rose-600 transition-colors group">
+                <Link href={`/cinema/${id}`} className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-zinc-600 hover:text-rose-600 transition-colors group">
                     <Icon icon="lucide:arrow-left" width={14} height={14} className="group-hover:-translate-x-1 transition-transform" />
                     Back to Artifact
                 </Link>
@@ -122,7 +122,7 @@ export default function ArtifactZinesPage() {
                 {/* Return CTA */}
                 <div className="flex justify-center pt-20">
                     <Link
-                        href={`/artifacts/${id}/zines/post`}
+                        href={`/cinema/${id}/zines/post`}
                         className="bg-rose-600 text-black font-black italic text-2xl px-16 py-6 shadow-[10px_10px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-tighter"
                     >
                         INITIALIZE_NEW_ZINE
@@ -133,3 +133,4 @@ export default function ArtifactZinesPage() {
         </MainLayout>
     );
 }
+

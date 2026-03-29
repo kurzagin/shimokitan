@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static routes
   const staticPaths = [
     '',
-    '/artifacts',
+    '/cinema',
     '/artists',
     '/about',
     '/contact',
@@ -36,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const artifact of artifacts) {
       for (const locale of locales) {
         sitemapEntries.push({
-          url: `${baseUrl}/${locale}/artifacts/${artifact.id}`,
+          url: `${baseUrl}/${locale}/cinema/${artifact.id}`,
           lastModified: artifact.updatedAt || artifact.createdAt || new Date(),
           changeFrequency: 'weekly',
           priority: 0.6,
@@ -67,3 +67,4 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return sitemapEntries;
 }
+

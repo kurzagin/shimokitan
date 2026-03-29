@@ -14,7 +14,7 @@ export default function PostZineClientForm({ artifactId }: { artifactId: string 
         setIsSubmitting(true);
         // In a real app, logic to save would go here
         alert("Echo broadcasted into the void. (Mock functionality)");
-        router.push(`/artifacts/${artifactId}`);
+        router.push(`/cinema/${artifactId}`);
     };
 
     return (
@@ -70,3 +70,4 @@ export default function PostZineClientForm({ artifactId }: { artifactId: string 
         </form>
     );
 }
+

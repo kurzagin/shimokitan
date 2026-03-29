@@ -90,7 +90,7 @@ export function CompactPulse({ artifactId, userReactions, counts, zineCount }: P
             <div className="w-[1px] h-5 bg-zinc-800 mx-0.5" />
 
             <Link 
-                href={`/artifacts/${artifactId}/zines/post`}
+                href={`/cinema/${artifactId}/zines/post`}
                 className="flex items-center gap-2.5 px-3 py-2 bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/50 hover:bg-rose-500/10 group/zine transition-all rounded-md"
                 title="Post Echo Shard"
             >
@@ -104,3 +104,4 @@ export function CompactPulse({ artifactId, userReactions, counts, zineCount }: P
         </div>
     );
 }
+
