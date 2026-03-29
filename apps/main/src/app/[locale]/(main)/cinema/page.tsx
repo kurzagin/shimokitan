@@ -90,8 +90,6 @@ export default async function CinemaBrowsePage(props: { params: Promise<{ locale
     ].sort((a, b) => (Number(b.resonance) || 0) - (Number(a.resonance) || 0));
 
     return (
-        <MainLayout>
-            <ArtifactsBrowser initialArtifacts={mergedRegistry} dict={dict} />
-        </MainLayout>
+        <ArtifactsBrowser initialArtifacts={mergedRegistry} dict={dict} />
     );
 }

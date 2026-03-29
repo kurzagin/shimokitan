@@ -44,8 +44,6 @@ export default async function BackAlleyPage(props: { params: Promise<{ locale: s
         });
 
     return (
-        <MainLayout>
-            <BackAlleyBrowser initialArtifacts={formattedArtifacts} />
-        </MainLayout>
+        <BackAlleyBrowser initialArtifacts={formattedArtifacts} />
     );
 }

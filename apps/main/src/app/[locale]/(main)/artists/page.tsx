@@ -35,8 +35,6 @@ export default async function ArtistsBrowsePage(props: { params: Promise<{ local
     });
 
     return (
-        <MainLayout>
-            <ArtistsBrowser initialEntities={formattedEntities} />
-        </MainLayout>
+        <ArtistsBrowser initialEntities={formattedEntities} />
     );
 }

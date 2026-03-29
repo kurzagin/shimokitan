@@ -13,6 +13,14 @@ export default function ArtifactZinesPage() {
     const artifact = MOCK_ARTIFACTS[id];
     const artifactZines = MOCK_ZINES.filter(z => z.artifactId === id);
 
+    if (!artifact) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-zinc-500 font-mono">
+                <h1 className="text-xl font-black uppercase tracking-widest">Shard Not Found</h1>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 pb-20">
 

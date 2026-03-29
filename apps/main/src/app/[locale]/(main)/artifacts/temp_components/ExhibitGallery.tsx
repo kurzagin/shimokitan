@@ -1,0 +1,510 @@
+"use client";
+
+import React, { useState, useMemo, useEffect } from "react";
+import { Icon } from "@iconify/react";
+import { useSearchParams } from "next/navigation";
+import { cn } from "@shimokitan/ui";
+import { useTheaterStore } from "@/lib/store/theater-store";
+
+import { resolveTranslation } from "@shimokitan/utils";
+
+/**
+ * Exhibit type as defined in the database schema.
+ */
+type ExhibitType =
+  | "trailer"
+  | "opening"
+  | "ending"
+  | "promotion"
+  | "gallery"
+  | "other";
+
+interface ExhibitTranslation {
+  locale: string;
+  title: string;
+  description?: string | null;
+}
+
+interface ExhibitMedia {
+  url: string;
+  blurhash?: string | null;
+  width?: number | null;
+  height?: number | null;
+}
+
+export interface ExhibitItem {
+  id: string;
+  type: ExhibitType;
+  url?: string | null;
+  position: number;
+  media?: ExhibitMedia | null;
+  translations: ExhibitTranslation[];
+}
+
+interface ExhibitGalleryProps {
+  exhibits: ExhibitItem[];
+  locale: string;
+}
+
+/**
+ * Icon mapping for each exhibit type.
+ */
+const TYPE_ICONS: Record<ExhibitType, string> = {
+  trailer: "lucide:play-circle",
+  opening: "lucide:sunrise",
+  ending: "lucide:sunset",
+  promotion: "lucide:megaphone",
+  gallery: "lucide:image",
+  other: "lucide:file",
+};
+
+/**
+ * Color accent mapping for each exhibit type.
+ */
+const TYPE_COLORS: Record<ExhibitType, string> = {
+  trailer: "text-rose-500",
+  opening: "text-amber-500",
+  ending: "text-violet-500",
+  promotion: "text-sky-500",
+  gallery: "text-emerald-500",
+  other: "text-zinc-500",
+};
+
+const TYPE_BG: Record<ExhibitType, string> = {
+  trailer: "bg-rose-500/10 border-rose-500/20",
+  opening: "bg-amber-500/10 border-amber-500/20",
+  ending: "bg-violet-500/10 border-violet-500/20",
+  promotion: "bg-sky-500/10 border-sky-500/20",
+  gallery: "bg-emerald-500/10 border-emerald-500/20",
+  other: "bg-zinc-500/10 border-zinc-500/20",
+};
+
+/**
+ * Checks if an exhibit type is video-based (should show play overlay).
+ */
+const isVideoType = (type: ExhibitType): boolean =>
+  ["trailer", "opening", "ending"].includes(type);
+
+/**
+ * Extracts a YouTube video ID from a URL string.
+ */
+const extractYouTubeId = (url: string): string | null => {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match?.[1] || null;
+};
+
+/**
+ * ExhibitGallery - A categorized, interactive exhibit viewer
+ * for the public artifact page.
+ *
+ * Features:
+ * - Tab-based filtering by exhibit type
+ * - Dense grid layout for gallery items
+ * - Video lightbox for trailer/opening/ending items
+ * - Responsive design (mobile/tablet/desktop)
+ */
+export function ExhibitGallery({
+  exhibits,
+  locale,
+}: ExhibitGalleryProps) {
+  const [activeTab, setActiveTab] = useState<ExhibitType | "all">("all");
+  const [lightboxExhibit, setLightboxExhibit] = useState<ExhibitItem | null>(
+    null
+  );
+  const searchParams = useSearchParams();
+  const exhibitIdParam = searchParams.get("exhibit");
+
+  // Handle auto-selection of exhibit from URL
+  useEffect(() => {
+    if (exhibitIdParam) {
+      const targetExhibit = exhibits.find(e => e.id === exhibitIdParam);
+      if (targetExhibit) {
+        // If it's a video, select it for the theater player
+        if (isVideoType(targetExhibit.type) && targetExhibit.url) {
+           let platform: 'youtube' | 'local' | 'unknown' = 'unknown';
+           if (targetExhibit.url.includes('youtube') || targetExhibit.url.includes('youtu.be')) platform = 'youtube';
+           
+           const { setActiveVideo } = useTheaterStore.getState();
+           setActiveVideo({
+             id: targetExhibit.id,
+             url: targetExhibit.url,
+             platform,
+             thumbnailUrl: targetExhibit.media?.url
+           });
+        } else {
+           // If it's an image, open the lightbox
+           setLightboxExhibit(targetExhibit);
+        }
+      }
+    }
+  }, [exhibitIdParam, exhibits]);
+
+  /** Determine which tabs to show based on available exhibit types. */
+  const availableTabs = useMemo(() => {
+    const typeSet = new Set(exhibits.map((e) => e.type));
+    const tabs: (ExhibitType | "all")[] = ["all"];
+    const order: ExhibitType[] = [
+      "trailer",
+      "opening",
+      "ending",
+      "gallery",
+      "promotion",
+      "other",
+    ];
+    order.forEach((t) => {
+      if (typeSet.has(t)) tabs.push(t);
+    });
+    return tabs;
+  }, [exhibits]);
+
+  /** Filter exhibits by active tab. */
+  const filteredExhibits = useMemo(() => {
+    const items =
+      activeTab === "all"
+        ? exhibits
+        : exhibits.filter((e) => e.type === activeTab);
+    return items.sort((a, b) => (a.position || 0) - (b.position || 0));
+  }, [exhibits, activeTab]);
+
+  /** Determine if current view is gallery-dominant (use dense grid). */
+  const isGalleryMode =
+    activeTab === "gallery" ||
+    (activeTab === "all" &&
+      exhibits.filter((e) => e.type === "gallery").length >
+        exhibits.length * 0.6);
+
+  const openLightbox = (exhibit: ExhibitItem) => {
+    if (isVideoType(exhibit.type) && exhibit.url) {
+      // It's a video, use theater player instead of lightbox
+      let platform: 'youtube' | 'local' | 'unknown' = 'unknown';
+      if (exhibit.url.includes('youtube') || exhibit.url.includes('youtu.be')) platform = 'youtube';
+      
+      const { setActiveVideo } = useTheaterStore.getState();
+      setActiveVideo({
+        id: exhibit.id,
+        url: exhibit.url,
+        platform,
+        thumbnailUrl: exhibit.media?.url
+      });
+      
+      // Scroll to media hub smoothly
+      window.scrollTo({ top: 300, behavior: 'smooth' }); // Rough estimation of where the player is, could just be top: 0
+    } else {
+      setLightboxExhibit(exhibit);
+    }
+  };
+
+  const closeLightbox = () => {
+    setLightboxExhibit(null);
+  };
+
+  /** Navigate between exhibits in lightbox. */
+  const navigateLightbox = (direction: "prev" | "next") => {
+    if (!lightboxExhibit) return;
+    const currentIndex = filteredExhibits.findIndex(
+      (e) => e.id === lightboxExhibit.id
+    );
+    const nextIndex =
+      direction === "next"
+        ? (currentIndex + 1) % filteredExhibits.length
+        : (currentIndex - 1 + filteredExhibits.length) %
+          filteredExhibits.length;
+    setLightboxExhibit(filteredExhibits[nextIndex]);
+  };
+
+  if (exhibits.length === 0) return null;
+
+  return (
+    <>
+      <div className="flex flex-col border-t border-zinc-900">
+        {/* Header */}
+        <div className="shrink-0 px-3 py-2.5 bg-zinc-950/80 border-b border-zinc-900 flex items-center gap-2">
+          <Icon
+            icon="lucide:archive"
+            width={13}
+            className="text-zinc-500 shrink-0"
+          />
+          <span className="text-xs text-zinc-400 uppercase tracking-[0.35em] font-black">
+            Exhibit_Root
+          </span>
+          <span className="ml-auto text-[9px] text-zinc-700 font-mono uppercase">
+            {exhibits.length} Item{exhibits.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+
+        {/* Tab Bar - Only show if more than one type exists */}
+        {availableTabs.length > 2 && (
+          <div className="flex items-center gap-1 px-3 py-2 border-b border-zinc-900/60 bg-zinc-950/40 overflow-x-auto scrollbar-none">
+            {availableTabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  "px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.15em] border transition-all whitespace-nowrap",
+                  activeTab === tab
+                    ? "bg-zinc-800 border-zinc-700 text-white"
+                    : "bg-transparent border-transparent text-zinc-600 hover:text-zinc-400 hover:border-zinc-800"
+                )}
+              >
+                {tab === "all" ? (
+                  "All"
+                ) : (
+                  <span className="flex items-center gap-1.5">
+                    <Icon
+                      icon={TYPE_ICONS[tab]}
+                      width={10}
+                      className={TYPE_COLORS[tab]}
+                    />
+                    {tab}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Content Grid */}
+        <div
+          className={cn(
+            "p-3",
+            isGalleryMode
+              ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2"
+              : "grid grid-cols-1 sm:grid-cols-2 gap-3"
+          )}
+        >
+          {filteredExhibits.map((exhibit) => {
+            const trans = resolveTranslation(exhibit.translations, locale);
+            const isVideo = isVideoType(exhibit.type);
+
+            return (
+              <button
+                key={exhibit.id}
+                type="button"
+                onClick={() => openLightbox(exhibit)}
+                className={cn(
+                  "group/card relative overflow-hidden border border-zinc-800/60 bg-zinc-900/30 transition-all text-left",
+                  "hover:border-zinc-700 hover:bg-zinc-900/60",
+                  isGalleryMode ? "aspect-square" : "aspect-video"
+                )}
+              >
+                {/* Thumbnail */}
+                {exhibit.media?.url ? (
+                  <img
+                    src={exhibit.media.url}
+                    alt={trans?.title || "Exhibit"}
+                    className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-500"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-zinc-950">
+                    <Icon
+                      icon={TYPE_ICONS[exhibit.type]}
+                      width={isGalleryMode ? 24 : 32}
+                      className="text-zinc-800"
+                    />
+                  </div>
+                )}
+
+                {/* Video Play Overlay */}
+                {isVideo && (
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all scale-75 group-hover/card:scale-100">
+                      <Icon
+                        icon="lucide:play"
+                        width={16}
+                        className="text-white ml-0.5"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom Info Bar */}
+                <div className="absolute bottom-0 inset-x-0 z-10 bg-black/80 backdrop-blur-sm px-3 py-2 flex items-center gap-2">
+                  <div
+                    className={cn(
+                      "shrink-0 px-1.5 py-0.5 border text-[7px] font-black uppercase tracking-wider",
+                      TYPE_BG[exhibit.type],
+                      TYPE_COLORS[exhibit.type]
+                    )}
+                  >
+                    {exhibit.type}
+                  </div>
+                  <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-tight truncate">
+                    {trans?.title || "Untitled"}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Lightbox Modal */}
+      {lightboxExhibit && (
+        <ExhibitLightbox
+          exhibit={lightboxExhibit}
+          locale={locale}
+          onClose={closeLightbox}
+          onPrev={() => navigateLightbox("prev")}
+          onNext={() => navigateLightbox("next")}
+          totalCount={filteredExhibits.length}
+          currentIndex={
+            filteredExhibits.findIndex(
+              (e) => e.id === lightboxExhibit.id
+            ) + 1
+          }
+        />
+      )}
+    </>
+  );
+}
+
+/**
+ * Full-screen lightbox for viewing an exhibit.
+ * Supports YouTube embeds for video-type exhibits and image viewing for gallery types.
+ */
+function ExhibitLightbox({
+  exhibit,
+  locale,
+  onClose,
+  onPrev,
+  onNext,
+  totalCount,
+  currentIndex,
+}: {
+  exhibit: ExhibitItem;
+  locale: string;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+  totalCount: number;
+  currentIndex: number;
+}) {
+  const trans = resolveTranslation(exhibit.translations, locale);
+  const isVideo = isVideoType(exhibit.type);
+  const youtubeId = exhibit.url ? extractYouTubeId(exhibit.url) : null;
+
+  /** Handle keyboard navigation. */
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") onPrev();
+      if (e.key === "ArrowRight") onNext();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose, onPrev, onNext]);
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col">
+      {/* Top Bar */}
+      <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-zinc-900">
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "px-2 py-1 border text-[8px] font-black uppercase tracking-wider",
+              TYPE_BG[exhibit.type],
+              TYPE_COLORS[exhibit.type]
+            )}
+          >
+            {exhibit.type}
+          </div>
+          <h2 className="text-sm font-black uppercase italic text-white tracking-tight truncate max-w-[50vw]">
+            {trans?.title || "Untitled_Exhibit"}
+          </h2>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-[9px] font-mono text-zinc-600 uppercase">
+            {currentIndex} / {totalCount}
+          </span>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-white transition-colors"
+          >
+            <Icon icon="lucide:x" width={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center relative min-h-0">
+        {/* Prev Button */}
+        {totalCount > 1 && (
+          <button
+            onClick={onPrev}
+            className="absolute left-2 md:left-4 z-20 w-10 h-10 flex items-center justify-center bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 transition-all"
+          >
+            <Icon icon="lucide:chevron-left" width={18} />
+          </button>
+        )}
+
+        {/* Content */}
+        <div className="w-full h-full flex items-center justify-center p-4 md:p-8">
+          {isVideo && youtubeId ? (
+            <div className="w-full max-w-4xl aspect-video">
+              <iframe
+                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          ) : isVideo && exhibit.url ? (
+            <div className="flex flex-col items-center gap-6">
+              {exhibit.media?.url && (
+                <img
+                  src={exhibit.media.url}
+                  alt={trans?.title || "Exhibit"}
+                  className="max-h-[60vh] max-w-full object-contain"
+                />
+              )}
+              <a
+                href={exhibit.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-700 text-xs font-black uppercase tracking-widest text-zinc-300 hover:text-white hover:border-zinc-500 transition-all"
+              >
+                <Icon icon="lucide:external-link" width={14} />
+                Open_External_Source
+              </a>
+            </div>
+          ) : exhibit.media?.url ? (
+            <img
+              src={exhibit.media.url}
+              alt={trans?.title || "Exhibit"}
+              className="max-h-[80vh] max-w-full object-contain"
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-4 text-zinc-700">
+              <Icon icon={TYPE_ICONS[exhibit.type]} width={48} />
+              <span className="text-xs font-mono uppercase tracking-widest">
+                No_Visual_Data
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Next Button */}
+        {totalCount > 1 && (
+          <button
+            onClick={onNext}
+            className="absolute right-2 md:right-4 z-20 w-10 h-10 flex items-center justify-center bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-600 transition-all"
+          >
+            <Icon icon="lucide:chevron-right" width={18} />
+          </button>
+        )}
+      </div>
+
+      {/* Bottom Description */}
+      {trans?.description && (
+        <div className="shrink-0 px-6 py-4 border-t border-zinc-900 bg-zinc-950/80 max-h-[20vh] overflow-y-auto">
+          <p className="text-sm text-zinc-400 italic leading-relaxed max-w-2xl mx-auto">
+            {trans.description}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

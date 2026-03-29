@@ -93,8 +93,8 @@ export default function ArtifactsBrowser({
                     const href = artifact.type === 'work' 
                         ? `/works/${artifact.id}` 
                         : artifact.type === 'exhibit' 
-                            ? `/cinema/${artifact.id}?exhibit=${artifact.exhibitId}`
-                            : `/cinema/${artifact.id}`;
+                            ? `/artifacts/${artifact.category}/${artifact.id}/exhibit/${artifact.exhibitId}`
+                            : `/artifacts/${artifact.category}/${artifact.id}`;
 
                     return (
                         <Link

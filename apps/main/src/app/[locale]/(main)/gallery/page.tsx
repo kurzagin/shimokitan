@@ -116,12 +116,10 @@ export default async function GalleryPage(props: { params: Promise<{ locale: str
     } catch (e) {}
 
     return (
-        <MainLayout>
-            <GalleryBrowser
-                illustrations={illustrations}
-                dict={dict}
-                weatherTemp={weatherTemp}
-            />
-        </MainLayout>
+        <GalleryBrowser
+            illustrations={illustrations}
+            dict={dict}
+            weatherTemp={weatherTemp}
+        />
     );
 }

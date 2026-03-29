@@ -22,15 +22,17 @@ export async function broadcastZineAction(data: { artifactId: string; exhibitId?
     const baseEnergy = 1.0; // Constant for a single Zine creation
     const initialResonance = userMultiplier * baseEnergy;
 
+    let artifact: any;
     await db.transaction(async (tx) => {
         // Fetch artifact to get parent Work and determine ratio
-        const artifact = await tx.query.artifacts.findFirst({
+        artifact = await tx.query.artifacts.findFirst({
             where: eq(schema.artifacts.id, data.artifactId),
             columns: {
                 id: true,
                 workId: true,
                 nature: true,
                 animeType: true,
+                category: true,
             }
         });
 
@@ -70,10 +72,14 @@ export async function broadcastZineAction(data: { artifactId: string; exhibitId?
         }
     });
 
-    revalidatePath(`/[locale]/cinema/${data.artifactId}`, 'page');
+    // Revalidate the new routes
+    revalidatePath(`/[locale]/artifacts/${(artifact as any).category}/${data.artifactId}`, 'layout');
+    if (data.exhibitId) {
+        revalidatePath(`/[locale]/artifacts/${(artifact as any).category}/${data.artifactId}/exhibit/${data.exhibitId}`, 'page');
+    }
+
     revalidatePath(`/[locale]/cinema`, 'page');
     revalidatePath(`/[locale]`, 'layout');
-    revalidatePath(`/[locale]/cinema/${data.artifactId}/zines`, 'page');
     
     return { success: true, id: zineId };
 }
