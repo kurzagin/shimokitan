@@ -20,17 +20,23 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'MISSING_REQUIRED_FIELDS' }, { status: 400 });
         }
 
-        const extension = filename.split('.').pop() || 'bin';
+        const extension = filename.split('.').pop()?.toLowerCase() || 'bin';
         const finalFilename = preserveFilename ? filename : `${nanoid()}.${extension}`;
         const mediaId = nanoid(); // Subfolder isolation
         
         let key = '';
+        const lowercaseType = contentType.toLowerCase();
 
         switch (context) {
             case 'artifacts':
-                if (contentType.startsWith('image/')) {
+                if (lowercaseType.startsWith('image/')) {
                     key = storagePaths.artifactImage(contextId, finalFilename, role || mediaId);
-                } else if (contentType.startsWith('audio/') || contentType === 'application/x-mpegURL' || filename.endsWith('.m3u8') || filename.endsWith('.m4s') || filename.endsWith('.ts') || filename.endsWith('.m4a')) {
+                } else if (
+                    lowercaseType.startsWith('audio/') || 
+                    lowercaseType === 'application/x-mpegurl' || 
+                    lowercaseType === 'application/vnd.apple.mpegurl' ||
+                    ['m3u8', 'm4s', 'ts', 'm4a'].includes(extension)
+                ) {
                     // For HLS/Audio, path them into the audio folder.
                     key = storagePaths.artifactAudio(contextId, finalFilename, role || mediaId);
                 } else {

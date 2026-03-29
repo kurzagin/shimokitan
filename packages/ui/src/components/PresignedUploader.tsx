@@ -17,6 +17,7 @@ interface PresignedUploaderProps {
     className?: string;
     multiple?: boolean;
     preserveFilename?: boolean;
+    role?: string; // Optional role for grouping
 }
 
 /**
@@ -35,7 +36,8 @@ export function PresignedUploader({
     label = "UPLOAD_FILES",
     className,
     multiple = false,
-    preserveFilename = false
+    preserveFilename = false,
+    role: initialRole
 }: PresignedUploaderProps) {
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -48,14 +50,15 @@ export function PresignedUploader({
     }, [value]);
 
     const getFileType = (file: File) => {
-        if (file.name.endsWith('.m3u8')) return 'application/x-mpegURL';
-        if (file.name.endsWith('.ts')) return 'video/MP2T';
-        if (file.name.endsWith('.m4s')) return 'video/iso.segment';
-        if (file.name.endsWith('.m4a')) return 'audio/mp4';
+        const name = file.name.toLowerCase();
+        if (name.endsWith('.m3u8')) return 'application/x-mpegurl';
+        if (name.endsWith('.ts')) return 'video/MP2T';
+        if (name.endsWith('.m4s')) return 'video/iso.segment';
+        if (name.endsWith('.m4a')) return 'audio/mp4';
         return file.type || 'application/octet-stream';
     };
 
-    const uploadFile = async (file: File): Promise<{ url: string, key: string }> => {
+    const uploadFile = async (file: File, batchRole?: string): Promise<{ url: string, key: string }> => {
         const contentType = getFileType(file);
 
         // 1. Get Presigned URL
@@ -67,7 +70,8 @@ export function PresignedUploader({
                 contentType,
                 preserveFilename,
                 context,
-                contextId
+                contextId,
+                role: batchRole || initialRole
             })
         });
 
@@ -88,7 +92,11 @@ export function PresignedUploader({
                 }
             };
 
-            xhr.onerror = () => reject(new Error(`NETWORK_ERROR_${file.name}`));
+            xhr.onerror = () => {
+                const errorMsg = `NETWORK_ERROR_${file.name} (Status: ${xhr.status})`;
+                console.error('[PRESIGNED_XHR_ERROR]', errorMsg);
+                reject(new Error(errorMsg));
+            };
             xhr.send(file);
         });
     };
@@ -102,13 +110,17 @@ export function PresignedUploader({
 
         try {
             const uploaded: { url: string, key: string }[] = [];
+            // Generate a shared role/folder for this specific batch if it's HLS or multiple
+            const batchRoleId = (files.some(f => f.name.toLowerCase().endsWith('.m3u8')) || files.length > 1) 
+                ? `batch_${Math.random().toString(36).substring(2, 9)}` 
+                : initialRole;
             
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 setStatusText(`UPLOADING ${i + 1}/${files.length}: ${file.name}`);
                 setProgress(((i) / files.length) * 100);
                 
-                const result = await uploadFile(file);
+                const result = await uploadFile(file, batchRoleId);
                 uploaded.push(result);
             }
 
