@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import { BrandIcon } from '@/components/BrandIcon';
-import { MainLayout } from '@/components/layout/MainLayout';
 import Link from 'next/link';
 import { Dictionary, getMediaByRole, resolveTranslation } from '@shimokitan/utils';
 import { cn } from '@shimokitan/ui';
@@ -33,9 +32,9 @@ const CATEGORY_ACCENT: Record<string, string> = {
 };
 
 const CATEGORY_LABEL_COLOR: Record<string, string> = {
-    social_media: 'text-zinc-500',
+    social_media: 'text-sky-500',
     commerce: 'text-amber-500',
-    platform: 'text-zinc-500',
+    platform: 'text-indigo-500',
     video: 'text-rose-500',
     audio: 'text-emerald-500',
 };
@@ -125,7 +124,7 @@ function HeroLinkCard({ link, dict, platforms }: { link: any, dict: Dictionary, 
                     <BrandIcon 
                         platform={link.platform} 
                         iconUrl={platforms.find(p => p.id === link.platform)?.iconUrl}
-                        className={cn("w-6 h-6 transition-all grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100", labelColor)} 
+                        className={cn("w-6 h-6 transition-all", labelColor)} 
                     />
                 </div>
                 <div className="space-y-0.5">
@@ -211,7 +210,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
     // ── Sealed Gate ──────────────────────────────────────────────────────
     if (entity.civilStatus === 'sealed') {
         return (
-            <MainLayout>
+            <>
                 <div className="fixed inset-0 pointer-events-none -z-20 overflow-hidden">
                     <div className="absolute w-full h-[1px] bg-white/5 animate-pulse" style={{ top: '15%' }} />
                     <div className="absolute w-full h-[1px] bg-white/5 animate-pulse" style={{ top: '85%' }} />
@@ -248,7 +247,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                         </div>
                     </div>
                 </div>
-            </MainLayout>
+            </>
         );
     }
 
@@ -285,7 +284,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
     const announcement = entity.announcement || null;
 
     return (
-        <MainLayout>
+        <>
             {/* Ambient scan lines */}
             <div className="fixed inset-0 pointer-events-none -z-20 overflow-hidden">
                 <div className="absolute w-full h-[1px] bg-white/[0.03]" style={{ top: '33%' }} />
@@ -515,7 +514,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                         commissionStatus === 'WAITLIST' ? 'bg-amber-500' :
                                             'bg-red-600'
                                 }
-                                defaultOpen={commissionStatus === 'OPEN'}
+                                defaultOpen={true}
                             >
                                 <div className="px-5 py-4 flex items-center gap-3">
                                     <div className={`w-2 h-2 rounded-full ${commissionStatus === 'OPEN' ? 'bg-emerald-500' :
@@ -571,7 +570,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                 id="platform"
                                 label={dict.entities.links.platform}
                                 count={`${platformLinks.length} CHANNELS`}
-                                statusColor="bg-zinc-500"
+                                statusColor="bg-indigo-500"
                                 defaultOpen={true}
                             >
                                 <div className="flex flex-col gap-px bg-zinc-900">
@@ -588,8 +587,8 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                 id="social"
                                 label={dict.entities.links.social_media}
                                 count={`${socialLinks.length} CHANNELS`}
-                                statusColor="bg-zinc-500"
-                                defaultOpen={false}
+                                statusColor="bg-sky-500"
+                                defaultOpen={true}
                             >
                                 <div className="flex flex-col gap-px bg-zinc-900">
                                     {socialLinks.map((link: any, i: number) => (
@@ -693,6 +692,6 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
 
                 </div>
             </div>
-        </MainLayout>
+        </>
     );
 }

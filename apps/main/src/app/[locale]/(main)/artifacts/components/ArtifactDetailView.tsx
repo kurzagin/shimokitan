@@ -310,13 +310,13 @@ export function ArtifactDetailView({
                                                         className="flex items-center justify-between px-3 py-2 bg-zinc-900/40 border border-zinc-800/60 hover:border-violet-500/40 hover:bg-zinc-900/60 transition-all group/gate"
                                                     >
                                                         <div className="flex items-center gap-3">
-                                                            <BrandIcon
-                                                                platform={res.platform}
-                                                                iconUrl={res.platformData?.iconUrl}
-                                                                className="text-zinc-600 group-hover/gate:text-violet-400 shrink-0"
-                                                                width={13}
-                                                                height={13}
-                                                            />
+                                                                <BrandIcon
+                                                                    platform={res.platform}
+                                                                    iconUrl={res.platformData?.iconUrl}
+                                                                    className="group-hover/gate:text-violet-400 shrink-0"
+                                                                    width={13}
+                                                                    height={13}
+                                                                />
                                                             <span className="text-[11px] font-bold text-zinc-400 group-hover/gate:text-white uppercase tracking-tight transition-colors truncate">
                                                                 {platformName}
                                                             </span>

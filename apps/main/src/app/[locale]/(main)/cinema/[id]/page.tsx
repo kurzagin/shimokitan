@@ -401,7 +401,7 @@ export default async function ArtifactPage(props: {
                                                                 <BrandIcon
                                                                     platform={res.platform}
                                                                     iconUrl={res.platformData?.iconUrl}
-                                                                    className="text-zinc-600 group-hover/gate:text-violet-400 shrink-0"
+                                                                    className="group-hover/gate:text-violet-400 shrink-0"
                                                                     width={13}
                                                                     height={13}
                                                                 />
