@@ -406,6 +406,26 @@ export default function ArtifactForm({
         setExhibits(next);
     };
 
+    /**
+     * Handles selection of an external media URL for an exhibit.
+     * Sets the mediaUrl for optimistic preview and clears mediaId.
+     * @param idx - Exhibit index
+     * @param url - External media URL
+     */
+    const handleExhibitMediaUrlSelected = (idx: number, url: string) => {
+        let targetUrl = url;
+        // If it's a YouTube link, automatically transform it to a thumbnail URL for preview
+        if (url.includes('youtube.com/') || url.includes('youtu.be/') || url.includes('youtube-nocookie.com/')) {
+            const id = extractMediaId(url, 'youtube');
+            const thumb = getThumbnailUrl(id, 'youtube', 'max');
+            if (thumb) targetUrl = thumb;
+        }
+
+        const next = [...exhibits];
+        next[idx] = { ...next[idx], mediaUrl: targetUrl, mediaId: null };
+        setExhibits(next);
+    };
+
     const addSpec = () => setSpecs([...specs, { key: '', value: '' }]);
     const removeSpec = (idx: number) => setSpecs(specs.filter((_, i) => i !== idx));
     const updateSpec = (idx: number, field: keyof Spec, value: string) => {
@@ -442,8 +462,21 @@ export default function ArtifactForm({
                 formData.append('url', pendingThumbnailUrl);
                 formData.append('context', 'artifact_asset');
                 formData.append('contextId', artifactId);
-                const res = await uploadMediaAction(formData);
-                finalThumbnailId = res.mediaId;
+                try {
+                    const res = await uploadMediaAction(formData);
+                    finalThumbnailId = res.mediaId;
+                } catch (e) {
+                    console.warn("Primary thumbnail download failed, checking for YT fallback...");
+                    if (pendingThumbnailUrl.includes('maxresdefault.jpg')) {
+                        const fallbackUrl = pendingThumbnailUrl.replace('maxresdefault.jpg', 'hqdefault.jpg');
+                        formData.set('url', fallbackUrl);
+                        const res = await uploadMediaAction(formData);
+                        finalThumbnailId = res.mediaId;
+                        toast.success('Used high-quality fallback for thumbnail.');
+                    } else {
+                        throw e;
+                    }
+                }
             }
 
             // 2. Upload/Prepare Poster
@@ -533,6 +566,44 @@ export default function ArtifactForm({
 
             const finalAssets = [...visualAssets, ...localAssets];
 
+            // 4b. Process Exhibits (Upload any pending external visuals)
+            const finalExhibits = [];
+            for (const ex of exhibits) {
+                let currentMediaId = ex.mediaId;
+                let currentMediaUrl = ex.mediaUrl;
+
+                if (!currentMediaId && currentMediaUrl && currentMediaUrl.startsWith('http')) {
+                    toast.info('Downloading exhibit asset...');
+                    const formData = new FormData();
+                    formData.append('url', currentMediaUrl);
+                    formData.append('context', 'artifact_asset');
+                    formData.append('contextId', artifactId);
+                    try {
+                        const res = await uploadMediaAction(formData);
+                        currentMediaId = res.mediaId;
+                        currentMediaUrl = res.url;
+                    } catch (e) {
+                        console.warn("Exhibit visual download failed, checking for YT fallback...");
+                        if (currentMediaUrl.includes('maxresdefault.jpg')) {
+                            const fallbackUrl = currentMediaUrl.replace('maxresdefault.jpg', 'hqdefault.jpg');
+                            formData.set('url', fallbackUrl);
+                            const res = await uploadMediaAction(formData);
+                            currentMediaId = res.mediaId;
+                            currentMediaUrl = res.url;
+                        } else {
+                            throw e;
+                        }
+                    }
+                }
+
+                finalExhibits.push({
+                    ...ex,
+                    mediaId: currentMediaId,
+                    mediaUrl: currentMediaUrl,
+                    translations: ex.translations.filter(t => t.title.trim() !== '')
+                });
+            }
+
             // 5. Build Final Payload
             const cleanCredits = credits.filter(c => c.entityId.trim() !== '');
             const cleanSpecs = specs.reduce((acc, curr) => { if (curr.key.trim()) acc[curr.key] = curr.value; return acc; }, {} as Record<string, string>);
@@ -547,7 +618,7 @@ export default function ArtifactForm({
                 assets: finalAssets,
                 resources: cleanResources,
                 credits: cleanCredits,
-                exhibits: exhibits.map(ex => ({ ...ex, translations: ex.translations.filter(t => t.title.trim() !== '') })),
+                exhibits: finalExhibits,
                 specs: cleanSpecs,
                 tags: cleanTags,
                 translations: cleanTranslations,
@@ -662,6 +733,7 @@ export default function ArtifactForm({
                     setExhibits={setExhibits}
                     artifactId={artifactId}
                     onMediaUploaded={handleExhibitMediaUploaded}
+                    onMediaUrlSelected={handleExhibitMediaUrlSelected}
                 />
 
                 {!workId ? (

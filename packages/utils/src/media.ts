@@ -1,6 +1,9 @@
 /**
  * Extracts the video/content ID from various platform URLs.
  * Focuses on YouTube, but designed to be extensible.
+ * @param url - The URL (YouTube, Bilibili, Niconico)
+ * @param platform - The platform identifier
+ * @returns The extracted media ID or null
  */
 export function extractMediaId(url: string, platform: string): string | null {
     if (!url) return null;
@@ -10,34 +13,30 @@ export function extractMediaId(url: string, platform: string): string | null {
     switch (platform.toLowerCase()) {
         case 'youtube':
         case 'youtube_music': {
-            // Patterns matched:
-            // youtube.com/watch?v=ID
-            // youtu.be/ID
-            // youtube.com/embed/ID
-            // youtube.com/v/ID
-            // youtube.com/shorts/ID
-            // music.youtube.com/watch?v=ID
-            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|shorts\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+            /** 
+             * Patterns matched:
+             * youtube.com/watch?v=ID
+             * youtu.be/ID
+             * youtube.com/embed/ID
+             * youtube.com/v/ID
+             * youtube.com/shorts/ID
+             * youtube.com/live/ID
+             * music.youtube.com/watch?v=ID
+             */
+            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
             const match = trimmedUrl.match(regex);
             return match ? match[1] : null;
         }
 
         case 'bilibili': {
-            // Patterns matched:
-            // bilibili.com/video/BV...
-            // bilibili.com/video/av...
             const bvidMatch = trimmedUrl.match(/\/video\/(BV[a-zA-Z0-9]+)/i);
             if (bvidMatch) return bvidMatch[1];
-
             const avidMatch = trimmedUrl.match(/\/video\/(av[0-9]+)/i);
             if (avidMatch) return avidMatch[1];
-
             return null;
         }
 
         case 'niconico': {
-            // Patterns matched:
-            // nicovideo.jp/watch/sm...
             const match = trimmedUrl.match(/\/watch\/(sm[0-9]+)/i);
             return match ? match[1] : null;
         }
@@ -49,17 +48,21 @@ export function extractMediaId(url: string, platform: string): string | null {
 
 /**
  * Generates a thumbnail URL for a given platform ID.
+ * @param id - The content identifier
+ * @param platform - The platform identifier
+ * @param quality - Optional quality selector (max, high, medium)
+ * @returns The thumbnail URL or null
  */
-export function getThumbnailUrl(id: string | null, platform: string): string | null {
+export function getThumbnailUrl(id: string | null, platform: string, quality: 'max' | 'high' | 'medium' = 'max'): string | null {
     if (!id) return null;
 
     switch (platform.toLowerCase()) {
         case 'youtube':
-        case 'youtube_music':
-            return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+        case 'youtube_music': {
+            const suffix = quality === 'max' ? 'maxresdefault' : (quality === 'high' ? 'hqdefault' : 'mqdefault');
+            return `https://img.youtube.com/vi/${id}/${suffix}.jpg`;
+        }
         case 'bilibili':
-            // Bilibili doesn't have a simple predictable thumbnail pattern like YouTube 
-            // without API calls, so we return null for now.
             return null;
         case 'niconico':
             return `https://nicovideo.cdn.nimg.jp/thumbnails/${id}/${id}.L`;

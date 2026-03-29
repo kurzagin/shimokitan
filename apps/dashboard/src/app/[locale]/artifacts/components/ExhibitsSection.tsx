@@ -3,9 +3,10 @@
 
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
-import { EXHIBIT_TYPES } from '@shimokitan/utils';
+import { EXHIBIT_TYPES, extractMediaId, getThumbnailUrl } from '@shimokitan/utils';
 import { MediaUploader } from '@shimokitan/ui';
 import { uploadMediaAction } from '../../media-actions';
+import { toast } from 'sonner';
 
 export interface Exhibit {
     id?: string;
@@ -26,6 +27,7 @@ interface ExhibitsSectionProps {
     setExhibits: (exhibits: Exhibit[]) => void;
     artifactId: string;
     onMediaUploaded: (idx: number, mediaId: string, url: string) => void;
+    onMediaUrlSelected: (idx: number, url: string) => void;
 }
 
 /**
@@ -63,7 +65,8 @@ export default function ExhibitsSection({
     exhibits,
     setExhibits,
     artifactId,
-    onMediaUploaded
+    onMediaUploaded,
+    onMediaUrlSelected
 }: ExhibitsSectionProps) {
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
@@ -235,6 +238,7 @@ export default function ExhibitsSection({
                     onUpdate={(field, value) => updateExhibit(editingIndex, field, value)}
                     onUpdateTranslation={(locale, field, value) => updateTranslation(editingIndex, locale, field, value)}
                     onMediaUploaded={(mediaId, url) => onMediaUploaded(editingIndex, mediaId, url)}
+                    onMediaUrlSelected={(url) => onMediaUrlSelected(editingIndex, url)}
                     onClose={() => setEditingIndex(null)}
                     onRemove={() => removeExhibit(editingIndex)}
                 />
@@ -274,6 +278,7 @@ function ExhibitEditor({
     onUpdate,
     onUpdateTranslation,
     onMediaUploaded,
+    onMediaUrlSelected,
     onClose,
     onRemove,
 }: {
@@ -283,6 +288,7 @@ function ExhibitEditor({
     onUpdate: (field: keyof Exhibit, value: any) => void;
     onUpdateTranslation: (locale: string, field: 'title' | 'description', value: string) => void;
     onMediaUploaded: (mediaId: string, url: string) => void;
+    onMediaUrlSelected: (url: string) => void;
     onClose: () => void;
     onRemove: () => void;
 }) {
@@ -340,7 +346,9 @@ function ExhibitEditor({
                         <MediaUploader
                             value={exhibit.mediaUrl || ''}
                             onChange={(mediaId: string, url: string) => onMediaUploaded(mediaId, url)}
+                            onUrlSelect={onMediaUrlSelected}
                             contextType="artifact_asset"
+                            contextId={artifactId}
                             uploadAction={uploadMediaAction}
                             className="aspect-video w-full rounded-xl border border-zinc-900 overflow-hidden shadow-inner bg-black"
                         />
@@ -371,20 +379,17 @@ function ExhibitEditor({
                                 <button
                                     type="button"
                                     onClick={async () => {
+                                        if (!exhibit.url) return;
                                         try {
-                                            const { extractMediaId, getThumbnailUrl } = await import('@shimokitan/utils');
-                                            const id = extractMediaId(exhibit.url!, 'youtube');
-                                            const thumbUrl = getThumbnailUrl(id, 'youtube');
-                                            if (thumbUrl) {
-                                                const formData = new FormData();
-                                                formData.append('url', thumbUrl);
-                                                formData.append('context', 'artifact_asset');
-                                                formData.append('contextId', artifactId);
-                                                const res = await uploadMediaAction(formData);
-                                                onMediaUploaded(res.mediaId, res.url);
+                                            const id = extractMediaId(exhibit.url, 'youtube');
+                                            if (!id) {
+                                                toast.error("Failed to extract ID from provided URL");
+                                                return;
                                             }
+                                            const thumbUrl = getThumbnailUrl(id, 'youtube', 'max');
+                                            if (thumbUrl) onMediaUrlSelected(thumbUrl);
                                         } catch (e: any) {
-                                            console.error("Failed to fetch YT thumbnail", e);
+                                            console.error("Failed to extract YT thumbnail", e);
                                         }
                                     }}
                                     className="text-[9px] font-mono uppercase bg-rose-600/10 text-rose-500 border border-rose-900/30 hover:border-rose-500 px-3 py-1.5 rounded w-full flex items-center justify-center gap-2 mt-2 transition-all"
