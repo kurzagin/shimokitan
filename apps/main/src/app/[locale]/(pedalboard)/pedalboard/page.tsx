@@ -219,7 +219,7 @@ export default async function PedalboardPage({ params, searchParams }: PageProps
                             <div className="space-y-2">
                                 <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Be an Architect</h3>
                                 <p className="text-xs text-rose-300/60 leading-relaxed font-medium">
-                                    Unlock the professional <b>Workbench</b>. Submit your portfolio for verification and begin emitting signals through artifacts.
+                                    Unlock the professional <b>Workbench</b>. Submit your portfolio for verification and begin emitting Signals through artifacts.
                                 </p>
                             </div>
                             <RequestAccessButton />

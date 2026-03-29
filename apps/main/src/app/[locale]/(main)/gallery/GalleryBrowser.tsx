@@ -138,7 +138,7 @@ export default function GalleryBrowser({
                   </h1>
                   <div className="p-3 border-l-2 border-rose-500/50 bg-zinc-950/80 backdrop-blur-md max-w-xs">
                     <p className="text-[11px] font-bold text-zinc-300 italic leading-snug">
-                      {get(0)!.description || "Explore the visual signals captured within the district boundaries."}
+                      {get(0)!.description || "Explore the visual Signals captured within the district boundaries."}
                     </p>
                   </div>
                 </div>

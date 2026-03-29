@@ -7,7 +7,7 @@ export default function Page() {
       
       {/* Brand Header */}
       <div className="mb-8">
-        <h1 className="text-5xl md:text-6xl font-black tracking-tighter mb-2">signal.</h1>
+        <h1 className="text-5xl md:text-6xl font-black tracking-tighter mb-2">Signal.</h1>
         <div className="h-1 w-16 bg-foreground mx-auto" />
       </div>
 

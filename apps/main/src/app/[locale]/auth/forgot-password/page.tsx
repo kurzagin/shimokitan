@@ -107,7 +107,7 @@ export default function ForgotPasswordPage({ params }: { params: Promise<{ local
                             <Icon icon="lucide:radio-receiver" width={48} className="text-violet-600 mb-6" />
                             <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white mb-4">TRANSMISSION_SENT.</h3>
                             <p className="text-sm text-zinc-400 leading-relaxed font-mono uppercase tracking-tight">
-                                We have dispatched a recovery signal to your registered endpoint. Follow the link within to establish a new access code.
+                                We have dispatched a recovery Signal to your registered endpoint. Follow the link within to establish a new access code.
                             </p>
                             <div className="mt-8">
                                 <Link href="/auth/signin" className="px-8 py-3 bg-zinc-900 text-white font-black italic text-xs uppercase tracking-widest hover:bg-violet-600 transition-all inline-block border border-zinc-800">

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "signal. | issues & feedback",
+  title: "Signal. | issues & feedback",
   description: "Actionable issues and collective feedback surface.",
 };
 

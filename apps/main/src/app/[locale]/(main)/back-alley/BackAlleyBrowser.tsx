@@ -46,7 +46,7 @@ export default function BackAlleyBrowser({ initialArtifacts }: { initialArtifact
                     </h1>
                 </div>
                 <p className="max-w-2xl font-mono text-zinc-500 text-xs uppercase tracking-widest leading-relaxed">
-                    The district's underground audio registry. High-fidelity sonic broadcasts and raw resonant signals.
+                    The district's underground audio registry. High-fidelity sonic broadcasts and raw resonant Signals.
                 </p>
             </header>
 
@@ -193,7 +193,7 @@ export default function BackAlleyBrowser({ initialArtifacts }: { initialArtifact
                         </div>
                         <h3 className="text-xl font-black italic tracking-tighter uppercase text-zinc-600 mb-2">SIGNAL_LOST</h3>
                         <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.2em] max-w-xs text-center leading-relaxed">
-                            The registry is currently silent. No resonant audio signals detected in the district archives.
+                            The registry is currently silent. No resonant audio Signals detected in the district archives.
                         </p>
                     </div>
                 )}

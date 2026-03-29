@@ -360,7 +360,7 @@ export default function HomeClient({
                         "w-full h-full object-cover transition-opacity duration-700",
                         !isDockedActive && "opacity-40"
                       )}
-                      alt="current signal"
+                      alt="current Signal"
                       onError={(e) => {
                         // Fallback for broken images (like deleted seeder assets)
                         (e.target as HTMLImageElement).style.display = 'none';
@@ -1169,7 +1169,7 @@ export default function HomeClient({
               <div className="h-full flex flex-col items-center justify-center p-6 text-zinc-400">
                 <Icon icon="lucide:radio-off" width={32} className="mb-2 opacity-50" />
                 <span className="text-[10px] font-mono font-black uppercase tracking-[0.3em]">WAITING_FOR_BROADCAST</span>
-                <p className="text-[8px] font-mono text-zinc-400 uppercase mt-1 opacity-60 italic">System is listening for incoming signals...</p>
+                <p className="text-[8px] font-mono text-zinc-400 uppercase mt-1 opacity-60 italic">System is listening for incoming Signals...</p>
               </div>
             )}
           </div>

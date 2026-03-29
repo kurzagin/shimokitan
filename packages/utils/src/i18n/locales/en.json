@@ -93,7 +93,7 @@
         "collections_label": "Collections",
         "collections_desc": "Curated groupings organized around a theme, a moment, or a mood.",
         "zines_label": "Signal Station",
-        "zines_desc": "Community logs and radio signals. Written reflections on artifacts and District events.",
+        "zines_desc": "Community logs and radio Signals. Written reflections on artifacts and District events.",
         "q4": "Who Runs This",
         "a4_1": "Shimokitan is independently operated from Indonesia. There is no company, no investors, no board. It exists because the people building it genuinely love this culture and wanted a better home for it online.",
         "a4_2": "The platform is named after Shimokitazawa - a neighborhood in Tokyo known for its independent record shops, second-hand stores, and small theaters. The kind of place where you discover things by wandering, guided by human resonance rather than predictive algorithms.",
@@ -466,7 +466,7 @@
         "march_2026_v2": {
             "title": "March 13, 2026",
             "subtitle": "Artist Registry Refinement",
-            "l1": "Polishing the residency signal hub and data resonance."
+            "l1": "Polishing the residency Signal hub and data resonance."
         },
         "march_2026": {
             "title": "March 13, 2026",
@@ -515,7 +515,7 @@
     },
     "registry": {
         "title": "ARTIST_REGISTRY_PROTOCOLS",
-        "description": "Establish your residency in the Shimokitan district. We manually curate every signal to ensure high-resonance artifacts.",
+        "description": "Establish your residency in the Shimokitan district. We manually curate every Signal to ensure high-resonance artifacts.",
         "step_01_title": "01 // IDENTITY_NODES",
         "step_01_desc": "Artist name, classification, and professional role.",
         "step_02_title": "02 // SOCIAL_UPLINKS",
@@ -578,7 +578,7 @@
     },
     "bad_request": {
         "title": "400 // INVALID_REQUEST",
-        "description": "The logic core could not parse your transmission. The signal parameters are malformed or incompatible with District protocols.",
+        "description": "The logic core could not parse your transmission. The Signal parameters are malformed or incompatible with District protocols.",
         "back_to_district": "RETURN TO DISTRICT",
         "status": "STATUS: DATA_CORRUPTION_DETECTED",
         "action_label": "RE-ESTABLISH_SIGNAL"
