@@ -151,7 +151,7 @@ function CreditRow({ credit, locale, isFirst }: { credit: any, locale: string, i
 
     return (
         <Link
-            href={`/artifacts/${credit.artifact.id}`}
+            href={`/artifacts/${credit.artifact.category}/${credit.artifact.id}`}
             className="group flex gap-4 p-4 md:p-5 hover:bg-white/[0.025] transition-colors relative"
         >
             {/* Thumbnail */}
@@ -330,7 +330,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
 
                             {/* ── ARTIFACT ROW ── */}
                             <Link
-                                href={`/artifacts/${featuredCredit.artifact.id}`}
+                                href={`/artifacts/${featuredCredit.artifact.category}/${featuredCredit.artifact.id}`}
                                 className="group/feat flex items-end justify-between gap-4 pb-4 border-b border-white/10 touch-manipulation"
                             >
                                 <div className="flex flex-col gap-1.5 min-w-0">

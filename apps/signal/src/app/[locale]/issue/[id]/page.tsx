@@ -5,6 +5,10 @@ import { getDb, schema, eq, resolveTranslation } from "@shimokitan/db";
 import { StatusBadge } from "@/components/status-badge";
 import { Locale } from "@shimokitan/utils";
 
+interface TransmissionMetadata {
+    feedbackSummary?: string[];
+}
+
 export default async function IssuePage({ params }: { params: Promise<{ id: string, locale: string }> }) {
     const { id, locale } = await params;
     const db = getDb();
@@ -23,6 +27,9 @@ export default async function IssuePage({ params }: { params: Promise<{ id: stri
     if (!issue) {
         notFound();
     }
+
+    const metadata = (issue.metadata as TransmissionMetadata) || {};
+    const feedbackSummary = metadata.feedbackSummary || [];
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col gap-8 max-w-3xl mx-auto w-full">
@@ -61,7 +68,7 @@ export default async function IssuePage({ params }: { params: Promise<{ id: stri
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
                         <Icon icon="lucide:message-square" className="w-4 h-4" />
-                        <span>{((issue.metadata as any)?.feedbackSummary as string[])?.length || 0} reports</span>
+                        <span>{feedbackSummary.length} reports</span>
                     </div>
                 </div>
             </div>
@@ -84,7 +91,7 @@ export default async function IssuePage({ params }: { params: Promise<{ id: stri
                         Collective Feedback
                     </h2>
                     <ul className="flex flex-col gap-3">
-                        {((issue.metadata as any)?.feedbackSummary as string[] || []).map((feedback, idx) => (
+                        {feedbackSummary.map((feedback, idx) => (
                             <li
                                 key={idx}
                                 className="bg-muted/50 border border-border/50 rounded-lg p-3 sm:p-4 text-sm text-foreground/90 flex gap-3"
@@ -93,7 +100,7 @@ export default async function IssuePage({ params }: { params: Promise<{ id: stri
                                 {feedback}
                             </li>
                         ))}
-                        {((issue.metadata as any)?.feedbackSummary as string[] || []).length === 0 && (
+                        {feedbackSummary.length === 0 && (
                             <li className="text-muted-foreground text-xs italic">No collective feedback reports yet.</li>
                         )}
                     </ul>

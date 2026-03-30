@@ -4,7 +4,7 @@ export interface TheaterVideo {
     id: string;
     url: string;
     thumbnailUrl?: string | null;
-    platform: 'youtube' | 'local' | 'unknown';
+    platform: 'youtube' | 'bilibili' | 'niconico' | 'local' | 'unknown';
 }
 
 interface TheaterState {

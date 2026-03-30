@@ -1,7 +1,8 @@
 
 import { getArtifactById, getDb, schema, eq } from '@shimokitan/db';
 import { notFound } from 'next/navigation';
-import { getDictionary, resolveTranslation } from '@shimokitan/utils';
+import { getDictionary, resolveTranslation, Locale } from '@shimokitan/utils';
+import { TheaterVideo } from '@/lib/store/theater-store';
 import { ArtifactDetailView } from '../../components/ArtifactDetailView';
 import { ensureUserSync } from '@/app/[locale]/(pedalboard)/pedalboard/auth-helpers';
 
@@ -10,17 +11,17 @@ export async function generateMetadata(props: any) {
     const artifact = await getArtifactById(id);
     if (!artifact) return {};
 
-    const trans = resolveTranslation(artifact.translations, locale);
+    const trans = resolveTranslation(artifact.translations, locale as Locale);
     return {
-        title: `${trans?.title || 'Artifact'} // Shimokitan Registry`,
-        description: trans?.description || 'Artifact detail in the Shimokitan District Registry.',
+        title: `${trans?.title || "Artifact"} // Shimokitan Registry`,
+        description: trans?.description || "Artifact detail in the Shimokitan District Registry.",
     };
 }
 
-export default async function ArtifactMasterPage(props: any) {
-    const { id, locale, type } = await props.params;
+export default async function ArtifactMasterPage({ params }: { params: Promise<{ id: string, locale: string, type: string }> }) {
+    const { id, locale, type } = await params;
     const user = await ensureUserSync();
-    const dict = await getDictionary(locale);
+    const dict = await getDictionary(locale as Locale);
     const artifact = await getArtifactById(id);
 
     if (!artifact) notFound();
@@ -45,12 +46,36 @@ export default async function ArtifactMasterPage(props: any) {
 
     // For master view, initial video is either the primary exhibit or the artifact's own resource
     const primaryExhibit = artifact.exhibits?.find((e: any) => e.isPrimary);
-    const initialVideo = primaryExhibit ? {
-        id: primaryExhibit.id,
-        title: resolveTranslation(primaryExhibit.translations, locale)?.title || 'Primary Exhibit',
-        url: primaryExhibit.url || '',
-        platform: primaryExhibit.type as any
-    } : null;
+    
+    let initialVideo = null;
+
+    if (primaryExhibit) {
+        initialVideo = {
+            id: primaryExhibit.id,
+            url: primaryExhibit.url || "",
+            platform: "unknown" as TheaterVideo['platform']
+        };
+        // Simple platform inference
+        const url = initialVideo.url.toLowerCase();
+        if (url.includes("youtube.com") || url.includes("youtu.be")) initialVideo.platform = "youtube";
+        else if (url.includes("bilibili.com")) initialVideo.platform = "bilibili";
+        else if (url.includes("nicovideo.jp")) initialVideo.platform = "niconico";
+    } else {
+        // Fallback to primary video resource
+        const primaryVideoResource = artifact.resources?.find((r) => 
+            r.isPrimary && (r.role === 'video' || ['youtube', 'bilibili', 'niconico'].includes(r.platform || ""))
+        );
+        
+        if (primaryVideoResource) {
+            initialVideo = {
+                id: `res-${primaryVideoResource.platform}-${primaryVideoResource.value.slice(-6)}`,
+                url: primaryVideoResource.value || "",
+                platform: (["youtube", "bilibili", "niconico"].includes(primaryVideoResource.platform || "") 
+                    ? primaryVideoResource.platform 
+                    : "unknown") as any
+            };
+        }
+    }
 
     return (
         <ArtifactDetailView
