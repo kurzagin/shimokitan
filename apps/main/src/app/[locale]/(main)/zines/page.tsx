@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from '@iconify/react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { getDb, schema, desc } from '@shimokitan/db';
-import Link from 'next/link';
+import Link from '@/components/Link';
 import { getDictionary, Locale } from "@shimokitan/utils";
 import { Metadata } from 'next';
 
@@ -52,7 +52,7 @@ export default async function PublicZinesPage({ params }: { params: Promise<{ lo
               {/* Artifact Reference */}
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Resonating With //</span>
-                <Link href={`/cinema/${zine.artifactId}`} className="text-xl font-black uppercase italic group-hover:text-rose-500 transition-colors truncate">
+                <Link href={`/artifacts/${zine.artifact?.category}/${zine.artifactId}`} className="text-xl font-black uppercase italic group-hover:text-rose-500 transition-colors truncate">
                   {zine.artifact?.title || "Unknown Shard"}
                 </Link>
               </div>

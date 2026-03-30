@@ -42,7 +42,21 @@ const artifactRelations = {
             entity: {
                 with: {
                     translations: true,
-                    avatar: true
+                    avatar: true,
+                    credits: {
+                        with: {
+                            artifact: {
+                                with: {
+                                    translations: true,
+                                    media: {
+                                        with: {
+                                            media: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -75,6 +89,16 @@ const artifactRelations = {
             media: {
                 with: {
                     media: true
+                }
+            },
+            artifacts: {
+                with: {
+                    translations: true,
+                    media: {
+                        with: {
+                            media: true
+                        }
+                    }
                 }
             },
             tags: {

@@ -765,7 +765,7 @@ export default function HomeClient({
         >
           {featuredArtifact ? (
             <Link
-              href={`/cinema/${featuredArtifact.id}`}
+              href={`/artifacts/${featuredArtifact.category}/${featuredArtifact.id}`}
               className="flex flex-col h-full group/pit"
             >
               <div className="relative flex-1 rounded-lg overflow-hidden mb-2 bg-zinc-950">
@@ -900,7 +900,7 @@ export default function HomeClient({
                 <>
                   {animeArtifact && (
                     <Link
-                      href={`/cinema/${animeArtifact.id}`}
+                      href={`/artifacts/${animeArtifact.category}/${animeArtifact.id}`}
                       className="relative group/item rounded-lg overflow-hidden border border-zinc-900 bg-zinc-950 row-span-2"
                     >
                       {animeArtifact.posterImage || animeArtifact.thumbnailImage ? (
@@ -931,7 +931,7 @@ export default function HomeClient({
                   {otherArtifacts.map((artifact) => (
                     <Link
                       key={artifact.id}
-                      href={`/cinema/${artifact.id}`}
+                      href={`/artifacts/${artifact.category}/${artifact.id}`}
                       className="relative group/item rounded-lg overflow-hidden border border-zinc-900 bg-zinc-950"
                     >
                       {artifact.thumbnailImage ? (

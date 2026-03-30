@@ -28,7 +28,20 @@ interface PulseShardsProps {
     counts: Record<ShardType, number>;
 }
 
-export function CompactPulse({ artifactId, userReactions, counts, zineCount, exhibitId, category }: PulseShardsProps & { zineCount?: number; exhibitId?: string; category?: string }) {
+export function CompactPulse({ 
+    artifactId, 
+    userReactions, 
+    counts, 
+    zineCount, 
+    exhibitId, 
+    category, 
+    className 
+}: PulseShardsProps & { 
+    zineCount?: number; 
+    exhibitId?: string; 
+    category?: string; 
+    className?: string 
+}) {
     const [isPending, startTransition] = useTransition();
 
     const handleToggle = (type: ShardType) => {
@@ -46,7 +59,7 @@ export function CompactPulse({ artifactId, userReactions, counts, zineCount, exh
     };
 
     return (
-        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/30 rounded-lg">
+        <div className={cn("flex items-center gap-1.5 p-1 bg-zinc-900/30 rounded-lg", className)}>
             {SHARDS.map((shard) => {
                 const isActive = userReactions.includes(shard.type);
                 const count = counts[shard.type] || 0;
@@ -104,4 +117,3 @@ export function CompactPulse({ artifactId, userReactions, counts, zineCount, exh
         </div>
     );
 }
-

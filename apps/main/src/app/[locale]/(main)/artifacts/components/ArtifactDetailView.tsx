@@ -24,6 +24,7 @@ interface ArtifactDetailViewProps {
     platforms: any[];
     initialVideo: TheaterVideo | null;
     isExhibitView?: boolean;
+    portfolio?: any[];
 }
 
 export function ArtifactDetailView({
@@ -36,7 +37,8 @@ export function ArtifactDetailView({
     reactionCounts,
     platforms,
     initialVideo,
-    isExhibitView
+    isExhibitView,
+    portfolio = []
 }: ArtifactDetailViewProps) {
     const translation = resolveTranslation(artifact.translations, locale);
     const workTranslation = resolveTranslation(artifact.work?.translations, locale);
@@ -92,6 +94,7 @@ export function ArtifactDetailView({
     const header = getMediaByRole(artifact.media, 'header');
 
     const isDatabaseStyle = !isExhibitView && (artifact.category === 'anime' || artifact.category === 'game');
+    const isIllustrationStyle = !isExhibitView && artifact.category === 'illustration';
 
     const trackData: StationTrack | null = hostedAudio ? {
         title,
@@ -140,18 +143,20 @@ export function ArtifactDetailView({
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
 
-            {!isDatabaseStyle && (
+            {!isDatabaseStyle && !isIllustrationStyle && (
                 <div className="shrink-0 border-b border-zinc-800 bg-zinc-950">
-                    <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-zinc-900">
-                        <div className="px-4 py-3 flex flex-col justify-center gap-1.5">
-                            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">{dict.discovery.nature}</span>
-                            <div className="flex items-center gap-1.5">
-                                <div className="w-0.5 h-4 bg-violet-600 shrink-0" />
-                                <span className="text-sm font-black italic text-violet-400 uppercase truncate">
-                                    {artifact.nature || 'original'}
-                                </span>
+                    <div className={cn("grid divide-x divide-y md:divide-y-0 divide-zinc-900", "grid-cols-2 md:grid-cols-4")}>
+                        {!isIllustrationStyle && (
+                            <div className="px-4 py-3 flex flex-col justify-center gap-1.5">
+                                <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">{dict.discovery.nature}</span>
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-0.5 h-4 bg-violet-600 shrink-0" />
+                                    <span className="text-sm font-black italic text-violet-400 uppercase truncate">
+                                        {artifact.nature || 'original'}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="px-4 py-3 flex flex-col justify-center gap-1.5">
                             <span className="text-[10px] text-zinc-600 uppercase tracking-[0.3em]">{dict.discovery.classification}</span>
@@ -193,7 +198,7 @@ export function ArtifactDetailView({
 
             <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:divide-x lg:divide-zinc-900">
                 {/* ── LEFT SIDEBAR ── */}
-                {!isExhibitView && (
+                {!isExhibitView && !isIllustrationStyle && (
                 <div className={cn("lg:order-none lg:col-span-3 flex flex-col border-t lg:border-t-0 border-zinc-900", isDatabaseStyle ? "order-1" : "order-3")}>
                     {isDatabaseStyle ? (
                         <>
@@ -372,20 +377,15 @@ export function ArtifactDetailView({
                             </div>
                         )}
 
-                        {/* Editorial Analysis — in sidebar for database style */}
-                        {isDatabaseStyle && (
+                        {isDatabaseStyle && description && (
                             <div className="px-4 py-4 flex flex-col gap-3 shrink-0">
                                 <div className="flex items-center gap-1.5">
                                     <div className="w-0.5 h-3.5 bg-zinc-700 shrink-0" />
                                     <span className="text-[10px] text-zinc-500 uppercase tracking-[0.35em] font-black">{dict.discovery.editorial_analysis}</span>
                                 </div>
-                                {description ? (
-                                    <p className="text-sm text-zinc-300 italic leading-relaxed tracking-tight whitespace-pre-wrap font-serif opacity-90">
-                                        {description}
-                                    </p>
-                                ) : (
-                                    <span className="text-[10px] text-zinc-700 uppercase tracking-widest italic">{dict.discovery.analysis_pending}</span>
-                                )}
+                                <p className="text-sm text-zinc-300 italic leading-relaxed tracking-tight whitespace-pre-wrap font-serif opacity-90">
+                                    {description}
+                                </p>
                             </div>
                         )}
 
@@ -479,6 +479,7 @@ export function ArtifactDetailView({
                 <div className={cn(
                     "lg:order-none flex flex-col",
                     isExhibitView ? "order-1 lg:col-span-8" :
+                    isIllustrationStyle ? "order-1 lg:col-span-9" :
                     isDatabaseStyle ? "order-2 lg:col-span-9" : "order-1 lg:col-span-5"
                 )}>
                     {isExhibitView ? (
@@ -497,9 +498,14 @@ export function ArtifactDetailView({
                         />
                     ) : (
                         <PanelHeader
-                            label={isDatabaseStyle ? "ARCHIVAL_RECORDS" : dict.discovery.media_hub}
+                            label={isIllustrationStyle ? "SIGNAL_REDUX" : (isDatabaseStyle ? "ARCHIVAL_RECORDS" : dict.discovery.media_hub)}
                             right={
                                 <div className="flex items-center gap-4">
+                                    {isIllustrationStyle && (
+                                        <div className="flex items-center gap-2 px-2 py-0.5 bg-violet-600/10 border border-violet-500/20 text-[9px] text-violet-400 font-black uppercase tracking-widest leading-none">
+                                            LIVE_SIGNAL
+                                        </div>
+                                    )}
                                     {trackData && (
                                         <PlayButton
                                             track={trackData}
@@ -572,18 +578,110 @@ export function ArtifactDetailView({
                     )}
 
                     {!isDatabaseStyle && !isExhibitView && (
-                        <div className="shrink-0 relative w-full aspect-video bg-black overflow-hidden border-b border-zinc-900/50">
-                            <TheaterPlayer 
-                                initialVideo={initialVideo} 
-                                defaultThumbnail={gateway?.url || thumbnail?.url} 
-                            />
+                        <div className={cn(
+                            "shrink-0 relative w-full bg-black overflow-hidden border-b border-zinc-900/50 flex items-center justify-center",
+                            isIllustrationStyle ? "min-h-[60vh] lg:min-h-[80vh] max-h-[90vh]" : "aspect-video"
+                        )}>
+                            {isIllustrationStyle ? (
+                                <>
+                                    {/* Ambient Backdrop */}
+                                    <div className="absolute inset-0 z-0 select-none pointer-events-none opacity-40 blur-3xl scale-110">
+                                        <img 
+                                            src={gateway?.url || poster?.url || thumbnail?.url} 
+                                            className="w-full h-full object-cover" 
+                                            alt=""
+                                        />
+                                    </div>
+                                    <div className="absolute inset-0 bg-black/40 z-1" />
+                                    
+                                    {/* Main Canvas */}
+                                    <img 
+                                        src={gateway?.url || poster?.url || thumbnail?.url} 
+                                        className="relative z-10 max-w-full max-h-full object-contain shadow-[0_0_100px_rgba(0,0,0,0.8)] transition-all duration-700" 
+                                        alt={title}
+                                    />
+
+                                    {/* Canvas Actions Overlay */}
+                                    <div className="absolute bottom-6 right-6 z-20 flex gap-2">
+                                        <a 
+                                            href={gateway?.url || poster?.url || thumbnail?.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            className="p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white hover:bg-white/20 transition-all group"
+                                            title="View_Raw_Signal"
+                                        >
+                                            <Icon icon="lucide:maximize" width={18} className="group-hover:scale-110 transition-transform" />
+                                        </a>
+                                    </div>
+                                </>
+                            ) : (
+                                <TheaterPlayer 
+                                    initialVideo={initialVideo} 
+                                    defaultThumbnail={gateway?.url || thumbnail?.url} 
+                                />
+                            )}
                         </div>
-                    )}
+                    )}                    {isIllustrationStyle && (
+                        <div className="shrink-0 px-6 py-6 border-b border-zinc-900 bg-zinc-950/40 flex flex-col gap-6">
+                            {/* Interaction Row */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <CompactPulse 
+                                        artifactId={artifact.id} 
+                                        userReactions={userReactionTypes as any} 
+                                        counts={reactionCounts as any} 
+                                        zineCount={filteredZines.length}
+                                        category={artifact.category}
+                                        className="scale-110 origin-left"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white text-[11px] font-black uppercase tracking-widest transition-all">
+                                        <Icon icon="lucide:share-2" width={14} />
+                                        SHARE
+                                    </button>
+                                </div>
+                            </div>
 
+                            {/* Info Content */}
+                            <div className="flex flex-col gap-3">
+                                <h1 className="text-2xl md:text-3xl font-black uppercase italic leading-none text-white tracking-tighter">
+                                    {title}
+                                </h1>
+                                
+                                <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-zinc-600 uppercase tracking-widest font-black">Date:</span>
+                                        <span className="text-sm text-zinc-400 font-bold uppercase">{new Date(artifact.createdAt).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-zinc-600 uppercase tracking-widest font-black">Nature:</span>
+                                        <span className="text-sm text-violet-400 font-black italic uppercase tracking-wider">{artifact.nature || 'original'}</span>
+                                    </div>
+                                </div>
 
+                                {description && (
+                                    <p className="text-base text-zinc-300 italic leading-relaxed font-serif max-w-2xl mt-2 opacity-80">
+                                        {description}
+                                    </p>
+                                )}
 
-
-                    <div className="flex flex-col divide-y divide-zinc-900">
+                                {artifact.tags && artifact.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-4">
+                                        {artifact.tags.map((at: any, i: number) => (
+                                            <Link
+                                                key={`tag-${i}`}
+                                                href={`/gallery?tag=${at.tag.id}`}
+                                                className="px-4 py-1.5 bg-zinc-900/60 border border-zinc-800 text-[11px] font-black text-zinc-500 hover:text-violet-400 hover:border-violet-500/50 transition-all uppercase tracking-widest"
+                                            >
+                                                #{resolveTranslation(at.tag.translations, locale)?.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}                    <div className="flex flex-col divide-y divide-zinc-900">
                         {!isExhibitView && artifact.exhibits && artifact.exhibits.length > 0 && (
                             <ExhibitGallery
                                 exhibits={artifact.exhibits}
@@ -594,19 +692,15 @@ export function ArtifactDetailView({
                             />
                         )}
 
-                        {!isDatabaseStyle && (
+                        {!isDatabaseStyle && !isIllustrationStyle && description && (
                             <div className="px-4 pt-6 pb-12 flex flex-col gap-3">
                                 <div className="flex items-center gap-2 shrink-0">
                                     <div className="w-0.5 h-4 bg-zinc-800 shrink-0" />
                                     <span className="text-xs text-zinc-500 uppercase tracking-[0.35em] font-black">{dict.discovery.editorial_analysis}</span>
                                 </div>
-                                {description ? (
-                                    <p className="text-base md:text-lg text-zinc-200 italic leading-relaxed tracking-tight whitespace-pre-wrap font-serif opacity-90">
-                                        {description}
-                                    </p>
-                                ) : (
-                                    <span className="text-[10px] text-zinc-700 uppercase tracking-widest italic">{dict.discovery.analysis_pending}</span>
-                                )}
+                                <p className="text-base md:text-lg text-zinc-200 italic leading-relaxed tracking-tight whitespace-pre-wrap font-serif opacity-90">
+                                    {description}
+                                </p>
                             </div>
                         )}
 
@@ -814,39 +908,125 @@ export function ArtifactDetailView({
                 )}
 
                 {!isDatabaseStyle && !isExhibitView && (
-                    <div className="order-4 md:order-2 lg:order-none lg:col-span-4 flex flex-col border-t lg:border-t-0 border-zinc-900">
-                        <PanelHeader label="Provenance_Tree" icon="lucide:cpu" />
-                        <div className="px-3 py-4 flex flex-col gap-5 pb-20">
-                            {heritageCredits.length > 0 && (
-                                <ProvenanceGroup
-                                    label="Root_Authority"
-                                    icon="lucide:crown"
-                                    color="rose"
-                                    credits={heritageCredits}
-                                    locale={locale}
-                                />
-                            )}
+                    <div className={cn(
+                        "order-4 md:order-2 lg:order-none flex flex-col border-t lg:border-t-0 border-zinc-900",
+                        isIllustrationStyle ? "lg:col-span-3" : "lg:col-span-4"
+                    )}>
+                        {isIllustrationStyle ? (
+                            <div className="flex flex-col divide-y divide-zinc-900">
+                                {/* Artist Profile Section */}
+                                <div className="px-5 py-6 flex flex-col gap-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-16 h-16 bg-zinc-900 border-2 border-zinc-800 p-0.5 shadow-xl">
+                                            {primaryEntity?.avatar?.url ? (
+                                                <img src={primaryEntity.avatar.url} className="w-full h-full object-cover" alt={primaryArtistName} />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-zinc-950">
+                                                    <Icon icon="lucide:user" width={24} className="text-zinc-800" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col gap-1 min-w-0">
+                                            <Link href={primaryEntity ? getEntityUrl(primaryEntity) : "#"} className="text-2xl font-black text-white hover:text-violet-400 transition-colors truncate italic">
+                                                {primaryArtistName}
+                                            </Link>
+                                            <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-[0.25em]">ROOT_AUTHORITY</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <Link 
+                                        href={getEntityUrl(primaryEntity)} 
+                                        className="flex items-center justify-center gap-2 w-full py-4 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 hover:border-violet-500/50 transition-all text-xs font-black text-white uppercase tracking-widest"
+                                    >
+                                        <Icon icon="lucide:layout-grid" width={14} />
+                                        Full_Portfolio
+                                    </Link>
+                                </div>
 
-                            {stationAuthorCredits.length > 0 && (
-                                <ProvenanceGroup
-                                    label={dict.discovery.core_authority}
-                                    icon="lucide:star"
-                                    color="violet"
-                                    credits={stationAuthorCredits}
-                                    locale={locale}
-                                />
-                            )}
+                                {/* Other Artifacts from this Artist (Portfolio) */}
+                                {portfolio && portfolio.length > 0 && (
+                                    <div className="px-5 py-6 flex flex-col gap-5">
+                                        <div className="flex items-center gap-2">
+                                            <Icon icon="lucide:layers" width={16} className="text-zinc-600" />
+                                            <span className="text-sm font-black text-zinc-500 uppercase tracking-widest leading-none">Catalog_Echo</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {portfolio.map((other: any) => {
+                                                const otherThumb = other.media?.find((m: any) => 
+                                                    ['thumbnail', 'poster', 'nature', 'NETWORK_GATEWAYS', 'vinyl', 'header'].includes(m.role)
+                                                );
+                                                return (
+                                                    <Link 
+                                                        key={other.id} 
+                                                        href={`/artifacts/${other.category}/${other.id}`}
+                                                        className="aspect-square bg-zinc-900 border-2 border-zinc-800 overflow-hidden group/other hover:border-violet-500 transition-all font-mono"
+                                                        title={resolveTranslation(other.translations, locale)?.title || "Source"}
+                                                    >
+                                                        {otherThumb?.media?.url ? (
+                                                            <img src={otherThumb.media.url} className="w-full h-full object-cover opacity-60 group-hover/other:opacity-100 group-hover/other:scale-110 transition-all duration-500" alt="Work" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center">
+                                                                <Icon icon="lucide:image" width={14} className="text-zinc-800" />
+                                                            </div>
+                                                        )}
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
 
-                            {(stationCollaboratorCredits.length > 0 || stationStaffCredits.length > 0) && (
-                                <ProvenanceGroup
-                                    label={dict.discovery.collaborative_flux}
-                                    icon="lucide:users"
-                                    color="zinc"
-                                    credits={[...stationCollaboratorCredits, ...stationStaffCredits]}
-                                    locale={locale}
-                                />
-                            )}
-                        </div>
+                                {/* Uplinks Block */}
+                                {sortedCategories.length > 0 && (
+                                    <div className="px-5 py-6 flex flex-col gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <Icon icon="lucide:link" width={14} className="text-zinc-600" />
+                                            <span className="text-xs font-black text-zinc-500 uppercase tracking-widest leading-none">External_Signals</span>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-2.5">
+                                            {sortedCategories.slice(0, 3).map(cat => groupedResources[cat].slice(0, 1).map((res: any, j: number) => (
+                                                <a key={`${cat}-${j}`} href={res.value} target="_blank" className="flex items-center gap-4 px-4 py-3 bg-zinc-900/40 border border-zinc-800 hover:border-violet-500/50 transition-all text-xs font-bold text-zinc-400 hover:text-white uppercase">
+                                                    <BrandIcon platform={res.platform} width={12} height={12} />
+                                                    {res.platformData?.name || res.platform}
+                                                </a>
+                                            )))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="px-3 py-4 flex flex-col gap-5 pb-20">
+                                {heritageCredits.length > 0 && (
+                                    <ProvenanceGroup
+                                        label="Root_Authority"
+                                        icon="lucide:crown"
+                                        color="rose"
+                                        credits={heritageCredits}
+                                        locale={locale}
+                                    />
+                                )}
+
+                                {stationAuthorCredits.length > 0 && (
+                                    <ProvenanceGroup
+                                        label={dict.discovery.core_authority}
+                                        icon="lucide:star"
+                                        color="violet"
+                                        credits={stationAuthorCredits}
+                                        locale={locale}
+                                    />
+                                )}
+
+                                {(stationCollaboratorCredits.length > 0 || stationStaffCredits.length > 0) && (
+                                    <ProvenanceGroup
+                                        label={dict.discovery.collaborative_flux}
+                                        icon="lucide:users"
+                                        color="zinc"
+                                        credits={[...stationCollaboratorCredits, ...stationStaffCredits]}
+                                        locale={locale}
+                                    />
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -876,9 +1056,9 @@ function ProvenanceGroup({ label, icon, color, credits, locale }: {
     const labelColor = colorMap[color];
 
     return (
-        <div className="flex flex-col gap-2 relative z-10">
+        <div className="flex flex-col gap-3 relative z-10">
             <div className="flex items-center gap-2 lg:pl-3 mb-0.5">
-                <Icon icon={icon} width={12} className={cn("shrink-0", labelColor)} />
+                <Icon icon={icon} width={14} className={cn("shrink-0", labelColor)} />
                 <span className={cn("text-xs font-black uppercase tracking-[0.35em]", labelColor)}>{label}</span>
             </div>
             <div className="flex flex-col gap-2 lg:pl-2">
@@ -927,7 +1107,7 @@ function ProvenanceCreditRow({ credit, locale, color }: { credit: any; locale: s
                 )}
             </div>
             <div className="min-w-0 flex-1">
-                <div className="text-sm font-black text-zinc-100 uppercase italic truncate leading-tight">{name}</div>
+                <div className="text-base font-black text-zinc-100 uppercase italic truncate leading-tight">{name}</div>
                 <div className="flex items-center gap-2 mt-1">
                     <span className={cn(
                         "px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest leading-none border",

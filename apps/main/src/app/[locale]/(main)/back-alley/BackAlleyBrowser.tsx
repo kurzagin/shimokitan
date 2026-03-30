@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Badge, cn } from '@shimokitan/ui';
-import Link from 'next/link';
+import Link from '@/components/Link';
 
 type Artifact = {
     id: string;
@@ -83,7 +83,7 @@ export default function BackAlleyBrowser({ initialArtifacts }: { initialArtifact
                     filteredArtifacts.map((artifact) => (
                         <Link
                             key={artifact.id}
-                            href={`/cinema/${artifact.id}`}
+                            href={`/artifacts/${artifact.category}/${artifact.id}`}
                             className={cn(
                                 "group/item transition-all duration-500 bg-zinc-950/20 border border-zinc-900 flex items-center p-3 relative overflow-hidden hover:border-violet-900/50",
                                 artifact.isMajor && "border-rose-900/30 hover:border-rose-500/50"
