@@ -468,7 +468,7 @@ export const artifactReactions = pgTable("artifact_reactions", {
 }, (t) => ({
     artifactIdx: index("idx_artifact_reactions_artifact").on(t.artifactId),
     authorIdx: index("idx_artifact_reactions_author").on(t.authorId),
-    uniqueReaction: uniqueIndex("idx_artifact_reactions_unique").on(t.artifactId, t.authorId, t.type),
+    uniqueReaction: uniqueIndex("idx_artifact_reactions_unique").on(t.artifactId, t.authorId, t.exhibitId, t.type),
 }));
 
 export const zinesI18n = pgTable("zines_i18n", {
@@ -493,6 +493,7 @@ export const exhibits = pgTable('exhibits', {
 	url: text('url'),
 	isPrimary: boolean('is_primary').default(false).notNull(),
 	position: integer('position').notNull().default(0),
+    resonance: numeric("resonance", { precision: 12, scale: 4 }).default("0.0000"),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
 }, (t) => ({

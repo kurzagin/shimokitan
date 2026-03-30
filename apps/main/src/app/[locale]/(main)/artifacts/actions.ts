@@ -1,6 +1,6 @@
 'use server';
 
-import { getDb, schema, eq, and, sql } from '@shimokitan/db';
+import { getDb, schema, eq, and, sql, isNull } from '@shimokitan/db';
 import { revalidatePath } from 'next/cache';
 import { nanoid } from '@shimokitan/utils';
 import { ensureUserSync } from '@/app/[locale]/(pedalboard)/pedalboard/auth-helpers';
@@ -17,6 +17,7 @@ const BASE_REACTION_ENERGY = 0.05;
  */
 export async function toggleArtifactReaction(data: { 
     artifactId: string; 
+    exhibitId?: string; // Optional exhibit context
     type: "core" | "flux" | "void" | "glitch" | "spark" | "pulse";
 }) {
     const user = await ensureUserSync();
@@ -27,12 +28,19 @@ export async function toggleArtifactReaction(data: {
 
     const userMultiplier = parseFloat((user as any).resonanceMultiplier || "1.0000");
     const resonanceEnergy = userMultiplier * BASE_REACTION_ENERGY;
+    
+    // Bubble ratio: Reactions on exhibits add 20% of their heat to the parent artifact.
+    const ARTIFACT_BUBBLE_RATIO = data.exhibitId ? 0.2 : 1.0; 
+    const artifactEnergy = resonanceEnergy * ARTIFACT_BUBBLE_RATIO;
 
     return await db.transaction(async (tx) => {
-        // Check for existing reaction by this user of this exact type
+        // Check for existing reaction by this user of this exact type/context
         const existing = await tx.query.artifactReactions.findFirst({
             where: and(
                 eq(schema.artifactReactions.artifactId, data.artifactId),
+                data.exhibitId 
+                    ? eq(schema.artifactReactions.exhibitId, data.exhibitId) 
+                    : isNull(schema.artifactReactions.exhibitId),
                 eq(schema.artifactReactions.authorId, user.id),
                 eq(schema.artifactReactions.type, data.type)
             )
@@ -57,13 +65,21 @@ export async function toggleArtifactReaction(data: {
             await tx.delete(schema.artifactReactions)
                 .where(eq(schema.artifactReactions.id, existing.id));
 
+            // Subtract from Artifact (possibly weighted)
             await tx.update(schema.artifacts)
-                .set({ resonance: sql`${schema.artifacts.resonance} - ${resonanceEnergy.toFixed(4)}` })
+                .set({ resonance: sql`${schema.artifacts.resonance} - ${artifactEnergy.toFixed(4)}` })
                 .where(eq(schema.artifacts.id, data.artifactId));
+
+            // Subtract from Exhibit (100% weight)
+            if (data.exhibitId) {
+                await tx.update(schema.exhibits)
+                    .set({ resonance: sql`${schema.exhibits.resonance} - ${resonanceEnergy.toFixed(4)}` })
+                    .where(eq(schema.exhibits.id, data.exhibitId));
+            }
 
             if (artifact.workId) {
                 const ratio = getResonanceRatio(artifact);
-                const bubbledHeat = resonanceEnergy * ratio;
+                const bubbledHeat = artifactEnergy * ratio;
                 await tx.update(schema.works)
                     .set({ resonance: sql`${schema.works.resonance} - ${bubbledHeat.toFixed(4)}` })
                     .where(eq(schema.works.id, artifact.workId));
@@ -77,18 +93,27 @@ export async function toggleArtifactReaction(data: {
             await tx.insert(schema.artifactReactions).values({
                 id: reactionId,
                 artifactId: data.artifactId,
+                exhibitId: data.exhibitId,
                 authorId: user.id,
                 type: data.type,
                 energy: resonanceEnergy.toFixed(4),
             });
 
+            // Add to Artifact (possibly weighted)
             await tx.update(schema.artifacts)
-                .set({ resonance: sql`${schema.artifacts.resonance} + ${resonanceEnergy.toFixed(4)}` })
+                .set({ resonance: sql`${schema.artifacts.resonance} + ${artifactEnergy.toFixed(4)}` })
                 .where(eq(schema.artifacts.id, data.artifactId));
+
+            // Add to Exhibit (100% weight)
+            if (data.exhibitId) {
+                await tx.update(schema.exhibits)
+                    .set({ resonance: sql`${schema.exhibits.resonance} + ${resonanceEnergy.toFixed(4)}` })
+                    .where(eq(schema.exhibits.id, data.exhibitId));
+            }
 
             if (artifact.workId) {
                 const ratio = getResonanceRatio(artifact);
-                const bubbledHeat = resonanceEnergy * ratio;
+                const bubbledHeat = artifactEnergy * ratio;
                 await tx.update(schema.works)
                     .set({ resonance: sql`${schema.works.resonance} + ${bubbledHeat.toFixed(4)}` })
                     .where(eq(schema.works.id, artifact.workId));

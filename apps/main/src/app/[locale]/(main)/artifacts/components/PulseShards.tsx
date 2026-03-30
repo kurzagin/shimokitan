@@ -48,7 +48,7 @@ export function CompactPulse({
         if (isPending) return;
         startTransition(async () => {
             try {
-                const res = await toggleArtifactReaction({ artifactId, type });
+                const res = await toggleArtifactReaction({ artifactId, type, exhibitId });
                 if (res.action === 'added') {
                     toast.success(`SIGNAL_SYCHRONIZED: ${type.toUpperCase()}`);
                 }

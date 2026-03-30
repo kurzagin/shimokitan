@@ -96,6 +96,10 @@ export function ArtifactDetailView({
     const isDatabaseStyle = !isExhibitView && (artifact.category === 'anime' || artifact.category === 'game');
     const isIllustrationStyle = !isExhibitView && artifact.category === 'illustration';
 
+    const currentExhibit = isExhibitView ? artifact.exhibits?.find((e: any) => e.id === exhibitId) : null;
+    const displayResonance = isExhibitView ? (currentExhibit?.resonance || 0) : (artifact.resonance || 0);
+    const resonanceLabel = isExhibitView ? "EXHIBIT_HEAT" : (dict.discovery?.heat || "HEAT");
+
     const trackData: StationTrack | null = hostedAudio ? {
         title,
         artist: primaryArtistName,
@@ -180,15 +184,15 @@ export function ArtifactDetailView({
 
                         <div className="px-4 py-3 flex items-center gap-3 overflow-hidden">
                             <div className="flex flex-col gap-0.5 shrink-0">
-                                <span className="text-[10px] text-rose-500 uppercase tracking-[0.3em]">{dict.discovery.heat}</span>
+                                <span className="text-[10px] text-rose-500 uppercase tracking-[0.3em] font-black">{resonanceLabel}</span>
                                 <span className="text-xl font-black italic text-white leading-none">
-                                    {artifact.resonance || 0}
+                                    {displayResonance}
                                 </span>
                             </div>
                             <div className="flex-1 h-1.5 bg-zinc-900 border border-zinc-800 overflow-hidden">
                                 <div
                                     className="h-full bg-gradient-to-r from-rose-900 to-rose-500 shadow-[0_0_6px_rgba(225,29,72,0.4)]"
-                                    style={{ width: `${Math.min(100, Number(artifact.resonance || 0) * 0.5)}%` }}
+                                    style={{ width: `${Math.min(100, Number(displayResonance) * 20)}%` }}
                                 />
                             </div>
                         </div>
@@ -257,8 +261,8 @@ export function ArtifactDetailView({
                             
                             <div className="p-4 border-b border-zinc-900 bg-zinc-950/40 flex items-center justify-between">
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-[9px] text-rose-500 font-black uppercase tracking-[0.3em]">{dict.discovery.heat}</span>
-                                    <span className="text-2xl font-black italic text-white leading-none">{artifact.resonance || 0}</span>
+                                    <span className="text-[9px] text-rose-500 font-black uppercase tracking-[0.3em]">{resonanceLabel}</span>
+                                    <span className="text-2xl font-black italic text-white leading-none">{displayResonance}</span>
                                 </div>
                                 <div className="flex flex-col gap-1 items-end">
                                     <span className="text-[9px] text-zinc-600 font-black uppercase tracking-[0.3em]">{dict.discovery.nature}</span>

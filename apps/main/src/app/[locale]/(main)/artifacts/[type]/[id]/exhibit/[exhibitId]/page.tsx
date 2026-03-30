@@ -1,5 +1,5 @@
 
-import { getArtifactById, getDb, schema, eq } from '@shimokitan/db';
+import { getArtifactById, getDb, schema, eq, and } from '@shimokitan/db';
 import { notFound } from 'next/navigation';
 import { getDictionary, resolveTranslation } from '@shimokitan/utils';
 import { ArtifactDetailView } from '../../../../components/ArtifactDetailView';
@@ -35,7 +35,10 @@ export default async function ExhibitDetailPage(props: any) {
 
     const db = getDb();
     const reactions = db ? await db.query.artifactReactions.findMany({
-        where: eq(schema.artifactReactions.artifactId, id),
+        where: and(
+            eq(schema.artifactReactions.artifactId, id),
+            eq(schema.artifactReactions.exhibitId, exhibitId)
+        ),
     }) : [];
 
     // Filter user's specific reactions

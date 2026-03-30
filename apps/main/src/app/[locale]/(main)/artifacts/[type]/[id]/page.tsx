@@ -1,5 +1,5 @@
 
-import { getArtifactById, getDb, schema, eq } from '@shimokitan/db';
+import { getArtifactById, getDb, schema, eq, and, isNull } from '@shimokitan/db';
 import { notFound } from 'next/navigation';
 import { getDictionary, resolveTranslation, Locale } from '@shimokitan/utils';
 import { TheaterVideo } from '@/lib/store/theater-store';
@@ -30,7 +30,10 @@ export default async function ArtifactMasterPage({ params }: { params: Promise<{
     if (!artifact || !db) notFound();
 
     const reactions = await db.query.artifactReactions.findMany({
-        where: eq(schema.artifactReactions.artifactId, id),
+        where: and(
+            eq(schema.artifactReactions.artifactId, id),
+            isNull(schema.artifactReactions.exhibitId)
+        ),
     });
 
     // Determine primary artist for portfolio discovery
