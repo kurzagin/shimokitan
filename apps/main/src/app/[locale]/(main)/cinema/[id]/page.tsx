@@ -195,9 +195,11 @@ export default async function ArtifactPage(props: {
     };
 
     let initialVideo: TheaterVideo | null = null;
+    // Priority 1: Selected exhibit from URL
+    // Priority 2: Standard Artifact resource (MV/Main) if no exhibit selected or available
     const primaryExhibit = exhibitId 
         ? artifact.exhibits?.find(e => e.id === exhibitId)
-        : artifact.exhibits?.find((e: any) => e.isPrimary);
+        : null; // Previously used .find((e: any) => e.isPrimary);
     
     // Initial Video logic - prioritized selection if exhibitId exists
     if (exhibitId && primaryExhibit?.url) {
@@ -515,12 +517,22 @@ export default async function ArtifactPage(props: {
                                                     
                                                     <div className="min-w-0 flex-1 flex flex-col gap-2">
                                                         <div className="flex items-center justify-between">
-                                                            <span className="text-[10px] font-black uppercase italic text-zinc-500 group-hover/zine:text-rose-400 transition-colors">
-                                                                {zine.author?.name || 'Resident_Source'}
-                                                            </span>
+                                                            <div className="flex items-center gap-2.5">
+                                                                <span className="text-[10px] font-black uppercase italic text-zinc-500 group-hover/zine:text-rose-400 transition-colors">
+                                                                    {zine.author?.name || 'Resident_Source'}
+                                                                </span>
+                                                                {zine.exhibit && (
+                                                                    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-zinc-900 border border-zinc-800 rounded">
+                                                                        <Icon icon="lucide:layers" width={10} className="text-zinc-600" />
+                                                                        <span className="text-[8px] font-black uppercase text-zinc-500 truncate max-w-[80px]">
+                                                                            {resolveTranslation(zine.exhibit.translations, locale)?.title || 'Exhibit'}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                             <div className="flex items-center gap-1.5">
                                                                 <Icon icon="lucide:zap" width={10} className="text-rose-500" />
-                                                                <span className="text-[10px] font-black text-rose-500 italic">{Number(zine.resonance || 0)}</span>
+                                                                <span className="text-[10px] font-black text-rose-500 italic">{zine.resonance || 0}</span>
                                                             </div>
                                                         </div>
                                                         

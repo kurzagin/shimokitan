@@ -54,7 +54,7 @@ export const resourceRoleEnum = pgEnum("resource_role", [
 export const contributorClassEnum = pgEnum("contributor_class", ["author", "collaborator", "staff"]);
 export const verificationTargetEnum = pgEnum("verification_target", ["artifact", "entity", "role_upgrade"]);
 export const verificationStatusEnum = pgEnum("verification_status", ["pending", "approved", "rejected"]);
-export const artifactMediaRoleEnum = pgEnum("artifact_media_role", ["cover", "poster", "background", "logo", "gallery", "thumbnail", "vinyl", "audio", "video", "source", "NETWORK_GATEWAYS"]);
+export const artifactMediaRoleEnum = pgEnum("artifact_media_role", ["cover", "poster", "background", "logo", "gallery", "thumbnail", "vinyl", "audio", "video", "source", "NETWORK_GATEWAYS", "header"]);
 export const workMediaRoleEnum = pgEnum("work_media_role", ["poster", "thumbnail", "background", "logo", "gallery"]);
 export const registryApplicationStatusEnum = pgEnum("registry_application_status", ["pending", "reviewed", "approved", "rejected"]);
 export const artifactReactionTypeEnum = pgEnum("artifact_reaction_type", ["core", "flux", "void", "glitch", "spark", "pulse"]);
@@ -481,29 +481,23 @@ export const zinesI18n = pgTable("zines_i18n", {
 
 // ==================================================================
 // 7.5. EXHIBITS (The Context)
-// Supplementary materials nested inside an Artifact.
-// They cannot receive Zines.
+// Exhibits represent supplementary materials, additional cuts, or specialized
+// displays of a master artifact.
 // ==================================================================
 
-export const exhibits = pgTable("exhibits", {
-    id: text("id").primaryKey(),
-    artifactId: text("artifact_id").references(() => artifacts.id, { onDelete: "cascade" }).notNull(),
-    type: exhibitTypeEnum("type").default("other").notNull(),
-    
-    // For art/poster exhibits
-    mediaId: text("media_id").references(() => media.id, { onDelete: "set null" }),
-    
-    // For external links (YouTube trailers, etc.)
-    url: text("url"),
-    
-    position: integer("position").default(0).notNull(),
-    isPrimary: boolean("is_primary").default(false).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+export const exhibits = pgTable('exhibits', {
+	id: text('id').primaryKey(),
+	artifactId: text('artifact_id').notNull().references(() => artifacts.id, { onDelete: 'cascade' }),
+	type: exhibitTypeEnum('type').notNull().default('other'),
+	mediaId: text('media_id').references(() => media.id, { onDelete: 'set null' }),
+	url: text('url'),
+	isPrimary: boolean('is_primary').default(false).notNull(),
+	position: integer('position').notNull().default(0),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
 }, (t) => ({
-    artifactIdx: index("idx_exhibits_artifact").on(t.artifactId),
-    typeIdx: index("idx_exhibits_type").on(t.type),
-    primaryIdx: index("idx_exhibits_primary").on(t.artifactId, t.isPrimary),
+	artifactIdx: index('idx_exhibits_artifact').on(t.artifactId),
+	typeIdx: index('idx_exhibits_type').on(t.type),
 }));
 
 export const exhibitsI18n = pgTable("exhibits_i18n", {
@@ -779,6 +773,7 @@ export const exhibitsRelations = relations(exhibits, ({ one, many }) => ({
     artifact: one(artifacts, { fields: [exhibits.artifactId], references: [artifacts.id] }),
     translations: many(exhibitsI18n),
     media: one(media, { fields: [exhibits.mediaId], references: [media.id] }),
+    zines: many(zines),
 }));
 
 export const exhibitsI18nRelations = relations(exhibitsI18n, ({ one }) => ({
@@ -797,6 +792,7 @@ export const collectionArtifactsRelations = relations(collectionArtifacts, ({ on
 export const zinesRelations = relations(zines, ({ one, many }) => ({
     translations: many(zinesI18n),
     artifact: one(artifacts, { fields: [zines.artifactId], references: [artifacts.id] }),
+    exhibit: one(exhibits, { fields: [zines.exhibitId], references: [exhibits.id] }),
     author: one(users, { fields: [zines.authorId], references: [users.id] }),
 }));
 

@@ -44,37 +44,33 @@ export default async function ArtifactMasterPage({ params }: { params: Promise<{
 
     const platforms = db ? await db.query.externalPlatforms.findMany() : [];
 
-    // For master view, initial video is either the primary exhibit or the artifact's own resource
-    const primaryExhibit = artifact.exhibits?.find((e: any) => e.isPrimary);
+    // Simplified media selection: ignore 'primary exhibit' and use artifact primary resource as the baseline.
+    let initialVideo: TheaterVideo | null = null;
     
-    let initialVideo = null;
+    // Priority 1: Primary video resource of the artifact itself
+    const primaryVideoResource = artifact.resources?.find((r) => 
+        r.isPrimary && (r.role === 'video' || ['youtube', 'bilibili', 'niconico'].includes(r.platform || ""))
+    );
+    
+    // Priority 2: Primary exhibit if no primary video resource exists
+    const primaryExhibit = artifact.exhibits?.find((e: any) => e.isPrimary);
 
-    if (primaryExhibit) {
+    if (primaryVideoResource) {
+        initialVideo = {
+            id: `res-${primaryVideoResource.platform}-${primaryVideoResource.value.slice(-6)}`,
+            url: primaryVideoResource.value || "",
+            platform: (["youtube", "bilibili", "niconico"].includes(primaryVideoResource.platform || "") 
+                ? primaryVideoResource.platform 
+                : "unknown") as TheaterVideo['platform']
+        };
+    } else if (primaryExhibit) {
         initialVideo = {
             id: primaryExhibit.id,
             url: primaryExhibit.url || "",
-            platform: "unknown" as TheaterVideo['platform']
+            platform: (["youtube", "bilibili", "niconico"].includes((primaryExhibit.type || "").toLowerCase())
+                ? (primaryExhibit.type || "").toLowerCase()
+                : "unknown") as TheaterVideo['platform']
         };
-        // Simple platform inference
-        const url = initialVideo.url.toLowerCase();
-        if (url.includes("youtube.com") || url.includes("youtu.be")) initialVideo.platform = "youtube";
-        else if (url.includes("bilibili.com")) initialVideo.platform = "bilibili";
-        else if (url.includes("nicovideo.jp")) initialVideo.platform = "niconico";
-    } else {
-        // Fallback to primary video resource
-        const primaryVideoResource = artifact.resources?.find((r) => 
-            r.isPrimary && (r.role === 'video' || ['youtube', 'bilibili', 'niconico'].includes(r.platform || ""))
-        );
-        
-        if (primaryVideoResource) {
-            initialVideo = {
-                id: `res-${primaryVideoResource.platform}-${primaryVideoResource.value.slice(-6)}`,
-                url: primaryVideoResource.value || "",
-                platform: (["youtube", "bilibili", "niconico"].includes(primaryVideoResource.platform || "") 
-                    ? primaryVideoResource.platform 
-                    : "unknown") as any
-            };
-        }
     }
 
     return (

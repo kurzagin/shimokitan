@@ -43,6 +43,7 @@ interface ExhibitGalleryProps {
   locale: string;
   artifactCategory: string;
   artifactId: string;
+  isDatabaseStyle?: boolean;
 }
 
 const TYPE_ICONS: Record<ExhibitType, string> = {
@@ -80,6 +81,7 @@ export function ExhibitGallery({
   locale,
   artifactCategory,
   artifactId,
+  isDatabaseStyle,
 }: ExhibitGalleryProps) {
   const [activeTab, setActiveTab] = useState<ExhibitType | "all">("all");
   const [lightboxExhibit, setLightboxExhibit] = useState<ExhibitItem | null>(null);
@@ -184,17 +186,94 @@ export function ExhibitGallery({
         <div
           className={cn(
             "p-3",
-            isGalleryMode
-              ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2"
-              : "grid grid-cols-1 sm:grid-cols-2 gap-3"
+            isDatabaseStyle 
+              ? "flex flex-col gap-1" 
+              : isGalleryMode
+                ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2"
+                : "grid grid-cols-1 sm:grid-cols-2 gap-3"
           )}
         >
           {filteredExhibits.map((exhibit) => {
             const trans = resolveTranslation(exhibit.translations, locale);
             const isVideo = isVideoType(exhibit.type);
-            
-            // If it's a video, we navigate to the new exhibit route
             const exhibitHref = `/artifacts/${artifactCategory}/${artifactId}/exhibit/${exhibit.id}`;
+
+            if (isDatabaseStyle) {
+              const content = (
+                <>
+                  <div className="shrink-0 w-36 aspect-video bg-zinc-900 border border-zinc-800 overflow-hidden relative">
+                    {exhibit.media?.url ? (
+                      <img
+                        src={exhibit.media.url}
+                        alt={trans?.title || "Exhibit"}
+                        className="w-full h-full object-cover grayscale-[0.2] group-hover/row:grayscale-0 transition-all"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-zinc-950">
+                        <Icon icon={TYPE_ICONS[exhibit.type]} width={16} className="text-zinc-800" />
+                      </div>
+                    )}
+                    {isVideo && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                        <Icon icon="lucide:play" width={14} className="text-white" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="min-w-0 flex-1 flex flex-col gap-0.5">
+                    <div className="flex items-center gap-2">
+                       <span className="text-xs font-black uppercase text-zinc-100 italic tracking-tight truncate leading-none">
+                        {trans?.title || "Untitled"}
+                      </span>
+                      <div className={cn(
+                        "shrink-0 px-1 py-0.5 border text-[7px] font-black uppercase tracking-wider leading-none",
+                        TYPE_BG[exhibit.type],
+                        TYPE_COLORS[exhibit.type]
+                      )}>
+                        {exhibit.type}
+                      </div>
+                    </div>
+                    {trans?.description && (
+                       <p className="text-[10px] text-zinc-500 line-clamp-1 italic font-serif leading-relaxed mt-0.5">
+                        {trans.description}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="shrink-0 opacity-0 group-hover/row:opacity-100 transition-opacity pr-2">
+                    <Icon 
+                        icon={isVideo ? "lucide:external-link" : "lucide:maximize-2"} 
+                        width={14} 
+                        className="text-zinc-700" 
+                    />
+                  </div>
+                </>
+              );
+
+              const className = cn(
+                "group/row flex items-center gap-4 p-3 bg-zinc-950/20 border border-zinc-900",
+                "hover:border-zinc-700 hover:bg-zinc-900/40 transition-all text-left"
+              );
+
+              if (isVideo) {
+                return (
+                  <Link key={exhibit.id} href={exhibitHref} className={className}>
+                    {content}
+                  </Link>
+                );
+              }
+
+              return (
+                <button
+                  key={exhibit.id}
+                  type="button"
+                  onClick={() => setLightboxExhibit(exhibit)}
+                  className={className}
+                >
+                  {content}
+                </button>
+              );
+            }
 
             if (isVideo) {
                 return (
@@ -206,10 +285,6 @@ export function ExhibitGallery({
                             "hover:border-zinc-700 hover:bg-zinc-900/60",
                             isGalleryMode ? "aspect-square" : "aspect-video"
                         )}
-                        onClick={() => {
-                            // Also update theater store for immediate feedback if needed, 
-                            // though the new page will load its own player
-                        }}
                     >
                         {exhibit.media?.url ? (
                             <img

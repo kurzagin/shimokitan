@@ -53,6 +53,11 @@ const artifactRelations = {
         with: {
             translations: true,
             author: true,
+            exhibit: {
+                with: {
+                    translations: true
+                }
+            }
         }
     },
     tags: {
@@ -102,7 +107,13 @@ const artifactRelations = {
     exhibits: {
         with: {
             translations: true,
-            media: true
+            media: true,
+            zines: {
+                with: {
+                    translations: true,
+                    author: true
+                }
+            }
         }
     }
 } as const;

@@ -26,9 +26,11 @@ interface PulseShardsProps {
     artifactId: string;
     userReactions: ShardType[];
     counts: Record<ShardType, number>;
+    exhibitId?: string;
+    category?: string;
 }
 
-export function CompactPulse({ artifactId, userReactions, counts, zineCount }: PulseShardsProps & { zineCount?: number }) {
+export function CompactPulse({ artifactId, userReactions, counts, zineCount, exhibitId }: PulseShardsProps & { zineCount?: number }) {
     const [isPending, startTransition] = useTransition();
 
     const handleToggle = (type: ShardType) => {
@@ -90,7 +92,7 @@ export function CompactPulse({ artifactId, userReactions, counts, zineCount }: P
             <div className="w-[1px] h-5 bg-zinc-800 mx-0.5" />
 
             <Link 
-                href={`/cinema/${artifactId}/zines/post`}
+                href={`/cinema/${artifactId}/zines/post${exhibitId ? `?exhibit=${exhibitId}` : ''}`}
                 className="flex items-center gap-2.5 px-3 py-2 bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/50 hover:bg-rose-500/10 group/zine transition-all rounded-md"
                 title="Post Echo Shard"
             >
