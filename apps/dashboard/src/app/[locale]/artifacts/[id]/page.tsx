@@ -104,6 +104,7 @@ export default async function EditArtifactPage(props: { params: Promise<{ locale
                     entities={entities}
                     initialData={artifact}
                     platforms={platforms as any}
+                    isCategoryLocked={true}
                 />
             </Suspense>
         </div>

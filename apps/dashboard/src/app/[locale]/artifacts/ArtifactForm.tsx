@@ -53,7 +53,9 @@ export default function ArtifactForm({
     userRole,
     verificationId,
     initialArchival,
-    platforms = []
+    platforms = [],
+    initialCategory,
+    isCategoryLocked = false
 }: {
     entities: Entity[],
     initialData?: any,
@@ -61,7 +63,9 @@ export default function ArtifactForm({
     userRole?: string,
     verificationId?: string,
     initialArchival?: boolean,
-    platforms?: Platform[]
+    platforms?: Platform[],
+    initialCategory?: string,
+    isCategoryLocked?: boolean
 }) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -179,7 +183,7 @@ export default function ArtifactForm({
     const [pendingIllustrationUrl, setPendingIllustrationUrl] = useState<string | null>(null);
 
 
-    const [category, setCategory] = useState(initialData?.category || (anilistId ? 'anime' : 'music'));
+    const [category, setCategory] = useState(initialCategory || initialData?.category || (anilistId ? 'anime' : 'music'));
     const [animeType, setAnimeType] = useState(initialData?.animeType || null);
 
     const [workId, setWorkId] = useState<string | null>(initialData?.workId || null);
@@ -702,6 +706,7 @@ export default function ArtifactForm({
                     onIllustrationRemove={handleIllustrationRemove}
                     category={category}
                     setCategory={setCategory}
+                    isCategoryLocked={isCategoryLocked}
                     animeType={animeType}
                     setAnimeType={setAnimeType}
                     artifactId={artifactId}

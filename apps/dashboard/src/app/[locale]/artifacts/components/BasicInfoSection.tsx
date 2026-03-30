@@ -63,6 +63,7 @@ interface BasicInfoSectionProps {
     setWorkId: (val: string | null) => void;
     workTitle?: string | null;
     setWorkTitle?: (val: string | null) => void;
+    isCategoryLocked?: boolean;
 }
 
 export default function BasicInfoSection({
@@ -110,7 +111,8 @@ export default function BasicInfoSection({
     workId,
     setWorkId,
     workTitle,
-    setWorkTitle
+    setWorkTitle,
+    isCategoryLocked = false
 }: BasicInfoSectionProps) {
 
     return (
@@ -128,11 +130,15 @@ export default function BasicInfoSection({
                         </div>
                         <div className="space-y-5">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-mono uppercase text-zinc-500 pl-1">Category_Sector</label>
+                                <div className="flex items-center justify-between pl-1">
+                                    <label className="text-[10px] font-mono uppercase text-zinc-500">Category_Sector</label>
+                                    {isCategoryLocked && <Icon icon="lucide:lock" width={10} className="text-zinc-700" />}
+                                </div>
                                 <select
+                                    disabled={isCategoryLocked}
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
-                                    className="w-full bg-black border border-zinc-900 p-3 text-xs text-white focus:border-rose-600 outline-none transition-all rounded-lg appearance-none cursor-pointer font-bold"
+                                    className={`w-full bg-black border border-zinc-900 p-3 text-xs text-white focus:border-rose-600 outline-none transition-all rounded-lg appearance-none cursor-pointer font-bold ${isCategoryLocked ? 'opacity-50 cursor-not-allowed bg-zinc-950 grayscale' : ''}`}
                                 >
                                     <option value="music">MUSIC_TRACK</option>
                                     <option value="anime">ANIME_FEATURE</option>
