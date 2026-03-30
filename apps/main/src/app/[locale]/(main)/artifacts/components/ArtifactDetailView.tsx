@@ -39,8 +39,11 @@ export function ArtifactDetailView({
     isExhibitView
 }: ArtifactDetailViewProps) {
     const translation = resolveTranslation(artifact.translations, locale);
-    const title = translation?.title || (artifact.category === 'illustration' ? 'ILLUSTRATION' : "Untitled");
-    const description = translation?.description || "";
+    const workTranslation = resolveTranslation(artifact.work?.translations, locale);
+    
+    // Fallback order: Artifact Title -> Work Title -> Category name -> Default "Untitled"
+    const title = translation?.title || workTranslation?.title || (artifact.category === 'illustration' ? 'ILLUSTRATION' : "Untitled");
+    const description = translation?.description || workTranslation?.description || "";
 
     const primaryResource = artifact.resources?.find((r: any) => r.isPrimary) || artifact.resources?.[0];
 
@@ -100,7 +103,6 @@ export function ArtifactDetailView({
         src: hostedAudio.value
     } : null;
 
-    const workTranslation = artifact.work ? resolveTranslation(artifact.work.translations, locale) : null;
     const galleryItems = artifact.media?.filter((m: any) => m.role === 'gallery') || [];
 
     const groupedResources = (artifact.resources || []).reduce((acc: Record<string, any[]>, res: any) => {
@@ -523,7 +525,11 @@ export function ArtifactDetailView({
                     {isExhibitView && (
                         <div className="shrink-0 px-4 py-4 border-b border-zinc-900 bg-zinc-950/40 flex flex-col gap-3">
                             <h1 className="text-lg md:text-xl font-black uppercase italic leading-none text-white tracking-tighter">
-                                {exhibitId ? artifact.exhibits?.find((e: any) => e.id === exhibitId)?.translations?.find((t: any) => t.locale === locale)?.title || 'Untitled_Exhibit' : 'Untitled_Exhibit'}
+                                {(() => {
+                                    const exhibit = artifact.exhibits?.find((e: any) => e.id === exhibitId);
+                                    if (!exhibit) return 'Untitled_Exhibit';
+                                    return resolveTranslation(exhibit.translations, locale)?.title || 'Untitled_Exhibit';
+                                })()}
                             </h1>
                             <div className="flex items-center gap-3">
                                 <CompactPulse 
