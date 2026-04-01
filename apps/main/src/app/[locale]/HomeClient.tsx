@@ -32,6 +32,7 @@ type Transmission = {
   affectedUsers: number | null;
   publishedAt: Date | string | null;
   description?: string;
+  attachmentUrl?: string | null;
 };
 
 export default function HomeClient({
@@ -46,10 +47,12 @@ export default function HomeClient({
   transmissions,
   dict,
   currentTrack,
+  archiveArtifacts,
 }: {
   spotlightArtifacts: Artifact[];
   featuredArtifact: Artifact | null;
   videoArtifact: Artifact | null;
+  archiveArtifacts: Artifact[];
   entities: any[];
   weatherTemp: string;
   totalResonance: string;
@@ -766,37 +769,58 @@ export default function HomeClient({
           {featuredArtifact ? (
             <Link
               href={`/artifacts/${featuredArtifact.category}/${featuredArtifact.id}`}
-              className="flex flex-col h-full group/pit"
+              className="flex flex-col h-full group/pit relative overflow-hidden"
             >
-              <div className="relative flex-1 rounded-lg overflow-hidden mb-2 bg-zinc-950">
+              <div className="relative flex-1 rounded-lg overflow-hidden mb-2 bg-zinc-950 border border-zinc-800 shadow-inner group-hover/pit:border-rose-500/50 transition-all duration-500">
                 {((featuredArtifact.category === "anime" ? featuredArtifact.thumbnailImage : featuredArtifact.posterImage) || featuredArtifact.thumbnailImage || featuredArtifact.posterImage) ? (
-                  <img
-                    src={
-                      (featuredArtifact.category === "anime"
-                        ? featuredArtifact.thumbnailImage || featuredArtifact.posterImage
-                        : featuredArtifact.posterImage || featuredArtifact.thumbnailImage) || ""
-                    }
-                    className="object-cover w-full h-full transition-all duration-500 group-hover/pit:scale-105"
-                    alt={featuredArtifact.title}
-                  />
+                  <>
+                    <img
+                      src={
+                        (featuredArtifact.category === "anime"
+                          ? featuredArtifact.thumbnailImage || featuredArtifact.posterImage
+                          : featuredArtifact.posterImage || featuredArtifact.thumbnailImage) || ""
+                      }
+                      className="object-cover w-full h-full transition-all duration-1000 group-hover/pit:scale-110 blur-sm group-hover/pit:blur-0 opacity-40 group-hover/pit:opacity-80"
+                      alt={featuredArtifact.title}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img
+                        src={
+                          (featuredArtifact.category === "anime"
+                            ? featuredArtifact.thumbnailImage || featuredArtifact.posterImage
+                            : featuredArtifact.posterImage || featuredArtifact.thumbnailImage) || ""
+                        }
+                        className="object-contain w-3/4 h-3/4 transition-all duration-700 group-hover/pit:scale-105 shadow-2xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+                        alt={featuredArtifact.title}
+                      />
+                    </div>
+                  </>
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-zinc-800">
+                  <div className="w-full h-full flex flex-col items-center justify-center text-zinc-900 bg-zinc-900/40">
                     <Icon icon="lucide:image-off" width={32} />
-                    <span className="text-[10px] font-mono mt-1 tracking-widest">
-                      NO_VISUAL_DATA
+                    <span className="text-[10px] font-mono mt-1 tracking-widest uppercase opacity-40 font-black">
+                      NO_VISUAL_RESONANCE
                     </span>
                   </div>
                 )}
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-zinc-950/60 flex flex-col justify-end p-2">
-                  <div className="text-[9px] font-mono text-rose-500 uppercase tracking-tighter">
-                    High_Resonance // 0.96
+                
+                {/* HUD Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60 pointer-events-none" />
+                <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end z-10 pointer-events-none">
+                  <div className="space-y-0.5">
+                    <div className="text-[10px] font-black text-rose-500 uppercase tracking-tighter italic bg-rose-500/10 px-1.5 py-0.5 border-l border-rose-500 rounded-sm">
+                      IN_THE_PIT
+                    </div>
+                    <div className="text-[8px] font-mono text-zinc-400 uppercase tracking-[0.2em] font-bold">
+                      Res::{Number(featuredArtifact.resonance || 0.96).toFixed(2)}
+                    </div>
                   </div>
                 </div>
               </div>
-              <h3 className="text-xs font-bold uppercase truncate group-hover/pit:text-rose-500 transition-colors">
+              <h3 className="text-xs font-black uppercase truncate group-hover/pit:text-rose-500 transition-colors tracking-tight italic">
                 {featuredArtifact.title}
               </h3>
-              <p className="text-[11px] text-zinc-500 line-clamp-1">
+              <p className="text-[10px] font-bold text-zinc-500 line-clamp-1 italic">
                 {featuredArtifact.description}
               </p>
             </Link>
@@ -888,47 +912,61 @@ export default function HomeClient({
         icon="lucide:disc"
       >
         <div className="grid grid-cols-[0.8fr_1.2fr] grid-rows-2 gap-2 h-[160px] sm:h-full">
-          {spotlightArtifacts.length > 0 ? (
+          {archiveArtifacts.length > 0 ? (
             (() => {
-              const animeArtifact = spotlightArtifacts.find(
-                (a) => a.category === "anime"
+              // 1. Find the best vertical candidate (Anime or Game) for the left slot
+              const verticalCandidate = archiveArtifacts.find(
+                (a) => a.category === "anime" || a.category === "game"
               );
-              const otherArtifacts = spotlightArtifacts
-                .filter((a) => a.id !== animeArtifact?.id)
+              
+              // 2. Find the best horizontal candidates (All other types) for the right slots
+              // This prevents vertical posters (Game/Anime) from being cropped in horizontal slots
+              const horizontalCandidates = archiveArtifacts
+                .filter((a) => 
+                  a.id !== verticalCandidate?.id && 
+                  a.category !== "anime" && 
+                  a.category !== "game"
+                )
                 .slice(0, 2);
+
+              // 3. Absolute fallbacks if we don't have enough diversely categorized assets
+              const finalOtherArtifacts = horizontalCandidates.length > 0 
+                ? horizontalCandidates 
+                : archiveArtifacts.filter(a => a.id !== verticalCandidate?.id).slice(0, 2);
+
               return (
                 <>
-                  {animeArtifact && (
+                  {verticalCandidate && (
                     <Link
-                      href={`/artifacts/${animeArtifact.category}/${animeArtifact.id}`}
+                      href={`/artifacts/${verticalCandidate.category}/${verticalCandidate.id}`}
                       className="relative group/item rounded-lg overflow-hidden border border-zinc-900 bg-zinc-950 row-span-2"
                     >
-                      {animeArtifact.posterImage || animeArtifact.thumbnailImage ? (
+                      {verticalCandidate.posterImage || verticalCandidate.thumbnailImage ? (
                         <img
                           src={
-                            animeArtifact.posterImage ||
-                            animeArtifact.thumbnailImage ||
+                            verticalCandidate.posterImage ||
+                            verticalCandidate.thumbnailImage ||
                             ""
                           }
                           className="w-full h-full object-cover transition-all duration-500"
-                          alt={animeArtifact.title}
+                          alt={verticalCandidate.title}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-zinc-950 text-zinc-800">
-                          <Icon icon="lucide:music" width={32} />
+                          <Icon icon="lucide:disc" width={32} />
                         </div>
                       )}
                       <div className="absolute bottom-0 left-0 right-0 p-1.5 bg-zinc-950/80 backdrop-blur-md sm:translate-y-full sm:group-hover/item:translate-y-0 transition-transform">
                         <div className="text-[9px] font-black text-white uppercase truncate">
-                          {animeArtifact.title}
+                          {verticalCandidate.title}
                         </div>
                         <div className="text-[8px] font-mono text-violet-400 uppercase mt-0.5 tracking-widest">
-                          {animeArtifact.category}
+                          {verticalCandidate.category}
                         </div>
                       </div>
                     </Link>
                   )}
-                  {otherArtifacts.map((artifact) => (
+                  {finalOtherArtifacts.map((artifact: any) => (
                     <Link
                       key={artifact.id}
                       href={`/artifacts/${artifact.category}/${artifact.id}`}
@@ -1115,9 +1153,20 @@ export default function HomeClient({
                       </h3>
                     </div>
 
-                    <p className="text-[12px] text-zinc-800 leading-tight font-bold max-w-2xl border-l-[2px] border-zinc-900 pl-2 italic line-clamp-2">
-                      &ldquo;{issue.content}&rdquo;
-                    </p>
+                    <div className="flex gap-4 items-start">
+                      {issue.attachmentUrl && (
+                        <div className="w-24 h-24 lg:w-32 lg:h-32 shrink-0 relative bg-zinc-100 border-2 border-zinc-900 shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
+                          <img
+                            src={issue.attachmentUrl}
+                            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                            alt={issue.title}
+                          />
+                        </div>
+                      )}
+                      <p className="text-[12px] text-zinc-800 leading-tight font-bold max-w-2xl border-l-[2px] border-zinc-900 pl-2 italic line-clamp-4">
+                        &ldquo;{issue.content}&rdquo;
+                      </p>
+                    </div>
 
                     <div className="flex items-center justify-between pt-2 border-t border-zinc-900/10">
                       <div className="flex flex-col">

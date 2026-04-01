@@ -1,6 +1,6 @@
 import React from "react";
 import { MainLayout } from "../../components/layout/MainLayout";
-import { getDb, schema, desc, eq, isNull, sql, and, gt, resolveTranslation } from "@shimokitan/db";
+import { getDb, schema, desc, eq, isNull, sql, and, gt, resolveTranslation, inArray, notInArray, ne, not } from "@shimokitan/db";
 import HomeClient from "./HomeClient";
 import { Locale, getDictionary } from "@shimokitan/utils";
 
@@ -39,7 +39,7 @@ export default async function AppPage({
       console.error("Diagnostic SQL check failed:", e.message);
   }
 
-  // 1. Fetch Spotlight Artifacts (Highest Score)
+  // 1. Fetch Spotlight Artifacts (Highest Resonance)
   let spotlightArtifacts: any[] = [];
   try {
     const rawArtifacts = await db.query.artifacts.findMany({
@@ -47,41 +47,74 @@ export default async function AppPage({
         isNull(schema.artifacts.deletedAt),
         gt(schema.artifacts.resonance, "0")
       ),
-      limit: 12, // Fetch more to allow in-memory sorting
+      orderBy: desc(schema.artifacts.resonance),
+      limit: 12,
       with: {
-        media: {
-          with: {
-            media: true
-          }
-        },
+        media: { with: { media: true } },
         translations: true,
       },
     });
 
-    // Map translations and sort by score manually
-    spotlightArtifacts = rawArtifacts
-      .map((a: any) => {
-        const trans = resolveTranslation(a.translations, locale);
-        const thumbnailMedia = (a.media as any[])?.find((m: any) => m.role === 'thumbnail')?.media;
-        const posterMedia = (a.media as any[])?.find((m: any) => m.role === 'poster')?.media;
-        
-        return {
-          ...a,
-          title: trans?.title || "Untitled",
-          description: trans?.description || "",
-          thumbnailImage: thumbnailMedia?.url || null,
-          posterImage: posterMedia?.url || null,
-        };
-      })
-      .sort((a, b) => (b.resonance || 0) - (a.resonance || 0))
-      .slice(0, 6);
+    spotlightArtifacts = rawArtifacts.map((a: any) => {
+      const trans = resolveTranslation(a.translations, locale);
+      const artifactMedia = (a.media as any[]) || [];
+      const thumbnail = artifactMedia.find((m: any) => m.role === 'thumbnail')?.media;
+      const poster = artifactMedia.find((m: any) => m.role === 'poster')?.media;
+      const cover = artifactMedia.find((m: any) => m.role === 'cover')?.media;
+      const background = artifactMedia.find((m: any) => m.role === 'background')?.media;
+      const firstAnyImage = artifactMedia.find((m: any) => m.media?.type === 'image')?.media;
+      
+      return {
+        ...a,
+        title: trans?.title || "Untitled",
+        description: trans?.description || "",
+        thumbnailImage: thumbnail?.url || poster?.url || cover?.url || background?.url || firstAnyImage?.url || null,
+        posterImage: poster?.url || cover?.url || thumbnail?.url || null,
+      };
+    });
   } catch (e: any) {
     if (process.env.NODE_ENV !== "production")
       console.error("Spotlight Fetch Failed:", e.message);
   }
 
+  // 1.5. Fetch Archive Artifacts (All Categories)
+  let archiveArtifacts: any[] = [];
+  try {
+    const rawArchives = await db.query.artifacts.findMany({
+      where: and(
+        isNull(schema.artifacts.deletedAt),
+        gt(schema.artifacts.resonance, "0")
+      ),
+      orderBy: desc(schema.artifacts.resonance),
+      limit: 20, // More candidates to ensure we find an anime for the left slot
+      with: {
+        media: { with: { media: true } },
+        translations: true,
+      },
+    });
 
-  // 3. Featured Artifacts (The ones in "The Pit")
+    archiveArtifacts = rawArchives.map((a: any) => {
+      const trans = resolveTranslation(a.translations, locale);
+      const artifactMedia = (a.media as any[]) || [];
+      const thumbnail = artifactMedia.find((m: any) => m.role === 'thumbnail')?.media;
+      const poster = artifactMedia.find((m: any) => m.role === 'poster')?.media;
+      const cover = artifactMedia.find((m: any) => m.role === 'cover')?.media;
+      const firstAnyImage = artifactMedia.find((m: any) => m.media?.type === 'image')?.media;
+      
+      return {
+        ...a,
+        title: trans?.title || "Untitled",
+        thumbnailImage: thumbnail?.url || poster?.url || cover?.url || firstAnyImage?.url || null,
+        posterImage: poster?.url || cover?.url || thumbnail?.url || null,
+      };
+    });
+  } catch (e: any) {
+    if (process.env.NODE_ENV !== "production")
+      console.error("Archive Fetch Failed:", e.message);
+  }
+
+
+  // 3. Featured Artifacts (The ones in "The Pit" - Always Anime)
   let featuredArtifact: any = null;
   let videoArtifact: any = null;
   try {
@@ -92,53 +125,72 @@ export default async function AppPage({
         eq(schema.artifacts.category, "anime")
       ),
       orderBy: desc(schema.artifacts.resonance),
-      limit: 20, // Fetch more to ensure we find ones with video resources
+      limit: 10,
       with: {
-        media: {
-          with: {
-            media: true
-          }
-        },
+        media: { with: { media: true } },
         translations: true,
         resources: true,
-        zines: true, // Include zines to identify editorially endorsed content
+        exhibits: true,
+        zines: true,
       },
     });
 
     const processArtifact = (raw: any) => {
       const trans = resolveTranslation(raw.translations, locale);
       let videoUrl = null;
-      
-      // Specifically look for video/youtube first
-      const primaryVideo = raw.resources?.find(
+      // 1. Look for artifact resources (YouTube, Spotify, etc.)
+      const primaryResource = raw.resources?.find(
         (r: any) =>
           r.role === "video" ||
           r.platform === "youtube",
-      ) || raw.resources?.find((r: any) => r.role === "audio"); // Fallback to audio if no video
+      );
 
-      if (primaryVideo) {
-        if (primaryVideo.value.includes("youtube.com/watch?v=")) {
-          const vId = primaryVideo.value.split("v=")[1]?.split("&")[0];
+      // 2. Look for high-energy video exhibits (trailers, PVs, openings)
+      const primaryExhibit = raw.exhibits?.find(
+        (e: any) =>
+          (e.type === "trailer" || e.type === "opening" || e.type === "ending" || e.type === "promotion") &&
+          e.url
+      );
+
+      const candidateResource = primaryResource || primaryExhibit;
+
+      if (candidateResource) {
+        const value = (candidateResource.value || candidateResource.url) as string;
+        if (value.includes("youtube.com/watch?v=")) {
+          const vId = value.split("v=")[1]?.split("&")[0];
           videoUrl = `https://www.youtube.com/embed/${vId}`;
-        } else if (primaryVideo.value.includes("youtu.be/")) {
-          const vId = primaryVideo.value.split("youtu.be/")[1]?.split("?")[0];
+        } else if (value.includes("youtube.com/live/")) {
+          const vId = value.split("live/")[1]?.split("?")[0];
           videoUrl = `https://www.youtube.com/embed/${vId}`;
-        } else if (primaryVideo.platform === 'youtube' && !primaryVideo.value.includes('/')) {
-          videoUrl = `https://www.youtube.com/embed/${primaryVideo.value}`;
+        } else if (value.includes("youtube.com/v/")) {
+          const vId = value.split("v/")[1]?.split("?")[0];
+          videoUrl = `https://www.youtube.com/embed/${vId}`;
+        } else if (value.includes("youtube.com/embed/")) {
+          videoUrl = value; // Already an embed URL
+        } else if (value.includes("youtu.be/")) {
+          const vId = value.split("youtu.be/")[1]?.split("?")[0];
+          videoUrl = `https://www.youtube.com/embed/${vId}`;
+        } else if ((candidateResource as any).platform === 'youtube' && !value.includes('/')) {
+          videoUrl = `https://www.youtube.com/embed/${value}`;
         } else {
-          videoUrl = primaryVideo.value;
+          videoUrl = value;
         }
       }
 
-      const thumbnailMedia = (raw.media as any[])?.find((m: any) => m.role === 'thumbnail')?.media;
-      const posterMedia = (raw.media as any[])?.find((m: any) => m.role === 'poster')?.media;
+      const artifactMedia = (raw.media as any[]) || [];
+      
+      const thumbnail = artifactMedia.find((m: any) => m.role === 'thumbnail')?.media;
+      const poster = artifactMedia.find((m: any) => m.role === 'poster')?.media;
+      const cover = artifactMedia.find((m: any) => m.role === 'cover')?.media;
+      const background = artifactMedia.find((m: any) => m.role === 'background')?.media;
+      const firstAnyImage = artifactMedia.find((m: any) => m.media?.type === 'image')?.media;
 
       return {
         ...raw,
         title: trans?.title || "Untitled",
         description: trans?.description || "",
-        thumbnailImage: thumbnailMedia?.url || null,
-        posterImage: posterMedia?.url || null,
+        thumbnailImage: thumbnail?.url || poster?.url || cover?.url || background?.url || firstAnyImage?.url || null,
+        posterImage: poster?.url || cover?.url || thumbnail?.url || null,
         videoUrl: videoUrl,
       };
     };
@@ -153,20 +205,36 @@ export default async function AppPage({
         featuredArtifact = candidates[0];
       }
 
-      // Pick a different one for the "Video" card, ideally one with a videoUrl
-      const artifactsWithVideo = rawPitArtifacts.filter((a, idx) => {
-        if (idx === 0) return false; // Don't pick the same one
-        return a.resources?.some(r => r.role === "video" || r.platform === "youtube");
+    // 3.5. Fetch dedicated Video Artifact (Any Category with YouTube link)
+    try {
+      const topVideoArtifacts = await db.query.artifacts.findMany({
+        where: isNull(schema.artifacts.deletedAt),
+        orderBy: desc(schema.artifacts.resonance),
+        limit: 15,
+        with: {
+          resources: true,
+          exhibits: true,
+          media: { with: { media: true } },
+          translations: true,
+        }
       });
 
-      if (artifactsWithVideo.length > 0) {
-        videoArtifact = processArtifact(artifactsWithVideo[0]);
-      } else if (rawPitArtifacts.length > 1) {
-        videoArtifact = processArtifact(rawPitArtifacts[1]);
+      const videoCandidates = topVideoArtifacts
+        .map(a => processArtifact(a))
+        .filter(a => !!a.videoUrl);
+
+      if (videoCandidates.length > 0) {
+        // Priority 1: High resonance non-featured video
+        const nonFeatured = videoCandidates.find(v => v.id !== featuredArtifact?.id);
+        videoArtifact = nonFeatured || videoCandidates[0];
       } else {
-        // Fallback: if only one exists, they stay the same or we leave videoArtifact null
+        // Fallback: use whatever anime artifact we had
         videoArtifact = featuredArtifact;
       }
+    } catch (e: any) {
+      if (process.env.NODE_ENV !== "production")
+        console.error("Video Artifact Fetch Failed:", e.message);
+    }
     }
   } catch (e: any) {
     if (process.env.NODE_ENV !== "production")
@@ -277,7 +345,12 @@ export default async function AppPage({
       const latestHosted = latestHostedResource.artifact;
       const trans = resolveTranslation(latestHosted.translations, locale);
       const audioRes = latestHosted.resources?.find(r => r.role === 'hosted_audio');
-      const thumbnailMedia = (latestHosted.media as any[])?.find((m: any) => m.role === 'thumbnail')?.media;
+      const artifactMedia = (latestHosted.media as any[]) || [];
+      const thumbnail = artifactMedia.find((m: any) => m.role === 'thumbnail')?.media;
+      const poster = artifactMedia.find((m: any) => m.role === 'poster')?.media;
+      const cover = artifactMedia.find((m: any) => m.role === 'cover')?.media;
+      const firstAnyImage = artifactMedia.find((m: any) => m.media?.type === 'image')?.media;
+      
       const artistNames = (latestHosted as any).credits
         ?.filter((c: any) => c.isPrimary)
         .map((c: any) => {
@@ -291,7 +364,7 @@ export default async function AppPage({
         title: trans?.title || "Untitled",
         artist: artistNames,
         album: trans?.description?.slice(0, 50) || "Single",
-        cover: thumbnailMedia?.url || "https://upload.wikimedia.org/wikipedia/en/3/39/The_Weeknd_-_Starboy.png",
+        cover: thumbnail?.url || poster?.url || cover?.url || firstAnyImage?.url || "https://upload.wikimedia.org/wikipedia/en/3/39/The_Weeknd_-_Starboy.png",
         bitrate: "1411 KBPS",
         format: (audioRes as any)?.value?.endsWith('.m3u8') ? "HLS" : "LOSSLESS",
         src: (audioRes as any)?.value || ""
@@ -310,7 +383,8 @@ export default async function AppPage({
       orderBy: [desc(schema.transmissions.publishedAt)],
       limit: 5,
       with: {
-        translations: true
+        translations: true,
+        attachment: true
       }
     });
 
@@ -319,7 +393,8 @@ export default async function AppPage({
       return {
         ...t,
         title: trans?.title || "Untitled Transmission",
-        content: trans?.content || ""
+        content: trans?.content || "",
+        attachmentUrl: (t as any).attachment?.url || null
       }
     });
   } catch (e: any) {
@@ -351,6 +426,7 @@ export default async function AppPage({
       />
       <HomeClient
         spotlightArtifacts={spotlightArtifacts}
+        archiveArtifacts={archiveArtifacts}
         featuredArtifact={featuredArtifact}
         videoArtifact={videoArtifact}
         entities={entities}

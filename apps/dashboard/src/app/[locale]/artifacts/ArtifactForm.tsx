@@ -553,10 +553,10 @@ export default function ArtifactForm({
 
             // 4. Map to Assets array
             const localAssets = resources
-                .filter(r => r.platform === 'r2' && r.url)
+                .filter(r => r.platform === 'r2' && r.url && r.role !== 'hosted_audio') // Skip hosted_audio as it is a resource, not an asset
                 .map(r => ({
                     mediaId: r.url.split('/').pop() || '',
-                    role: r.role === 'hosted_audio' ? 'audio' : r.role,
+                    role: r.role,
                     isPrimary: r.isPrimary,
                     position: 0
                 }));
@@ -711,9 +711,28 @@ export default function ArtifactForm({
                     setAnimeType={setAnimeType}
                     artifactId={artifactId}
                     onHostedAudioUploaded={(url: string) => {
-                        const existingAudio = resources.find(r => r.role === 'hosted_audio');
-                        if (existingAudio) updateResource(resources.indexOf(existingAudio), 'url', url);
-                        else setResources([...resources, { type: 'audio', platform: 'r2', url, role: 'hosted_audio', isPrimary: true }]);
+                        // Smart HLS Filtering
+                        const isPlaylist = url.toLowerCase().endsWith('.m3u8');
+                        const isAudio = url.toLowerCase().endsWith('.m4a') || url.toLowerCase().endsWith('.mp3');
+
+                        if (!isPlaylist && !isAudio) return;
+
+                        setResources(prev => {
+                            const existingAudio = prev.find(r => r.role === 'hosted_audio');
+                            if (existingAudio) {
+                                return prev.map(r => r.role === 'hosted_audio' ? { ...r, url } : r);
+                            }
+                            return [...prev, { 
+                                id: nanoid(),
+                                type: 'audio', 
+                                platform: 'r2', 
+                                url, 
+                                role: 'hosted_audio', 
+                                isPrimary: true 
+                            }];
+                        });
+                        
+                        toast.success("Signal Manifest_Synchronized");
                     }}
                     entities={entities}
                     userRole={userRole}
