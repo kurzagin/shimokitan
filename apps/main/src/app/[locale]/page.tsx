@@ -346,6 +346,7 @@ export default async function AppPage({
       const trans = resolveTranslation(latestHosted.translations, locale);
       const audioRes = latestHosted.resources?.find(r => r.role === 'hosted_audio');
       const artifactMedia = (latestHosted.media as any[]) || [];
+      const vinyl = artifactMedia.find((m: any) => m.role === 'vinyl')?.media;
       const thumbnail = artifactMedia.find((m: any) => m.role === 'thumbnail')?.media;
       const poster = artifactMedia.find((m: any) => m.role === 'poster')?.media;
       const cover = artifactMedia.find((m: any) => m.role === 'cover')?.media;
@@ -364,10 +365,10 @@ export default async function AppPage({
         title: trans?.title || "Untitled",
         artist: artistNames,
         album: trans?.description?.slice(0, 50) || "Single",
-        cover: thumbnail?.url || poster?.url || cover?.url || firstAnyImage?.url || "https://upload.wikimedia.org/wikipedia/en/3/39/The_Weeknd_-_Starboy.png",
+        cover: vinyl?.url || thumbnail?.url || poster?.url || cover?.url || firstAnyImage?.url || "https://upload.wikimedia.org/wikipedia/en/3/39/The_Weeknd_-_Starboy.png",
         bitrate: "1411 KBPS",
-        format: (audioRes as any)?.value?.endsWith('.m3u8') ? "HLS" : "LOSSLESS",
-        src: (audioRes as any)?.value || ""
+        format: latestHostedResource.value?.includes('.m3u8') ? "HLS" : "LOSSLESS",
+        src: latestHostedResource.value || ""
       };
     }
   } catch (e: any) {

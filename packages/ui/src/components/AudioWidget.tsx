@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Hls from 'hls.js';
 import { Icon } from '@iconify/react';
 import { Badge } from './Badge';
+import { toast } from 'sonner';
 
 // --- Types ---
 
@@ -35,6 +36,7 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({ track, onClose }) => {
     const [duration, setDuration] = useState<number>(0);
     const [volume, setVolume] = useState<number>(80);
     const audioRef = useRef<HTMLAudioElement>(null);
+    const hlsRef = useRef<Hls | null>(null);
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
     const [mounted, setMounted] = useState(false);
 
@@ -129,15 +131,27 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({ track, onClose }) => {
 
         const handleCommand = (e: Event) => {
             const detail = (e as CustomEvent).detail;
+            console.log("AudioWidget: Command received:", detail);
             if (detail?.type === 'playToggle') {
                 if (audio.paused) {
+                    console.log("AudioWidget: Attempting play...");
+                    if (!audio.src && !hlsRef.current) {
+                        console.warn("AudioWidget: Play requested but no source attached.");
+                        toast.error("Audio: No source attached. Retrying...");
+                        return;
+                    }
                     const playPromise = audio.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(error => {
-                            if (error.name !== 'AbortError') console.error("AudioWidget: Play error:", error);
+                            console.error("AudioWidget: Play error:", error);
+                            // Avoid toast on user-initiated pause/cancel
+                            if (error.name !== 'AbortError') {
+                                toast.error("Audio: Playback failed (Autoplay/CORS issue)");
+                            }
                         });
                     }
                 } else {
+                    console.log("AudioWidget: Pausing playback...");
                     audio.pause();
                 }
             } else if (detail?.type === 'seek') {
@@ -159,7 +173,7 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({ track, onClose }) => {
             audio.removeEventListener('loadedmetadata', onLoadedMetadata);
             window.removeEventListener('shim_audio_command', handleCommand);
         };
-    }, [mounted]); // Run when mounted becomes true
+    }, [mounted, audioRef.current]); // Also depend on audioRef.current
 
     // Effect 2: Source Management
     useEffect(() => {
@@ -183,24 +197,85 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({ track, onClose }) => {
         setCurrentTime(0);
 
         if (Hls.isSupported() && targetSrc.includes('.m3u8')) {
-            hls = new Hls();
+            console.log("AudioWidget: Initializing HLS for", targetSrc);
+            const hls = new Hls({
+                enableWorker: true,
+                lowLatencyMode: true,
+                manifestLoadingMaxRetry: 10,
+                manifestLoadingRetryDelay: 1000,
+                levelLoadingMaxRetry: 10,
+                levelLoadingRetryDelay: 1000,
+                fragLoadingMaxRetry: 10,
+                fragLoadingRetryDelay: 1000,
+                xhrSetup: (xhr, url) => {
+                    xhr.withCredentials = false;
+                }
+            });
+            hlsRef.current = hls;
             hls.loadSource(targetSrc);
             hls.attachMedia(audio);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                 console.log("AudioWidget: HLS Manifest parsed.");
                  broadcastState();
             });
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    console.error("AudioWidget: HLS Fatal ERROR:", {
+                        type: data.type,
+                        details: data.details,
+                        response: data.response,
+                        url: data.url
+                    });
+                    
+                    switch (data.type) {
+                      case Hls.ErrorTypes.NETWORK_ERROR:
+                        if (data.details === "manifestLoadError") {
+                            const status = (data.response as any)?.status;
+                            console.error(`AudioWidget: Manifest load error for ${data.url || 'unknown source'} (Status: ${status}). Retrying in 2s...`);
+                            toast.error(`Audio: Connection lost (Status: ${status || 'Unknown'}). Reconnecting...`);
+                            setTimeout(() => {
+                                if (hlsRef.current === hls) {
+                                    hls.startLoad();
+                                }
+                            }, 2000);
+                        } else {
+                            console.error(`AudioWidget: Network error (${data.details}). Trying to recover...`);
+                            hls.startLoad();
+                        }
+                        break;
+                      case Hls.ErrorTypes.MEDIA_ERROR:
+                        console.error("AudioWidget: Media error, trying to recover...");
+                        hls.recoverMediaError();
+                        break;
+                      default:
+                        console.error("AudioWidget: Cannot recover, destroying HLS instance.");
+                        toast.error(`Audio: Stream terminal failure`);
+                        hls.destroy();
+                        hlsRef.current = null;
+                        break;
+                    }
+                } else {
+                    // Filter out some noisy warnings
+                    if (data.details !== 'bufferStalledError') {
+                        console.warn("AudioWidget: HLS Warning:", data.details);
+                    }
+                }
+            });
         } else {
+            console.log("AudioWidget: Using standard audio element for", targetSrc);
             audio.src = targetSrc;
         }
 
         broadcastState();
 
         return () => {
-            if (hls) {
-                hls.destroy();
+            if (hlsRef.current) {
+                console.log("AudioWidget: Cleaning up HLS...");
+                hlsRef.current.destroy();
+                hlsRef.current = null;
             }
         };
-    }, [mounted, track?.src]);
+    }, [mounted, track?.src, audioRef.current]);
 
     useEffect(() => {
         if (audioRef.current) {
@@ -269,15 +344,17 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({ track, onClose }) => {
     if (!mounted) return null;
 
     return (
-        <div
-            ref={widgetRef}
-            className="hidden md:block fixed z-[9999] select-none touch-none"
-            style={{
-                left: `${position.x}px`,
-                top: `${position.y}px`,
-                cursor: isDragging ? 'grabbing' : 'auto'
-            }}
-        >
+        <>
+            <audio ref={audioRef} crossOrigin="anonymous" />
+            <div
+                ref={widgetRef}
+                className="hidden md:block fixed z-[9999] select-none touch-none"
+                style={{
+                    left: `${position.x}px`,
+                    top: `${position.y}px`,
+                    cursor: isDragging ? 'grabbing' : 'auto'
+                }}
+            >
             <div
                 className="relative group transition-all duration-500"
                 onMouseDown={!isExpanded ? handleMouseDown : undefined}
@@ -423,7 +500,6 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({ track, onClose }) => {
                             )}
                         </div>
 
-                        <audio ref={audioRef} />
                         {/* --- CONTENT AREA --- */}
                         {isExpanded && (
                             <div className="flex-1 flex items-center justify-between ml-10 mr-4 transition-all duration-500">
@@ -559,6 +635,7 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({ track, onClose }) => {
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     );
 };

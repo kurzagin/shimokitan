@@ -127,12 +127,23 @@ export default function HomeClient({
       console.log("SHIM_SYSTEM: No hosted audio found on server. Clearing local cache.");
       station.reset();
     }
-  }, [shouldResetAudio, station.currentTrack, station.isClosed]);
+  }, [shouldResetAudio]);
+
+  // Force-Sync: If server has a new track (e.g. after a re-upload), update the local store immediately
+  useEffect(() => {
+    if (currentTrack?.src && station.currentTrack?.src !== currentTrack.src) {
+      console.log("SHIM_SYSTEM: Syncing local store with updated server media...");
+      // Cast safely as the server-side track is built with defaults in page.tsx
+      station.initialize(currentTrack as any);
+    }
+  }, [currentTrack, station.currentTrack?.src]);
 
   // If server reports no music and no artifacts, we ignore the local store to prevent "ghost" records
   const trackToDisplay = shouldResetAudio ? null : (station.currentTrack || currentTrack);
   const hasTrack = !!(trackToDisplay?.src);
-  const isDockedActive = hasTrack && !station.isClosed;
+  
+  // LIVE_CENTER should be visually active if there's a track, regardless of the 'closed' toggle (which is for the floating widget)
+  const isDockedActive = hasTrack;
 
   return (
     <div className="
@@ -510,15 +521,21 @@ export default function HomeClient({
               </button>
               <button
                 onClick={() => {
+                  console.log("HomeClient: Play button clicked.");
                   if (station.isInitialized && station.currentTrack?.src) {
+                    console.log("HomeClient: Station is initialized, dispatching playToggle.");
+                    if (station.isClosed) station.setClosed(false);
                     dispatchCommand("playToggle");
                   } else if (currentTrack?.src) {
+                    console.log("HomeClient: First-time initialization for", currentTrack.title);
                     station.initialize(currentTrack as any);
+                    // Wait a bit longer for the store to persist and AudioWidget to load the source
                     setTimeout(() => {
+                      console.log("HomeClient: Dispatching deferred playToggle.");
                       dispatchCommand("playToggle");
-                    }, 100);
+                    }, 500);
                   } else {
-                    console.warn("No track source available to play");
+                    console.warn("HomeClient: No track source available to play");
                   }
                 }}
                 className={cn(
