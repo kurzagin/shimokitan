@@ -11,6 +11,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     return {
         title: dict.navigation.artists,
         description: dict.home.district,
+        alternates: {
+            canonical: `/${locale}/artists`,
+        },
     };
 }
 

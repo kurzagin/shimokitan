@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://shimokitan.live";
   const dict = getDictionary(locale as Locale);
-  
+
   const title = dict.home.title;
   const description = dict.home.description;
 

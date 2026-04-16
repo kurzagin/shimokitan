@@ -39,6 +39,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     return {
         title: `${dict.navigation.gallery} // SHIMOKITAN`,
         description: "Visual shards and illustrations from the district's residents.",
+        alternates: {
+            canonical: `/${locale}/gallery`,
+        },
     };
 }
 

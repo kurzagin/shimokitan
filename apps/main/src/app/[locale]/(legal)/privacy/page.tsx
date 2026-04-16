@@ -7,6 +7,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const dict = getDictionary(locale);
     return {
         title: dict.legal.privacy.title,
+        alternates: {
+            canonical: `/${locale}/privacy`,
+        },
     };
 }
 

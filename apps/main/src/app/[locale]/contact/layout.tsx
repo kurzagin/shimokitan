@@ -10,6 +10,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const dict = getDictionary(locale as Locale);
     return {
         title: dict.contact.title,
+        alternates: {
+            canonical: `/${locale}/contact`,
+        },
     };
 }
 

@@ -14,6 +14,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     return {
         title: `${dict.navigation.artifacts} // CINEMA`,
         description: dict.cinema.description,
+        alternates: {
+            canonical: `/${locale}/cinema`,
+        },
     };
 }
 

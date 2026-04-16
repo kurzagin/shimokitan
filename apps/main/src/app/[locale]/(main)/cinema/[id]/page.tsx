@@ -57,10 +57,11 @@ export async function generateMetadata(props: {
         title: fullTitle,
         description,
         alternates: {
+            canonical: `/${locale}/cinema/${artifact.id}`,
             languages: {
                 'en': `/en/cinema/${artifact.id}`,
                 'ja': `/ja/cinema/${artifact.id}`,
-                'id': `/id/id/cinema/${artifact.id}`,
+                'id': `/id/cinema/${artifact.id}`,
             }
         },
         openGraph: {

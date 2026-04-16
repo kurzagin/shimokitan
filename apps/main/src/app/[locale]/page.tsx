@@ -63,7 +63,7 @@ export default async function AppPage({
       const cover = artifactMedia.find((m: any) => m.role === 'cover')?.media;
       const background = artifactMedia.find((m: any) => m.role === 'background')?.media;
       const firstAnyImage = artifactMedia.find((m: any) => m.media?.type === 'image')?.media;
-      
+
       return {
         ...a,
         title: trans?.title || "Untitled",
@@ -100,7 +100,7 @@ export default async function AppPage({
       const poster = artifactMedia.find((m: any) => m.role === 'poster')?.media;
       const cover = artifactMedia.find((m: any) => m.role === 'cover')?.media;
       const firstAnyImage = artifactMedia.find((m: any) => m.media?.type === 'image')?.media;
-      
+
       return {
         ...a,
         title: trans?.title || "Untitled",
@@ -178,7 +178,7 @@ export default async function AppPage({
       }
 
       const artifactMedia = (raw.media as any[]) || [];
-      
+
       const thumbnail = artifactMedia.find((m: any) => m.role === 'thumbnail')?.media;
       const poster = artifactMedia.find((m: any) => m.role === 'poster')?.media;
       const cover = artifactMedia.find((m: any) => m.role === 'cover')?.media;
@@ -205,36 +205,36 @@ export default async function AppPage({
         featuredArtifact = candidates[0];
       }
 
-    // 3.5. Fetch dedicated Video Artifact (Any Category with YouTube link)
-    try {
-      const topVideoArtifacts = await db.query.artifacts.findMany({
-        where: isNull(schema.artifacts.deletedAt),
-        orderBy: desc(schema.artifacts.resonance),
-        limit: 15,
-        with: {
-          resources: true,
-          exhibits: true,
-          media: { with: { media: true } },
-          translations: true,
+      // 3.5. Fetch dedicated Video Artifact (Any Category with YouTube link)
+      try {
+        const topVideoArtifacts = await db.query.artifacts.findMany({
+          where: isNull(schema.artifacts.deletedAt),
+          orderBy: desc(schema.artifacts.resonance),
+          limit: 15,
+          with: {
+            resources: true,
+            exhibits: true,
+            media: { with: { media: true } },
+            translations: true,
+          }
+        });
+
+        const videoCandidates = topVideoArtifacts
+          .map(a => processArtifact(a))
+          .filter(a => !!a.videoUrl);
+
+        if (videoCandidates.length > 0) {
+          // Priority 1: High resonance non-featured video
+          const nonFeatured = videoCandidates.find(v => v.id !== featuredArtifact?.id);
+          videoArtifact = nonFeatured || videoCandidates[0];
+        } else {
+          // Fallback: use whatever anime artifact we had
+          videoArtifact = featuredArtifact;
         }
-      });
-
-      const videoCandidates = topVideoArtifacts
-        .map(a => processArtifact(a))
-        .filter(a => !!a.videoUrl);
-
-      if (videoCandidates.length > 0) {
-        // Priority 1: High resonance non-featured video
-        const nonFeatured = videoCandidates.find(v => v.id !== featuredArtifact?.id);
-        videoArtifact = nonFeatured || videoCandidates[0];
-      } else {
-        // Fallback: use whatever anime artifact we had
-        videoArtifact = featuredArtifact;
+      } catch (e: any) {
+        if (process.env.NODE_ENV !== "production")
+          console.error("Video Artifact Fetch Failed:", e.message);
       }
-    } catch (e: any) {
-      if (process.env.NODE_ENV !== "production")
-        console.error("Video Artifact Fetch Failed:", e.message);
-    }
     }
   } catch (e: any) {
     if (process.env.NODE_ENV !== "production")
@@ -351,7 +351,7 @@ export default async function AppPage({
       const poster = artifactMedia.find((m: any) => m.role === 'poster')?.media;
       const cover = artifactMedia.find((m: any) => m.role === 'cover')?.media;
       const firstAnyImage = artifactMedia.find((m: any) => m.media?.type === 'image')?.media;
-      
+
       const artistNames = (latestHosted as any).credits
         ?.filter((c: any) => c.isPrimary)
         .map((c: any) => {

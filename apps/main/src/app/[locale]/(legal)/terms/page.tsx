@@ -6,6 +6,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const dict = getDictionary(locale);
     return {
         title: dict.legal.terms.title,
+        alternates: {
+            canonical: `/${locale}/terms`,
+        },
     };
 }
 import { InlineMarkdown } from "@shimokitan/ui";

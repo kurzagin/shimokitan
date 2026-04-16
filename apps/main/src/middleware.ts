@@ -54,11 +54,11 @@ export default function middleware(request: NextRequest) {
     let subPathname: string;
 
     if (pathnameHasLocale && currentLocaleMatch) {
-         locale = currentLocaleMatch;
-         subPathname = pathname.replace(new RegExp(`^/${locale}/?`), '/') || '/';
+        locale = currentLocaleMatch;
+        subPathname = pathname.replace(new RegExp(`^/${locale}/?`), '/') || '/';
     } else {
-         locale = getLocale(request);
-         subPathname = pathname;
+        locale = getLocale(request);
+        subPathname = pathname;
     }
 
     const cleanSubPathname = subPathname.replace(/\/$/, '') || '/';

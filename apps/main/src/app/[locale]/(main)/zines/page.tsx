@@ -11,6 +11,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const dict = getDictionary(locale);
     return {
         title: dict.navigation.zines,
+        alternates: {
+            canonical: `/${locale}/zines`,
+        },
     };
 }
 

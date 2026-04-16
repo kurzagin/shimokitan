@@ -11,6 +11,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const dict = getDictionary(locale as Locale);
     return {
         title: dict.navigation.back_alley,
+        alternates: {
+            canonical: `/${locale}/back-alley`,
+        },
     };
 }
 
