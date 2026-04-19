@@ -310,7 +310,7 @@ export default function WorkForm({
                                     <div className="flex flex-col pl-1">
                                         <span className="text-[10px] font-mono uppercase text-zinc-400">Portrait_Identity</span>
                                     </div>
-                                    <div className="aspect-[3/4] bg-zinc-950/50 border border-zinc-900 rounded-xl relative overflow-hidden group hover:border-zinc-700 transition-colors">
+                                    <div className="aspect-3/4 bg-zinc-950/50 border border-zinc-900 rounded-xl relative overflow-hidden group hover:border-zinc-700 transition-colors">
                                         <MediaUploader
                                             value={posterUrl || ''}
                                             uploadAction={uploadMediaAction}

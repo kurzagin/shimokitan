@@ -191,7 +191,7 @@ export function ArtifactDetailView({
                             </div>
                             <div className="flex-1 h-1.5 bg-zinc-900 border border-zinc-800 overflow-hidden">
                                 <div
-                                    className="h-full bg-gradient-to-r from-rose-900 to-rose-500 shadow-[0_0_6px_rgba(225,29,72,0.4)]"
+                                    className="h-full bg-linear-to-r from-rose-900 to-rose-500 shadow-[0_0_6px_rgba(225,29,72,0.4)]"
                                     style={{ width: `${Math.min(100, Number(displayResonance) * 20)}%` }}
                                 />
                             </div>
@@ -203,12 +203,12 @@ export function ArtifactDetailView({
             <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:divide-x lg:divide-zinc-900">
                 {/* ── LEFT SIDEBAR ── */}
                 {!isExhibitView && !isIllustrationStyle && (
-                <div className={cn("lg:order-none lg:col-span-3 flex flex-col border-t lg:border-t-0 border-zinc-900", isDatabaseStyle ? "order-1" : "order-3")}>
+                <div className={cn("lg:order-0 lg:col-span-3 flex flex-col border-t lg:border-t-0 border-zinc-900", isDatabaseStyle ? "order-1" : "order-3")}>
                     {isDatabaseStyle ? (
                         <>
                             <div className="relative border-b border-zinc-900 overflow-hidden">
                                 {/* Header banner */}
-                                <div className="relative w-full aspect-[16/7] bg-zinc-900 overflow-hidden">
+                                <div className="relative w-full aspect-16/7 bg-zinc-900 overflow-hidden">
                                     {(header?.url || gateway?.url || thumbnail?.url) ? (
                                         <img
                                             src={header?.url || gateway?.url || thumbnail?.url}
@@ -223,7 +223,7 @@ export function ArtifactDetailView({
 
                                 {/* Poster overlaid on header */}
                                 <div className="relative -mt-24 px-4 pb-4 flex flex-col items-center">
-                                    <div className="w-32 aspect-[2/3] bg-zinc-900 border-2 border-zinc-800 overflow-hidden shadow-2xl shadow-black/60 group/poster">
+                                    <div className="w-32 aspect-2/3 bg-zinc-900 border-2 border-zinc-800 overflow-hidden shadow-2xl shadow-black/60 group/poster">
                                         {poster?.url || thumbnail?.url ? (
                                             <img src={poster?.url || thumbnail?.url} className="w-full h-full object-cover group-hover/poster:scale-105 transition-transform duration-500" alt="Identity_Poster" />
                                         ) : (
@@ -241,7 +241,7 @@ export function ArtifactDetailView({
                                     <h1 className="text-xl font-black uppercase italic leading-none text-white tracking-tighter">
                                         {title}
                                     </h1>
-                                    <div className="px-2 py-0.5 bg-rose-500 text-black text-[9px] font-black uppercase tracking-widest skew-x-[-12deg] shrink-0">
+                                    <div className="px-2 py-0.5 bg-rose-500 text-black text-[9px] font-black uppercase tracking-widest -skew-x-12 shrink-0">
                                         Verified
                                     </div>
                                 </div>
@@ -321,7 +321,7 @@ export function ArtifactDetailView({
                                                                 <div className="px-1.5 py-0.5 bg-violet-600/10 border border-violet-500/20 text-[8px] text-violet-400 font-black uppercase tracking-widest leading-none">
                                                                     {resolveTranslation(c.translations, locale)?.role || c.role || "ORIGIN"}
                                                                 </div>
-                                                                <span className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.1em]">Heritage_Root</span>
+                                                                <span className="text-[9px] text-zinc-700 font-bold uppercase tracking-widest">Heritage_Root</span>
                                                             </div>
                                                         </div>
                                                     );
@@ -481,7 +481,7 @@ export function ArtifactDetailView({
 
                 {/* ── CENTER CONTENT (Dynamic Layout) ── */}
                 <div className={cn(
-                    "lg:order-none flex flex-col",
+                    "lg:order-0 flex flex-col",
                     isExhibitView ? "order-1 lg:col-span-8" :
                     isIllustrationStyle ? "order-1 lg:col-span-9" :
                     isDatabaseStyle ? "order-2 lg:col-span-9" : "order-1 lg:col-span-5"
@@ -725,7 +725,7 @@ export function ArtifactDetailView({
                     {!isDatabaseStyle && !isExhibitView && galleryItems.length > 0 && (
                         <div className="shrink-0 flex gap-2 p-2 border-b border-zinc-900 bg-zinc-950/20 overflow-x-auto scrollbar-none">
                             {[thumbnail, ...artifact.media?.filter((m: any) => m.role === 'poster').map((m: any) => m.media), ...galleryItems.map((gi: any) => gi.media)].filter(Boolean).map((img: any, i: number) => (
-                                <div key={i} className="shrink-0 h-12 aspect-[2/3] md:h-16 bg-zinc-900 border border-zinc-800 overflow-hidden group/thumb cursor-pointer">
+                                <div key={i} className="shrink-0 h-12 aspect-2/3 md:h-16 bg-zinc-900 border border-zinc-800 overflow-hidden group/thumb cursor-pointer">
                                     <img src={img.url} className="w-full h-full object-cover opacity-60 group-hover/thumb:opacity-100 transition-all" />
                                 </div>
                             ))}
@@ -763,7 +763,7 @@ export function ArtifactDetailView({
                                                             <Icon icon="lucide:user" className="text-zinc-700" width={14} />
                                                         )}
                                                     </div>
-                                                    <div className="w-[1px] flex-1 bg-zinc-800/40 my-2" />
+                                                    <div className="w-px flex-1 bg-zinc-800/40 my-2" />
                                                 </div>
                                                 
                                                 <div className="min-w-0 flex-1 flex flex-col gap-2">
@@ -802,7 +802,7 @@ export function ArtifactDetailView({
                                             
                                             {/* Decorative vertical line for the "pulse stream" effect */}
                                             {idx !== filteredZines.length - 1 && (
-                                                <div className="absolute left-8 top-12 bottom-0 w-[1px] bg-zinc-900 z-0" />
+                                                <div className="absolute left-8 top-12 bottom-0 w-px bg-zinc-900 z-0" />
                                             )}
                                         </div>
                                     );
@@ -839,13 +839,13 @@ export function ArtifactDetailView({
 
                 {/* ── EXHIBIT SIDEBAR (YouTube-style right column) ── */}
                 {isExhibitView && (
-                    <div className="order-2 lg:order-none lg:col-span-4 flex flex-col border-t lg:border-t-0 border-zinc-900">
+                    <div className="order-2 lg:order-0 lg:col-span-4 flex flex-col border-t lg:border-t-0 border-zinc-900">
                         {/* Source Artifact Card */}
                         <Link
                             href={`/artifacts/${artifact.category}/${artifact.id}`}
                             className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-900 bg-zinc-950/60 hover:bg-zinc-900/40 transition-all group/src"
                         >
-                            <div className="shrink-0 w-10 aspect-[2/3] bg-zinc-900 border border-zinc-800 overflow-hidden">
+                            <div className="shrink-0 w-10 aspect-2/3 bg-zinc-900 border border-zinc-800 overflow-hidden">
                                 {(poster?.url || thumbnail?.url) ? (
                                     <img src={poster?.url || thumbnail?.url} className="w-full h-full object-cover" alt="Source" />
                                 ) : (
@@ -925,7 +925,7 @@ export function ArtifactDetailView({
 
                 {!isDatabaseStyle && !isExhibitView && (
                     <div className={cn(
-                        "order-4 md:order-2 lg:order-none flex flex-col border-t lg:border-t-0 border-zinc-900",
+                        "order-4 md:order-2 lg:order-0 flex flex-col border-t lg:border-t-0 border-zinc-900",
                         isIllustrationStyle ? "lg:col-span-3" : "lg:col-span-4"
                     )}>
                         {isIllustrationStyle ? (

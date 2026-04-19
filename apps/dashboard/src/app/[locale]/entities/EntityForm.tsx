@@ -330,7 +330,7 @@ export default function EntityForm({
                                             onChange={(id, url) => { setThumbnailId(id); setThumbnailUrl(url); }}
                                             onUrlSelect={handleThumbnailUrlSelect}
                                             contextType="entity_thumbnail"
-                                            className="w-full aspect-[21/9] md:aspect-[16/6]"
+                                            className="w-full aspect-21/9 md:aspect-16/6"
                                         />
                                     </div>
                                 </div>

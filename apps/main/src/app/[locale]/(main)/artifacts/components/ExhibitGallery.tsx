@@ -406,7 +406,7 @@ function ExhibitLightbox({
   }, [onClose, onPrev, onNext]);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col">
+    <div className="fixed inset-0 z-100 bg-black/95 flex flex-col">
       <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-zinc-900">
         <div className="flex items-center gap-3">
           <div className={cn(
