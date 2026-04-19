@@ -491,6 +491,11 @@ export function ArtifactDetailView({
                             label={dict.discovery.exhibit}
                             right={
                                 <div className="flex items-center gap-4">
+                                    {artifact.exhibits?.length > 0 && (
+                                        <span className="text-[9px] text-zinc-700 font-mono uppercase tracking-widest">
+                                            {artifact.exhibits.length} Item{artifact.exhibits.length !== 1 ? "s" : ""}
+                                        </span>
+                                    )}
                                     {trackData && (
                                         <PlayButton
                                             track={trackData}
@@ -505,6 +510,11 @@ export function ArtifactDetailView({
                             label={isIllustrationStyle ? "SIGNAL_REDUX" : (isDatabaseStyle ? dict.discovery.exhibit : dict.discovery.media_hub)}
                             right={
                                 <div className="flex items-center gap-4">
+                                    {isDatabaseStyle && artifact.exhibits?.length > 0 && (
+                                        <span className="text-[9px] text-zinc-700 font-mono uppercase tracking-widest">
+                                            {artifact.exhibits.length} Item{artifact.exhibits.length !== 1 ? "s" : ""}
+                                        </span>
+                                    )}
                                     {isIllustrationStyle && (
                                         <div className="flex items-center gap-2 px-2 py-0.5 bg-violet-600/10 border border-violet-500/20 text-[9px] text-violet-400 font-black uppercase tracking-widest leading-none">
                                             LIVE_SIGNAL

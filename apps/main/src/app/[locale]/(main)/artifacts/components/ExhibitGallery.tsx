@@ -141,20 +141,6 @@ export function ExhibitGallery({
   return (
     <>
       <div className="flex flex-col border-t border-zinc-900">
-        <div className="shrink-0 px-3 py-2.5 bg-zinc-950/80 border-b border-zinc-900 flex items-center gap-2">
-          <Icon
-            icon="lucide:archive"
-            width={13}
-            className="text-zinc-500 shrink-0"
-          />
-          <span className="text-xs text-zinc-400 uppercase tracking-[0.35em] font-black">
-            {dict.discovery.exhibit}
-          </span>
-          <span className="ml-auto text-[9px] text-zinc-700 font-mono uppercase">
-            {exhibits.length} Item{exhibits.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-
         {availableTabs.length > 2 && (
           <div className="flex items-center gap-1 px-3 py-2 border-b border-zinc-900/60 bg-zinc-950/40 overflow-x-auto scrollbar-none">
             {availableTabs.map((tab) => (
