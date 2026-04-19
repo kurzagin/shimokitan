@@ -51,7 +51,7 @@ export const BentoCard = ({
             </div>
         )}
 
-        <div className={cn("relative z-10 flex-1 flex flex-col h-full min-h-0", !minimal && "p-4", contentClassName)}>
+        <div className={cn("relative z-10 flex-1 flex flex-col min-h-0", minimal ? "h-full" : "h-[calc(100%-2rem)]", !minimal && "p-4", contentClassName)}>
             {children}
         </div>
 

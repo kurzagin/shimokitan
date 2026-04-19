@@ -169,7 +169,7 @@ export default function HomeClient({
             priority
             className="object-cover object-[35%_center] opacity-40 group-hover:opacity-60 transition-all duration-1000 grayscale group-hover:grayscale-[0.3] scale-105 group-hover:scale-100"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-zinc-950/90 via-zinc-950/40 to-zinc-950/90" />
+          <div className="absolute inset-0 bg-linear-to-br from-zinc-950/90 via-zinc-950/40 to-zinc-950/90" />
           <div className="absolute inset-0 bg-zinc-950/20 mix-blend-overlay" />
         </div>
 
@@ -194,7 +194,7 @@ export default function HomeClient({
               ))}
             </div>
             <div className="mt-auto flex flex-col items-center gap-4">
-              <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-violet-500 to-transparent animate-pulse" />
+              <div className="w-px h-12 bg-linear-to-b from-transparent via-violet-500 to-transparent animate-pulse" />
               <div className="text-[8px] font-mono text-violet-500 uppercase [writing-mode:vertical-lr] rotate-180 tracking-widest font-black opacity-60">
                 ACTIVE_LINK
               </div>
@@ -265,10 +265,10 @@ export default function HomeClient({
 
             {/* Viewport Effects */}
             <div className="absolute inset-0 z-20 pointer-events-none">
-              <div className="absolute inset-y-0 left-1/4 w-[1px] bg-white/5" />
-              <div className="absolute inset-y-0 left-2/4 w-[1px] bg-white/5" />
-              <div className="absolute inset-y-0 left-3/4 w-[1px] bg-white/5" />
-              <div className="w-full h-[1px] bg-violet-500/20 absolute top-0 animate-[scan_8s_linear_infinite]" />
+              <div className="absolute inset-y-0 left-1/4 w-px bg-white/5" />
+              <div className="absolute inset-y-0 left-2/4 w-px bg-white/5" />
+              <div className="absolute inset-y-0 left-3/4 w-px bg-white/5" />
+              <div className="w-full h-px bg-violet-500/20 absolute top-0 animate-[scan_8s_linear_infinite]" />
             </div>
 
             {/* Photo Attribution */}
@@ -301,9 +301,9 @@ export default function HomeClient({
         icon="lucide:radio"
         minimal
       >
-        <div className="flex flex-col h-full relative z-[60] pointer-events-auto">
+        <div className="flex flex-col h-full relative z-60 pointer-events-auto">
           {/* Header */}
-          <div className="h-9 border-b border-zinc-800/50 flex items-center justify-between px-4 bg-zinc-950/40 shrink-0 relative z-[70]">
+          <div className="h-9 border-b border-zinc-800/50 flex items-center justify-between px-4 bg-zinc-950/40 shrink-0 relative z-70">
             <div className="flex items-center gap-2 text-zinc-500">
               <Icon
                 icon="lucide:disc"
@@ -399,7 +399,7 @@ export default function HomeClient({
               <div
                 className={cn(
                   "absolute -right-3 top-0 w-20 h-24 origin-top transition-transform duration-1000 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] z-20 pointer-events-none",
-                  audioState.isPlaying && !station.isMinimized && !station.isClosed ? "rotate-[20deg]" : "rotate-[-12deg]"
+                  audioState.isPlaying && !station.isMinimized && !station.isClosed ? "rotate-20" : "-rotate-12"
                 )}
                 style={{ transformOrigin: "80% 15%" }}
               >
@@ -412,12 +412,12 @@ export default function HomeClient({
                   <div className="absolute -top-5 right-0 w-5 h-9 bg-zinc-700 rounded-sm border-x border-b border-zinc-800 shadow-[2px_2px_0_rgba(0,0,0,0.4)] transform rotate-[-15deg]" />
                 </div>
                 <div className="absolute right-[20px] top-4 w-[5px] h-20 bg-zinc-400 rounded-full origin-top rotate-[5deg] overflow-hidden border-x border-zinc-500">
-                  <div className="absolute inset-y-0 left-0 w-[1px] bg-white/40" />
-                  <div className="absolute inset-y-0 right-0 w-[1px] bg-black/20" />
+                  <div className="absolute inset-y-0 left-0 w-px bg-white/40" />
+                  <div className="absolute inset-y-0 right-0 w-px bg-black/20" />
                 </div>
-                <div className="absolute bottom-[-12px] left-[10px] w-6 h-9 flex flex-col items-center transform rotate-[20deg]">
+                <div className="absolute bottom-[-12px] left-[10px] w-6 h-9 flex flex-col items-center transform rotate-20">
                   <div className="w-4 h-7 bg-zinc-900 rounded-t-sm rounded-br-xl border-l-2 border-zinc-800 relative shadow-[3px_3px_0px_rgba(0,0,0,0.5)]">
-                    <div className="absolute top-0 left-0 w-full h-[1px] bg-white/10" />
+                    <div className="absolute top-0 left-0 w-full h-px bg-white/10" />
                     <div className="absolute top-1 -right-3 w-3 h-1 bg-zinc-800 rounded-full rotate-[-30deg] border-b border-black/40" />
                   </div>
                   <div className="w-2 h-3 bg-rose-600 rounded-b-sm mt-[-2px] ml-1 z-30 border-x border-b border-rose-800 shadow-[2px_2px_0px_rgba(0,0,0,0.5)]" />
@@ -469,7 +469,7 @@ export default function HomeClient({
           </div>
 
           {/* Controls */}
-          <div className="p-3 bg-zinc-900/30 border-t border-zinc-900 space-y-2 shrink-0 relative z-[100] pointer-events-auto">
+          <div className="p-3 bg-zinc-900/30 border-t border-zinc-900 space-y-2 shrink-0 relative z-100 pointer-events-auto">
             <div className="w-full flex items-center gap-2 text-[9px] text-zinc-500 font-mono font-black italic">
               <span className="w-7 text-right">
                 {formatTime(audioState.currentTime)}
@@ -679,8 +679,8 @@ export default function HomeClient({
         "
         minimal
       >
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
-        <div className="flex flex-col h-full relative z-10 bg-gradient-to-b from-transparent to-zinc-950/90">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-size-[16px_16px] pointer-events-none" />
+        <div className="flex flex-col h-full relative z-10 bg-linear-to-b from-transparent to-zinc-950/90">
           {/* Header */}
           <div className="flex items-center justify-between h-8 px-4 bg-zinc-950/50 border-b border-zinc-800/50 z-10 group">
             <div className="flex items-center gap-2 text-zinc-500 group-hover:text-violet-400 transition-colors">
@@ -822,7 +822,7 @@ export default function HomeClient({
                 )}
                 
                 {/* HUD Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-transparent to-transparent opacity-60 pointer-events-none" />
                 <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end z-10 pointer-events-none">
                   <div className="space-y-0.5">
                     <div className="text-[10px] font-black text-rose-500 uppercase tracking-tighter italic bg-rose-500/10 px-1.5 py-0.5 border-l border-rose-500 rounded-sm">
@@ -927,8 +927,9 @@ export default function HomeClient({
         "
         title="Featured Archives"
         icon="lucide:disc"
+        contentClassName="p-2 sm:p-2.5"
       >
-        <div className="grid grid-cols-[0.8fr_1.2fr] grid-rows-2 gap-2 h-[160px] sm:h-full">
+        <div className="grid grid-cols-[0.8fr_1.2fr] grid-rows-2 gap-1.5 h-[160px] lg:h-auto lg:flex-1 lg:min-h-0">
           {archiveArtifacts.length > 0 ? (
             (() => {
               // 1. Find the best vertical candidate (Anime or Game) for the left slot
@@ -1180,7 +1181,7 @@ export default function HomeClient({
                           />
                         </div>
                       )}
-                      <p className="text-[12px] text-zinc-800 leading-tight font-bold max-w-2xl border-l-[2px] border-zinc-900 pl-2 italic line-clamp-4">
+                      <p className="text-[12px] text-zinc-800 leading-tight font-bold max-w-2xl border-l-2 border-zinc-900 pl-2 italic line-clamp-4">
                         &ldquo;{issue.content}&rdquo;
                       </p>
                     </div>
