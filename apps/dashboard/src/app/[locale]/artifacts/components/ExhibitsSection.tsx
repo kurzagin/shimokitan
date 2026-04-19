@@ -167,6 +167,12 @@ export default function ExhibitsSection({
                                         src={ex.mediaUrl}
                                         alt={getDisplayTitle(ex)}
                                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            if (target.src.includes('maxresdefault.jpg')) {
+                                                target.src = target.src.replace('maxresdefault.jpg', 'hqdefault.jpg');
+                                            }
+                                        }}
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">

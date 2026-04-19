@@ -204,7 +204,7 @@ export default function ArtifactForm({
 
     const handleThumbnailUrlSelect = (url: string) => {
         let targetUrl = url;
-        if (url.includes('youtube.com/') || url.includes('youtu.be/')) {
+        if ((url.includes('youtube.com/') || url.includes('youtu.be/')) && !url.includes('img.youtube.com')) {
             const id = extractMediaId(url, 'youtube');
             const thumb = getThumbnailUrl(id, 'youtube');
             if (thumb) targetUrl = thumb;
@@ -229,7 +229,7 @@ export default function ArtifactForm({
 
     const handlePosterUrlSelect = (url: string) => {
         let targetUrl = url;
-        if (url.includes('youtube.com/') || url.includes('youtu.be/')) {
+        if ((url.includes('youtube.com/') || url.includes('youtu.be/')) && !url.includes('img.youtube.com')) {
             const id = extractMediaId(url, 'youtube');
             const thumb = getThumbnailUrl(id, 'youtube');
             if (thumb) targetUrl = thumb;
@@ -247,7 +247,7 @@ export default function ArtifactForm({
 
     const handleVinylUrlSelect = (url: string) => {
         let targetUrl = url;
-        if (url.includes('youtube.com/') || url.includes('youtu.be/')) {
+        if ((url.includes('youtube.com/') || url.includes('youtu.be/')) && !url.includes('img.youtube.com')) {
             const id = extractMediaId(url, 'youtube');
             const thumb = getThumbnailUrl(id, 'youtube');
             if (thumb) targetUrl = thumb;
@@ -419,7 +419,7 @@ export default function ArtifactForm({
     const handleExhibitMediaUrlSelected = (idx: number, url: string) => {
         let targetUrl = url;
         // If it's a YouTube link, automatically transform it to a thumbnail URL for preview
-        if (url.includes('youtube.com/') || url.includes('youtu.be/') || url.includes('youtube-nocookie.com/')) {
+        if ((url.includes('youtube.com/') || url.includes('youtu.be/') || url.includes('youtube-nocookie.com/')) && !url.includes('img.youtube.com')) {
             const id = extractMediaId(url, 'youtube');
             const thumb = getThumbnailUrl(id, 'youtube', 'max');
             if (thumb) targetUrl = thumb;

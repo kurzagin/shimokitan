@@ -23,7 +23,7 @@ export function extractMediaId(url: string, platform: string): string | null {
              * youtube.com/live/ID
              * music.youtube.com/watch?v=ID
              */
-            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+            const regex = /(?:youtube\.com\/(?:(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
             const match = trimmedUrl.match(regex);
             return match ? match[1] : null;
         }
@@ -172,7 +172,7 @@ export function detectPlatformFromUrl(url: string | null): {
     if (!url) return null;
     const v = url.toLowerCase();
 
-    if (v.includes('youtube.com/') || v.includes('youtu.be/')) return { platform: 'youtube', category: 'video', role: 'video' };
+    if ((v.includes('youtube.com/') || v.includes('youtu.be/') || v.includes('youtube-nocookie.com/')) && !v.includes('img.youtube.com')) return { platform: 'youtube', category: 'video', role: 'video' };
     if (v.includes('spotify.com/')) return { platform: 'spotify', category: 'audio', role: 'audio' };
     if (v.includes('soundcloud.com/')) return { platform: 'soundcloud', category: 'audio', role: 'audio' };
     if (v.includes('apple.com/')) return { platform: 'apple_music', category: 'audio', role: 'audio' };

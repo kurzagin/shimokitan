@@ -150,7 +150,7 @@ export default function WorkForm({
 
     const handleThumbnailUrlSelect = (url: string) => {
         let targetUrl = url;
-        if (url.includes('youtube.com/') || url.includes('youtu.be/')) {
+        if ((url.includes('youtube.com/') || url.includes('youtu.be/')) && !url.includes('img.youtube.com')) {
             const id = extractMediaId(url, 'youtube');
             const thumb = getThumbnailUrl(id, 'youtube');
             if (thumb) targetUrl = thumb;

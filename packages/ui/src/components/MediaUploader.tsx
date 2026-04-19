@@ -134,7 +134,17 @@ export function MediaUploader({
                 {preview ? (
                     <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={preview} alt="Preview" className={`w-full h-full object-cover transition-opacity ${uploading ? 'opacity-50' : 'opacity-100'}`} />
+                        <img 
+                            src={preview} 
+                            alt="Preview" 
+                            className={`w-full h-full object-cover transition-opacity ${uploading ? 'opacity-50' : 'opacity-100'}`} 
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                if (target.src.includes('maxresdefault.jpg')) {
+                                    target.src = target.src.replace('maxresdefault.jpg', 'hqdefault.jpg');
+                                }
+                            }}
+                        />
                         {onRemove && (
                             <button
                                 type="button"
