@@ -7,7 +7,7 @@
         "packages/*"
     ],
     "scripts": {
-        "sync-env": "bun -e \"import fs from 'node:fs'; const env = '.env.local'; ['apps/main', 'apps/signal', 'apps/dashboard'].forEach(dir => { if (fs.existsSync(env)) fs.copyFileSync(env, dir + '/' + env) })\"",
+        "sync-env": "bun -e \"import fs from 'node:fs'; const env = '.env.local'; ['apps/main', 'apps/signal', 'apps/dashboard', 'packages/db'].forEach(dir => { if (fs.existsSync(env)) fs.copyFileSync(env, dir + '/' + env) })\"",
         "build": "bun run sync-env && bun x turbo build",
         "build:main": "bun run sync-env && bun x turbo build --filter=main",
         "build:signal": "bun run sync-env && bun x turbo build --filter=signal",

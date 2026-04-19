@@ -18,7 +18,7 @@ let dbInstance: NeonDatabase<typeof schema>;
 
 export function getDb() {
   if (!dbInstance) {
-    const databaseUrl = process.env.DATABASE_URL || process.env.NEXT_PUBLIC_DATABASE_URL;
+    const databaseUrl = process.env.DATABASE_URL;
     if (!databaseUrl) {
       console.warn('DATABASE_URL is not defined. Database operations will fail.');
       return null;
