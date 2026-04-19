@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 import { BrandIcon } from '@/components/BrandIcon';
-import { Badge, cn } from '@shimokitan/ui';
+import { Badge, cn, DistrictAvatar } from '@shimokitan/ui';
 
 import { getArtifactById, resolveTranslation, getDb, schema, eq } from '@shimokitan/db';
 import Link from '@/components/Link';
@@ -506,13 +506,14 @@ export default async function ArtifactPage(props: {
                                             <div key={zine.id} className="relative group/zine">
                                                 <div className="flex gap-4 p-4 border border-zinc-900 bg-zinc-950/40 hover:border-rose-900/40 hover:bg-rose-950/5 transition-all duration-500">
                                                     <div className="flex flex-col items-center shrink-0 pt-1">
-                                                        <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center p-0 overflow-hidden shadow-inner shrink-0 leading-none">
-                                                            {zine.author?.avatarUrl ? (
-                                                                <img src={zine.author.avatarUrl} className="w-full h-full object-cover" />
-                                                            ) : (
-                                                                <Icon icon="lucide:user" className="text-zinc-700" width={14} />
-                                                            )}
-                                                        </div>
+                                                        <DistrictAvatar 
+                                                            src={zine.author?.avatar?.url} 
+                                                            fallbackSrc={zine.author?.image}
+                                                            size="sm" 
+                                                            shape="circle" 
+                                                            alt={zine.author?.name || "Resident"} 
+                                                            className="shadow-inner"
+                                                        />
                                                         <div className="w-[1px] flex-1 bg-gradient-to-b from-zinc-800 to-transparent my-2" />
                                                     </div>
                                                     
@@ -704,13 +705,14 @@ function ProvenanceCreditRow({ credit, locale, color }: { credit: any; locale: s
             )}
         >
             <div className={cn("absolute top-0 left-0 w-0.5 h-full", barColorMap[color])} />
-            <div className="w-9 h-9 shrink-0 bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden">
-                {credit.entity?.avatar?.url ? (
-                    <img src={credit.entity.avatar.url} className="w-full h-full object-cover" />
-                ) : (
-                    <Icon icon="lucide:user" width={14} className="text-zinc-700" />
-                )}
-            </div>
+            <DistrictAvatar 
+                src={credit.entity?.avatar?.url} 
+                fallbackSrc={credit.entity?.thumbnail?.url}
+                size="sm" 
+                shape="square" 
+                className="border border-zinc-800"
+                alt={name}
+            />
             <div className="min-w-0 flex-1">
                 <div className="text-sm font-black text-zinc-100 uppercase italic truncate leading-tight">{name}</div>
                 <div className="flex items-center gap-2 mt-1">

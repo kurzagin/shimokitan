@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
-import { BentoCard, Badge, cn } from '@shimokitan/ui';
+import { BentoCard, Badge, cn, DistrictAvatar } from '@shimokitan/ui';
 import Link from 'next/link';
 
 import { getEntityUrl } from '@shimokitan/utils';
@@ -13,6 +13,7 @@ type Entity = {
     name: string;
     type: string;
     avatarUrl: string | null;
+    thumbnailUrl: string | null;
     civilStatus: string;
     artifactCount: number;
 };
@@ -86,20 +87,14 @@ export default function ArtistsBrowser({ initialEntities }: { initialEntities: E
                         className="group relative bg-zinc-950/20 border border-zinc-900 hover:border-violet-900/50 p-6 transition-all duration-700 overflow-hidden flex flex-col gap-6"
                     >
                         <div className="flex items-start gap-6 z-10">
-                            <div className="w-32 h-32 bg-zinc-900 border border-zinc-800 flex-shrink-0">
-                                {entity.avatarUrl ? (
-                                    <img
-                                        src={entity.avatarUrl}
-                                        alt={entity.name}
-                                        className="w-full h-full object-cover transition-all duration-700"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 text-zinc-700">
-                                        <div className="w-2 h-2 bg-zinc-800 rounded-sm mb-1" />
-                                        <span className="text-[6px] font-mono tracking-tighter">NO_SIGNAL</span>
-                                    </div>
-                                )}
-                            </div>
+                            <DistrictAvatar 
+                                src={entity.avatarUrl} 
+                                fallbackSrc={entity.thumbnailUrl}
+                                size="xl" 
+                                shape="square" 
+                                className="border border-zinc-800"
+                                alt={entity.name}
+                            />
                             <div className="flex flex-col flex-1 min-w-0 pt-1">
                                 <div className="flex items-center justify-between mb-1.5">
                                     <div className="flex items-center gap-1.5">

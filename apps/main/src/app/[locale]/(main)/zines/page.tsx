@@ -4,6 +4,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { getDb, schema, desc } from '@shimokitan/db';
 import Link from '@/components/Link';
 import { getDictionary, Locale } from "@shimokitan/utils";
+import { DistrictAvatar } from '@shimokitan/ui';
 import { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -26,7 +27,11 @@ export default async function PublicZinesPage({ params }: { params: Promise<{ lo
         orderBy: [desc(schema.zines.createdAt)],
         with: {
             artifact: true,
-            author: true,
+            author: {
+                with: {
+                    avatar: true
+                }
+            },
             translations: true
         }
     });
@@ -50,6 +55,8 @@ export default async function PublicZinesPage({ params }: { params: Promise<{ lo
       {/* Zine Stream */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {zines.map((zine: any) => {
+          const authorAvatar = zine.author?.avatar?.url || zine.author?.image;
+          
           return (
             <div key={zine.id} className="bg-zinc-950/20 border border-zinc-900 rounded-2xl p-8 flex flex-col gap-8 relative overflow-hidden group hover:border-rose-900/30 transition-all duration-700">
               {/* Artifact Reference */}
@@ -71,14 +78,12 @@ export default async function PublicZinesPage({ params }: { params: Promise<{ lo
               {/* Author & Resonance */}
               <div className="mt-auto pt-8 border-t border-zinc-900/50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center p-0 overflow-hidden">
-                    {zine.author?.avatarUrl ? (
-                      <img src={zine.author.avatarUrl} className="w-full h-full object-cover" />
-                    ) : (
-                      <Icon icon="lucide:user" className="text-zinc-600" width={18} height={18} />
-                    )
-                    }
-                  </div>
+                  <DistrictAvatar 
+                    src={authorAvatar} 
+                    size="md" 
+                    shape="circle" 
+                    alt={zine.author?.name || "Resident"} 
+                  />
                   <div className="flex flex-col">
                     <span className="text-xs font-black uppercase text-zinc-200">{zine.author?.name || "Resident"}</span>
                   </div>

@@ -76,6 +76,7 @@ export { InlineMarkdown } from "./components/InlineMarkdown";
 export { NavigationLink } from "./components/NavigationLink";
 export { NotFound } from "./components/NotFound";
 export { ErrorDisplay } from "./components/ErrorDisplay";
+export { DistrictAvatar } from "./components/DistrictAvatar";
 
 // --- Theme ---
 export { ThemeProvider } from "./components/theme-provider";

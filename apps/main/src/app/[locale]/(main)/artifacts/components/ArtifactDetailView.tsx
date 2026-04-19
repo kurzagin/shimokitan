@@ -2,7 +2,7 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 import { BrandIcon } from '@/components/BrandIcon';
-import { Badge, cn } from '@shimokitan/ui';
+import { Badge, cn, DistrictAvatar } from '@shimokitan/ui';
 import Link from '@/components/Link';
 import { getEntityUrl } from '@shimokitan/utils';
 import { PlayButton } from './PlayButton';
@@ -756,13 +756,13 @@ export function ArtifactDetailView({
                                         <div key={zine.id} className="relative group/zine">
                                             <div className="flex gap-4 p-4 border border-zinc-900 bg-zinc-950/40 hover:border-rose-900/40 hover:bg-rose-950/5 transition-all duration-500">
                                                 <div className="flex flex-col items-center shrink-0 pt-1">
-                                                    <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center p-0 overflow-hidden shadow-inner shrink-0 leading-none">
-                                                        {zine.author?.avatarUrl ? (
-                                                            <img src={zine.author.avatarUrl} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <Icon icon="lucide:user" className="text-zinc-700" width={14} />
-                                                        )}
-                                                    </div>
+                                                    <DistrictAvatar 
+                                                        src={zine.author?.avatar?.url || zine.author?.image} 
+                                                        size="sm" 
+                                                        shape="square" 
+                                                        alt={zine.author?.name || ''} 
+                                                        className="group-hover/zine:border-rose-500/50"
+                                                    />
                                                     <div className="w-px flex-1 bg-zinc-800/40 my-2" />
                                                 </div>
                                                 

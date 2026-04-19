@@ -9,6 +9,9 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 import { Icon } from '@iconify/react';
 import { isNull, schema as dbSchema, getDb } from '@shimokitan/db';
+import { 
+    DistrictAvatar,
+} from '@shimokitan/ui';
 import Link from '@/components/Link';
 import { auth } from '@shimokitan/auth';
 import { RequestAccessButton } from './_components/RequestAccessButton';
@@ -39,13 +42,19 @@ export default async function PedalboardPage({ params, searchParams }: PageProps
     // Fetch User Profile Data
     const userProfile = await db.query.users.findFirst({
         where: (u, { eq }) => eq(u.id, user.id),
+        with: {
+            avatar: true,
+            header: true,
+        }
     });
 
     const profileData = {
         name: userProfile?.name || user?.name || 'GHOST_SIGNAL',
         status: userProfile?.status || '',
         bio: userProfile?.bio || 'A digital resident of Shimokitazawa.',
-        handle: user?.email?.split('@')[0] || 'unknown'
+        handle: user?.email?.split('@')[0] || 'unknown',
+        avatarUrl: userProfile?.avatar?.url || '',
+        headerUrl: userProfile?.header?.url || '',
     };
 
     const isFounder = currentRole === 'FOUNDER';
@@ -60,7 +69,11 @@ export default async function PedalboardPage({ params, searchParams }: PageProps
             translations: {
                 where: (t, { eq }) => eq(t.locale, 'en')
             },
-            author: true,
+            author: {
+                with: {
+                    avatar: true
+                }
+            },
             artifact: {
                 with: {
                     translations: {
@@ -88,6 +101,7 @@ export default async function PedalboardPage({ params, searchParams }: PageProps
         artifact: z.artifact?.translations?.[0]?.title || 'UNSET',
         content: z.translations?.[0]?.content || 'Signal fragmentation detected...',
         author: z.author?.name || 'Anonymous',
+        authorAvatar: z.author?.avatar?.url || z.author?.image || '',
         updatedAt: 'recently', // Simplified for now
         views: '0',
         heat: `+${z.resonance || 0}`,
@@ -101,16 +115,29 @@ export default async function PedalboardPage({ params, searchParams }: PageProps
             {/* Profile Header Block */}
             <section className="relative">
                 <div className="h-48 md:h-64 bg-zinc-900 border border-zinc-800 relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:20px_20px]" />
+                    {profileData.headerUrl ? (
+                        <img 
+                            src={profileData.headerUrl} 
+                            className="w-full h-full object-cover opacity-80"
+                            alt="Header"
+                        />
+                    ) : (
+                        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:20px_20px]" />
+                    )}
                 </div>
 
                 <div className="px-6 md:px-10 -mt-16 relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div className="flex flex-col md:flex-row md:items-end gap-6">
-                        <div className="w-32 h-32 md:w-40 md:h-40 bg-black border-4 border-[#050505] relative shadow-2xl">
-                            <div className="w-full h-full bg-zinc-800 flex items-center justify-center text-zinc-600 overflow-hidden">
-                                <Icon icon="lucide:user" width={64} />
-                            </div>
-                            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-rose-600 flex items-center justify-center text-white border-2 border-black">
+                        <div className="relative">
+                            <DistrictAvatar 
+                                src={userProfile?.avatar?.url} 
+                                fallbackSrc={user.image} 
+                                size="xl" 
+                                shape="square" 
+                                className="border-4 border-[#050505] shadow-2xl"
+                                alt={user.name || ''}
+                            />
+                            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-rose-600 flex items-center justify-center text-white border-2 border-black z-20">
                                 <Icon icon="lucide:check-circle-2" width={16} />
                             </div>
                         </div>
@@ -158,7 +185,12 @@ export default async function PedalboardPage({ params, searchParams }: PageProps
                         {formattedZineFeed.length > 0 ? formattedZineFeed.map((zine) => (
                             <div key={zine.id} className="p-6 md:p-8 border-b border-zinc-900 hover:bg-zinc-900/10 transition-colors group relative">
                                 <div className="flex gap-4">
-                                    <div className="w-10 h-10 bg-zinc-800 shrink-0 border border-zinc-700" />
+                                    <DistrictAvatar 
+                                        src={zine.authorAvatar} 
+                                        size="md" 
+                                        shape="square" 
+                                        alt={zine.author} 
+                                    />
 
                                     <div className="flex-1 space-y-3">
                                         <div className="flex items-center justify-between">

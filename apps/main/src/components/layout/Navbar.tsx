@@ -15,6 +15,7 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
+    DistrictAvatar
 } from '@shimokitan/ui';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@shimokitan/auth';
@@ -155,15 +156,13 @@ export function Navbar() {
                                     <div className="hidden sm:flex flex-col items-end leading-none">
                                         <span className="text-white text-[10px] font-black uppercase tracking-tight group-hover:text-violet-400 transition-colors">{user.name || 'Resident'}</span>
                                     </div>
-                                    <div className="w-8 h-8 rounded-sm bg-zinc-900 border border-zinc-800 overflow-hidden group-hover:border-violet-500/50 transition-colors">
-                                        {user.image ? (
-                                            <img src={user.image} alt={user.name || ''} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-zinc-700">
-                                                <Icon icon="lucide:user" width={16} />
-                                            </div>
-                                        )}
-                                    </div>
+                                    <DistrictAvatar 
+                                        src={user.image} 
+                                        size="sm" 
+                                        shape="square" 
+                                        alt={user.name || ''} 
+                                        className="group-hover:border-violet-500/50"
+                                    />
                                 </Link>
                                 <button
                                     onClick={handleLogout}
@@ -304,9 +303,13 @@ export function Navbar() {
                                         {user ? (
                                             <div className="flex items-center justify-between p-3 bg-zinc-900/50 border border-zinc-800/50 rounded-xl">
                                                 <Link href="/pedalboard" onClick={() => setIsOpen(false)} className="flex items-center gap-3 group">
-                                                    <div className="w-10 h-10 rounded-lg border border-zinc-800 overflow-hidden bg-zinc-900 shadow-inner group-hover:border-violet-500/50 transition-colors">
-                                                        {user.image ? <img src={user.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-zinc-700 bg-zinc-950"><Icon icon="lucide:user" width={20} /></div>}
-                                                    </div>
+                                                    <DistrictAvatar 
+                                                        src={user.image} 
+                                                        size="md" 
+                                                        shape="square" 
+                                                        alt={user.name || ''} 
+                                                        className="group-hover:border-violet-500/50"
+                                                    />
                                                     <div className="flex flex-col">
                                                         <span className="text-white text-[11px] font-black uppercase italic tracking-tight group-hover:text-violet-400 transition-colors">{user.name}</span>
                                                         <span className="text-emerald-500 text-[8px] font-mono font-bold tracking-[0.2em] uppercase">{dict.resident_stable}</span>

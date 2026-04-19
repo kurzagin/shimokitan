@@ -5,7 +5,7 @@ import { Icon } from '@iconify/react';
 import { BrandIcon } from '@/components/BrandIcon';
 import Link from 'next/link';
 import { Dictionary, getMediaByRole, resolveTranslation } from '@shimokitan/utils';
-import { cn } from '@shimokitan/ui';
+import { cn, DistrictAvatar } from '@shimokitan/ui';
 
 // ─── Link Category Detection ─────────────────────────────────────────────────
 type LinkCategory = 'social_media' | 'commerce' | 'platform' | 'video' | 'audio';
@@ -410,17 +410,14 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
                         
                         <div className="relative z-10 flex items-center gap-4 pb-20 md:pb-32 lg:pb-40">
-                            <div className="relative flex-shrink-0 w-16 h-16 md:w-20 md:h-20 border border-zinc-600 bg-zinc-950 overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-                                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-zinc-400 z-10" />
-                                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-zinc-400 z-10" />
-                                {entity.avatar?.url || entity.thumbnail?.url ? (
-                                    <img src={entity.avatar?.url || entity.thumbnail?.url} className="w-full h-full object-cover" alt={name} />
-                                ) : (
-                                    <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-600">
-                                        <Icon icon="lucide:user-round" width={32} />
-                                    </div>
-                                )}
-                            </div>
+                            <DistrictAvatar 
+                                src={entity.avatar?.url} 
+                                fallbackSrc={entity.thumbnail?.url}
+                                size="lg" 
+                                shape="square" 
+                                className="border border-zinc-600 shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+                                alt={name}
+                            />
                             <div className="flex flex-col gap-1.5 min-w-0">
                                 <div className="flex items-center gap-2.5">
                                     <h1 className="font-black italic tracking-tighter uppercase text-white leading-none" style={{ fontSize: 'clamp(1.4rem, 5vw, 2.5rem)' }}>

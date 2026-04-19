@@ -62,6 +62,8 @@ export async function ensureUserSync() {
             const updateObj: any = {};
             if (existingById.email !== userEmail) updateObj.email = userEmail;
             if (!existingById.name && userName) updateObj.name = userName;
+            if (existingById.image !== userImage && userImage) updateObj.image = userImage;
+            if (existingById.emailVerified !== (session.user as any).emailVerified) updateObj.emailVerified = (session.user as any).emailVerified;
 
             if (Object.keys(updateObj).length > 0) {
                 updateObj.updatedAt = new Date();
@@ -70,7 +72,14 @@ export async function ensureUserSync() {
                     .where(eq(schema.users.id, userId));
             }
 
-            return { ...session.user, email: userEmail, role: existingById.role, resonanceMultiplier: existingById.resonanceMultiplier };
+            return { 
+                ...session.user, 
+                email: userEmail, 
+                role: existingById.role, 
+                resonanceMultiplier: Number(existingById.resonanceMultiplier),
+                image: existingById.image,
+                emailVerified: existingById.emailVerified
+            };
         }
 
         // 2. If not found by ID, try to find by Email
@@ -83,11 +92,20 @@ export async function ensureUserSync() {
                 .set({
                     id: userId,
                     name: existingByEmail.name || userName,
+                    image: existingByEmail.image || userImage,
+                    emailVerified: (session.user as any).emailVerified || existingByEmail.emailVerified,
                     updatedAt: new Date()
                 })
                 .where(eq(schema.users.email, userEmail));
 
-            return { ...session.user, email: userEmail, role: existingByEmail.role, resonanceMultiplier: existingByEmail.resonanceMultiplier };
+            return { 
+                ...session.user, 
+                email: userEmail, 
+                role: existingByEmail.role, 
+                resonanceMultiplier: Number(existingByEmail.resonanceMultiplier),
+                image: existingByEmail.image || userImage,
+                emailVerified: (session.user as any).emailVerified || existingByEmail.emailVerified
+            };
         }
 
         // 3. Create new user
@@ -95,11 +113,20 @@ export async function ensureUserSync() {
             id: userId,
             email: userEmail,
             name: userName,
+            image: userImage,
+            emailVerified: (session.user as any).emailVerified || false,
             role: 'resident' as const,
         };
         await db.insert(schema.users).values(newUser);
 
-        return { ...session.user, email: userEmail, role: 'resident', resonanceMultiplier: 100 };
+        return { 
+            ...session.user, 
+            email: userEmail, 
+            role: 'resident', 
+            resonanceMultiplier: 100,
+            image: userImage,
+            emailVerified: (session.user as any).emailVerified || false
+        };
 
     } catch (error: any) {
         if (error.code === '23505') {

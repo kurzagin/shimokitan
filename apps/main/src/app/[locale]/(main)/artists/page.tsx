@@ -32,6 +32,7 @@ export default async function ArtistsBrowsePage(props: { params: Promise<{ local
             name: translation?.name || (e as any).name || "Anonymous Artist",
             type: e.type,
             avatarUrl: e.avatar?.url,
+            thumbnailUrl: e.thumbnail?.url,
             civilStatus: e.civilStatus,
             artifactCount: e.credits?.length || 0
         };

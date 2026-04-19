@@ -18,6 +18,10 @@ export default async function ProfileEditPage(props: { params: Promise<{ locale:
 
     const userProfile = await db.query.users.findFirst({
         where: eq(schema.users.id, user.id),
+        with: {
+            avatar: true,
+            header: true,
+        }
     });
 
     if (!userProfile) {
@@ -28,6 +32,10 @@ export default async function ProfileEditPage(props: { params: Promise<{ locale:
         name: userProfile.name || '',
         status: userProfile.status || '',
         bio: userProfile.bio || '',
+        avatarId: userProfile.avatarId || null,
+        headerId: userProfile.headerId || null,
+        avatarUrl: userProfile.avatar?.url || '',
+        headerUrl: userProfile.header?.url || '',
     };
 
     return (

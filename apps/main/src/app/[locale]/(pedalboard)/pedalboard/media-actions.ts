@@ -71,10 +71,10 @@ export async function uploadMediaAction(formData: FormData) {
             image.resize(1024, 1024, { fit: 'inside', withoutEnlargement: true });
         }
 
-        // Convert to WebP
-        processedBuffer = await image.webp({ quality: 80 }).toBuffer();
-        mimeType = 'image/webp';
-        extension = 'webp';
+        // Convert to AVIF
+        processedBuffer = await image.avif({ quality: 65 }).toBuffer();
+        mimeType = 'image/avif';
+        extension = 'avif';
 
         const finalMetadata = await sharp(processedBuffer).metadata();
         width = finalMetadata.width || null;
@@ -84,12 +84,18 @@ export async function uploadMediaAction(formData: FormData) {
         blurhashStr = await encodeImageToBlurhash(processedBuffer);
     }
 
-    const key = generateStoragePath({
-        mediaType: isImage ? 'images' : 'dumps',
-        context: contextType === 'entity_avatar' ? 'profiles' : 'artifacts',
-        identifier: mediaId, // Default to mediaId for isolation
-        filename: `${nanoid()}.${extension}`
-    });
+    let key: string;
+    if (contextType === 'entity_avatar') {
+        // Custom path as requested: /users/media/mediaid.avif
+        key = `users/media/${mediaId}.${extension}`;
+    } else {
+        key = generateStoragePath({
+            mediaType: isImage ? 'images' : 'dumps',
+            context: 'artifacts',
+            identifier: mediaId,
+            filename: `${nanoid()}.${extension}`
+        });
+    }
 
     // Upload optimized buffer to R2
     const publicUrl = await uploadFileToR2(processedBuffer, key, mimeType);

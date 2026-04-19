@@ -99,17 +99,25 @@ export function getOptimizedImageUrl(
 ): string | null {
     if (!url) return null;
 
-    // Use default quality 80 if not specified
+    // Use format=auto to allow Cloudflare to serve AVIF/WebP based on browser support
     const quality = options.quality ?? 80;
-    const params = [`format=webp`, `quality=${quality}`];
+    const params = [`format=auto`, `quality=${quality}`];
 
     if (options.width) params.push(`width=${options.width}`);
     if (options.height) params.push(`height=${options.height}`);
     if (options.fit) params.push(`fit=${options.fit}`);
 
+    // If it's an internal CDN URL, we can use a relative path for Cloudflare resizing
+    // this is often more reliable than passing a full URL to cdn-cgi
+    const cdnDomain = 'https://cdn.shimokitan.live';
+    let processedUrl = url;
+    if (url.startsWith(cdnDomain)) {
+        processedUrl = url.replace(cdnDomain, '');
+    }
+
     // Cloudflare Image Resizing endpoint
     // Format: /cdn-cgi/image/{params}/{url}
-    return `/cdn-cgi/image/${params.join(',')}/${url}`;
+    return `/cdn-cgi/image/${params.join(',')}/${processedUrl}`;
 }
 
 /**

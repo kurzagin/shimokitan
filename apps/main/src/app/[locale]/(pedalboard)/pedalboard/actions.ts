@@ -147,22 +147,55 @@ export async function purgeCollection(id: string) {
 
 // --- PROFILE & STORAGE ---
 
-export async function updateUserProfile(data: { name: string; status: string; bio: string }) {
+export async function updateUserProfile(data: { 
+    name: string; 
+    status: string; 
+    bio: string; 
+    avatarId?: string | null; 
+    headerId?: string | null;
+}) {
     const user = await requireUser();
     const db = getDb();
     if (!db) throw new Error('DB_Terminal_Offline');
 
-    await db.update(schema.users)
-        .set({
-            name: data.name,
-            status: data.status,
-            bio: data.bio,
-            updatedAt: new Date()
-        })
-        .where(eq(schema.users.id, user.id));
+    await db.transaction(async (tx) => {
+        let avatarUrl = undefined;
+        if (data.avatarId) {
+            const m = await tx.query.media.findFirst({
+                where: (m, { eq }) => eq(m.id, data.avatarId!)
+            });
+            if (m) avatarUrl = m.url;
+        }
 
+        await tx.update(schema.users)
+            .set({
+                name: data.name,
+                status: data.status,
+                bio: data.bio,
+                avatarId: data.avatarId,
+                headerId: data.headerId,
+                ...(avatarUrl ? { image: avatarUrl } : {}),
+                updatedAt: new Date()
+            })
+            .where(eq(schema.users.id, user.id));
+
+        // Sync to neon_auth schema for session consistency
+        if (avatarUrl) {
+            await tx.execute(sql`UPDATE neon_auth.user SET image = ${avatarUrl} WHERE id::text = ${user.id}`);
+        }
+
+        if (data.avatarId) {
+            await tx.update(schema.media).set({ isOrphan: false }).where(eq(schema.media.id, data.avatarId));
+        }
+        if (data.headerId) {
+            await tx.update(schema.media).set({ isOrphan: false }).where(eq(schema.media.id, data.headerId));
+        }
+    });
+
+    revalidatePath('/', 'layout');
     revalidatePath('/[locale]/pedalboard', 'page');
     revalidatePath('/[locale]/pedalboard/profile/edit', 'page');
+    revalidatePath('/[locale]/zines', 'page');
     return { success: true };
 }
 

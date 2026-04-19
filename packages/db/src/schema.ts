@@ -155,11 +155,15 @@ export const entityTags = pgTable("entity_tags", {
 export const users = pgTable("users", {
     id: text("id").primaryKey(),
     email: text("email").notNull().unique(),
+    emailVerified: boolean("email_verified").default(false).notNull(),
     name: text("name"),
+    image: text("image"),
     bio: text("bio"),
     status: text("status"),
     role: userRoleEnum("role").default("resident").notNull(),
     resonanceMultiplier: numeric("resonance_multiplier", { precision: 10, scale: 4 }).default("1.0000"),
+    avatarId: text("avatar_id").references(() => media.id, { onDelete: "set null" }),
+    headerId: text("header_id").references(() => media.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
@@ -757,11 +761,12 @@ export const mediaRelations = relations(media, ({ one }) => ({
     uploader: one(users, { fields: [media.uploaderId], references: [users.id] }),
 }));
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
     managedEntities: many(entityManagers),
     zines: many(zines),
     reactions: many(artifactReactions),
-
+    avatar: one(media, { fields: [users.avatarId], references: [media.id] }),
+    header: one(media, { fields: [users.headerId], references: [media.id] }),
 }));
 
 export const collectionsRelations = relations(collections, ({ one, many }) => ({

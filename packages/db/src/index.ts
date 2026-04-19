@@ -66,7 +66,11 @@ const artifactRelations = {
     zines: {
         with: {
             translations: true,
-            author: true,
+            author: {
+                with: {
+                    avatar: true
+                }
+            },
             exhibit: {
                 with: {
                     translations: true
@@ -135,7 +139,11 @@ const artifactRelations = {
             zines: {
                 with: {
                     translations: true,
-                    author: true
+                    author: {
+                        with: {
+                            avatar: true
+                        }
+                    }
                 }
             }
         }
