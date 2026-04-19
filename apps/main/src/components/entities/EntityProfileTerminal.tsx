@@ -152,10 +152,10 @@ function CreditRow({ credit, locale, isFirst }: { credit: any, locale: string, i
     return (
         <Link
             href={`/artifacts/${credit.artifact.category}/${credit.artifact.id}`}
-            className="group flex gap-4 p-4 md:p-5 hover:bg-white/[0.025] transition-colors relative"
+            className="group flex gap-4 p-4 md:p-5 hover:bg-white/2.5 transition-colors relative"
         >
             {/* Thumbnail */}
-            <div className={`flex-shrink-0 bg-zinc-900 border-2 border-zinc-800 overflow-hidden group-hover:border-zinc-500 transition-all shadow-xl ${isFirst ? 'w-28 h-20 md:w-36 md:h-24' : 'w-20 h-14 md:w-28 md:h-18'}`}>
+            <div className={`shrink-0 bg-zinc-900 border-2 border-zinc-800 overflow-hidden group-hover:border-zinc-500 transition-all shadow-xl ${isFirst ? 'w-28 h-20 md:w-36 md:h-24' : 'w-20 h-14 md:w-28 md:h-18'}`}>
                 {thumbnailUrl ? (
                     <img
                         src={thumbnailUrl}
@@ -212,8 +212,8 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
         return (
             <>
                 <div className="fixed inset-0 pointer-events-none -z-20 overflow-hidden">
-                    <div className="absolute w-full h-[1px] bg-white/5 animate-pulse" style={{ top: '15%' }} />
-                    <div className="absolute w-full h-[1px] bg-white/5 animate-pulse" style={{ top: '85%' }} />
+                    <div className="absolute w-full h-px bg-white/5 animate-pulse" style={{ top: '15%' }} />
+                    <div className="absolute w-full h-px bg-white/5 animate-pulse" style={{ top: '85%' }} />
                 </div>
                 <div className="relative z-10 animate-in fade-in duration-1000 min-h-[80vh] flex items-center justify-center">
                     <div className="text-center space-y-8 max-w-md mx-auto px-6">
@@ -287,10 +287,10 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
         <>
             {/* Ambient scan lines */}
             <div className="fixed inset-0 pointer-events-none -z-20 overflow-hidden">
-                <div className="absolute w-full h-[1px] bg-white/[0.03]" style={{ top: '33%' }} />
-                <div className="absolute w-full h-[1px] bg-white/[0.03]" style={{ top: '66%' }} />
-                <div className="absolute top-0 left-[15%] w-[1px] h-full bg-white/[0.02]" />
-                <div className="absolute top-0 left-[85%] w-[1px] h-full bg-white/[0.02]" />
+                <div className="absolute w-full h-px bg-white/3" style={{ top: '33%' }} />
+                <div className="absolute w-full h-px bg-white/3" style={{ top: '66%' }} />
+                <div className="absolute top-0 left-[15%] w-px h-full bg-white/2" />
+                <div className="absolute top-0 left-[85%] w-px h-full bg-white/2" />
             </div>
 
             <div className="relative z-10 animate-in fade-in duration-700 -mt-4">
@@ -315,9 +315,9 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                         )}
 
                         {/* Scrim layers */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
-                        <div className="absolute bottom-0 left-0 right-0 h-3/4 bg-gradient-to-t from-black/90 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-r from-black/60 via-transparent to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 h-3/4 bg-linear-to-t from-black/90 to-transparent" />
 
                         {/* FEATURED badge — top left */}
                         <div className="absolute top-12 left-10 flex items-center gap-1.5 px-3 py-2 bg-black/70 backdrop-blur-sm border border-violet-500/40">
@@ -361,7 +361,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                 </div>
 
                                 {/* View arrow */}
-                                <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 border border-zinc-700 group-hover/feat:border-white group-hover/feat:bg-white/10 active:scale-95 transition-all">
+                                <div className="shrink-0 flex items-center justify-center w-10 h-10 border border-zinc-700 group-hover/feat:border-white group-hover/feat:bg-white/10 active:scale-95 transition-all">
                                     <Icon icon="lucide:arrow-up-right" width={16} className="text-zinc-500 group-hover/feat:text-white group-hover/feat:translate-x-0.5 group-hover/feat:-translate-y-0.5 transition-all" />
                                 </div>
                             </Link>
@@ -369,7 +369,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                             {/* ── PROFILE ROW ── */}
                             <div className="flex items-center gap-4 pt-4">
                                 {/* Avatar */}
-                                <div className="relative flex-shrink-0 w-16 h-16 border border-zinc-600 bg-zinc-950 overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+                                <div className="relative shrink-0 w-16 h-16 border border-zinc-600 bg-zinc-950 overflow-hidden shadow-[0_0_15px_rgba(255,255,255,0.05)]">
                                     <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-zinc-400 z-10" />
                                     <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-zinc-400 z-10" />
                                     {entity.avatar?.url || entity.thumbnail?.url ? (
@@ -389,7 +389,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                         </h1>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <div className="w-4 h-[1px] bg-zinc-700" />
+                                        <div className="w-4 h-px bg-zinc-700" />
                                         <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.3em] font-black">
                                             {professionalTitle && <span className="text-zinc-200">{professionalTitle} // </span>}
                                             {entityType}
@@ -407,7 +407,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                         {/* Ambient background for the empty hero */}
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(139,92,246,0.04),transparent)]" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(244,63,94,0.02),transparent)]" />
-                        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-black to-transparent" />
                         
                         <div className="relative z-10 flex items-center gap-4 pb-20 md:pb-32 lg:pb-40">
                             <DistrictAvatar 
@@ -425,7 +425,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                                     </h1>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-4 h-[1px] bg-zinc-700" />
+                                    <div className="w-4 h-px bg-zinc-700" />
                                     <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.3em] font-black">
                                         {professionalTitle && <span className="text-zinc-200">{professionalTitle} // </span>}
                                         {entityType}
@@ -627,7 +627,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
                         
                         {/* ── SECTION: Authorized Works ── */}
                         {authorizedCredits.length > 0 && (
-                            <div className="divide-y divide-zinc-900 border-b border-zinc-900 last:border-0 border-t border-zinc-900 first:border-t-0">
+                            <div className="divide-y divide-zinc-900 border-y border-zinc-900 last:border-0 first:border-t-0">
                                 <div className="lg:sticky lg:top-0 z-20 h-14 bg-zinc-950/90 backdrop-blur-md px-5 border-b border-zinc-900 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-5 h-5 border-2 border-violet-700 flex items-center justify-center">
@@ -651,7 +651,7 @@ export function EntityProfileTerminal({ entity, locale, dict, platforms = [] }: 
 
                         {/* ── SECTION: Contribution Ledger ── */}
                         {contributionCredits.length > 0 && (
-                            <div className="divide-y divide-zinc-900 border-b border-zinc-900 last:border-0 border-t border-zinc-900 first:border-t-0">
+                            <div className="divide-y divide-zinc-900 border-y border-zinc-900 last:border-0 first:border-t-0">
                                 <div className="lg:sticky lg:top-0 z-20 h-14 bg-zinc-950/90 backdrop-blur-md px-5 border-b border-zinc-900 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-5 h-5 border-2 border-zinc-600 flex items-center justify-center">

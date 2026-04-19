@@ -123,7 +123,7 @@ export default function ArtistsBrowser({ initialEntities }: { initialEntities: E
                         </div>
 
                         {/* Hover Overlay Gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-tr from-violet-950/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                        <div className="absolute inset-0 bg-linear-to-tr from-violet-950/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                         
                         {/* Static Deco HUD */}
                         <div className="absolute top-0 right-0 p-1 border-b border-l border-zinc-900 group-hover:border-violet-900/50 transition-colors z-10">

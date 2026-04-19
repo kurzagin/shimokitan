@@ -269,7 +269,7 @@ export default async function ArtifactPage(props: {
                             </div>
                             <div className="flex-1 h-1.5 bg-zinc-900 border border-zinc-800 overflow-hidden">
                                 <div
-                                    className="h-full bg-gradient-to-r from-rose-900 to-rose-500 shadow-[0_0_6px_rgba(225,29,72,0.4)]"
+                                    className="h-full bg-linear-to-r from-rose-900 to-rose-500 shadow-[0_0_6px_rgba(225,29,72,0.4)]"
                                     style={{ width: `${Math.min(100, Number(artifact.resonance || 0) * 0.5)}%` }}
                                 />
                             </div>
@@ -278,7 +278,7 @@ export default async function ArtifactPage(props: {
                 </div>
 
                 <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:divide-x lg:divide-zinc-900">
-                    <div className="order-3 lg:order-none lg:col-span-3 flex flex-col border-t lg:border-t-0 border-zinc-900">
+                    <div className="order-3 lg:order-0 lg:col-span-3 flex flex-col border-t lg:border-t-0 border-zinc-900">
                         <PanelHeader label={dict.discovery.record_panel} dot />
                         <div className="flex flex-col divide-y divide-zinc-900">
                             {artifact.work && (
@@ -309,7 +309,7 @@ export default async function ArtifactPage(props: {
                                                                     <div className="px-1.5 py-0.5 bg-violet-600/10 border border-violet-500/20 text-[8px] text-violet-400 font-black uppercase tracking-widest leading-none">
                                                                         {resolveTranslation(c.translations, locale)?.role || c.role || "ORIGIN"}
                                                                     </div>
-                                                                    <span className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.1em]">Heritage_Root</span>
+                                                                    <span className="text-[9px] text-zinc-700 font-bold uppercase tracking-widest">Heritage_Root</span>
                                                                 </div>
                                                             </div>
                                                         );
@@ -424,7 +424,7 @@ export default async function ArtifactPage(props: {
                         </div>
                     </div>
 
-                    <div className="order-1 lg:order-none lg:col-span-5 flex flex-col">
+                    <div className="order-1 lg:order-0 lg:col-span-5 flex flex-col">
                         <PanelHeader
                             label={dict.discovery.media_hub}
                             right={
@@ -462,7 +462,7 @@ export default async function ArtifactPage(props: {
                         {galleryItems.length > 0 && (
                             <div className="shrink-0 flex gap-2 p-2 border-b border-zinc-900 bg-zinc-950/20 overflow-x-auto scrollbar-none">
                                 {[thumbnail, poster, ...galleryItems.map((gi: any) => gi.media)].filter(Boolean).map((img: any, i: number) => (
-                                    <div key={i} className="shrink-0 h-12 aspect-[2/3] md:h-16 bg-zinc-900 border border-zinc-800 overflow-hidden group/thumb cursor-pointer">
+                                    <div key={i} className="shrink-0 h-12 aspect-2/3 md:h-16 bg-zinc-900 border border-zinc-800 overflow-hidden group/thumb cursor-pointer">
                                         <img src={img.url} className="w-full h-full object-cover opacity-60 group-hover/thumb:opacity-100 transition-all" />
                                     </div>
                                 ))}
@@ -514,7 +514,7 @@ export default async function ArtifactPage(props: {
                                                             alt={zine.author?.name || "Resident"} 
                                                             className="shadow-inner"
                                                         />
-                                                        <div className="w-[1px] flex-1 bg-gradient-to-b from-zinc-800 to-transparent my-2" />
+                                                        <div className="w-px flex-1 bg-linear-to-b from-zinc-800 to-transparent my-2" />
                                                     </div>
                                                     
                                                     <div className="min-w-0 flex-1 flex flex-col gap-2">
@@ -553,7 +553,7 @@ export default async function ArtifactPage(props: {
                                                 
                                                 {/* Decorative vertical line for the "pulse stream" effect */}
                                                 {idx !== (artifact as any).zines.length - 1 && (
-                                                    <div className="absolute left-8 top-12 bottom-0 w-[1px] bg-zinc-900 z-0" />
+                                                    <div className="absolute left-8 top-12 bottom-0 w-px bg-zinc-900 z-0" />
                                                 )}
                                             </div>
                                         );
@@ -584,7 +584,7 @@ export default async function ArtifactPage(props: {
                         )}
                     </div>
 
-                    <div className="order-4 md:order-2 lg:order-none lg:col-span-4 flex flex-col border-t lg:border-t-0 border-zinc-900">
+                    <div className="order-4 md:order-2 lg:order-0 lg:col-span-4 flex flex-col border-t lg:border-t-0 border-zinc-900">
                         <PanelHeader label="Provenance_Tree" icon="lucide:cpu" />
                         <div className="px-3 py-4 flex flex-col gap-5 pb-20">
                             {heritageCredits.length > 0 && (

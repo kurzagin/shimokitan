@@ -122,7 +122,7 @@ export default async function PedalboardPage({ params, searchParams }: PageProps
                             alt="Header"
                         />
                     ) : (
-                        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:20px_20px]" />
+                        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#27272a_1px,transparent_1px)] bg-size-[20px_20px]" />
                     )}
                 </div>
 
@@ -181,7 +181,7 @@ export default async function PedalboardPage({ params, searchParams }: PageProps
                         <button className="pb-4 text-xs font-black uppercase tracking-widest text-zinc-600 hover:text-zinc-400 transition-colors">Digital_Shelf</button>
                     </div>
 
-                    <div className="space-y-0 -mx-6 md:-mx-0">
+                    <div className="space-y-0 -mx-6 md:mx-0">
                         {formattedZineFeed.length > 0 ? formattedZineFeed.map((zine) => (
                             <div key={zine.id} className="p-6 md:p-8 border-b border-zinc-900 hover:bg-zinc-900/10 transition-colors group relative">
                                 <div className="flex gap-4">
