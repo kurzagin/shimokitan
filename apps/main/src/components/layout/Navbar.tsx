@@ -66,7 +66,7 @@ export function Navbar() {
 
     return (
         <header className="h-14 border-b border-zinc-800/80 flex items-center justify-between px-4 bg-zinc-950/40 backdrop-blur-2xl z-40 shrink-0 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-violet-500/50 to-transparent" />
 
             <div className="flex items-center gap-6">
                 <Link href="/" className="flex items-center gap-3 group">
@@ -151,11 +151,11 @@ export function Navbar() {
                     <>
                         {user ? (
                             <div className="flex items-center gap-4 animate-in fade-in duration-300">
-                                <div className="flex items-center gap-3">
+                                <Link href="/pedalboard" className="flex items-center gap-3 group">
                                     <div className="hidden sm:flex flex-col items-end leading-none">
-                                        <span className="text-white text-[10px] font-black uppercase tracking-tight">{user.name || 'Resident'}</span>
+                                        <span className="text-white text-[10px] font-black uppercase tracking-tight group-hover:text-violet-400 transition-colors">{user.name || 'Resident'}</span>
                                     </div>
-                                    <div className="w-8 h-8 rounded-sm bg-zinc-900 border border-zinc-800 overflow-hidden">
+                                    <div className="w-8 h-8 rounded-sm bg-zinc-900 border border-zinc-800 overflow-hidden group-hover:border-violet-500/50 transition-colors">
                                         {user.image ? (
                                             <img src={user.image} alt={user.name || ''} className="w-full h-full object-cover" />
                                         ) : (
@@ -164,15 +164,14 @@ export function Navbar() {
                                             </div>
                                         )}
                                     </div>
-
-                                    <button
-                                        onClick={handleLogout}
-                                        className="hidden sm:block p-1 px-2 text-zinc-600 hover:text-rose-500 transition-colors border border-transparent hover:border-zinc-800 rounded-sm"
-                                        title="Disconnect"
-                                    >
-                                        <Icon icon="lucide:power" width={14} />
-                                    </button>
-                                </div>
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="hidden sm:block p-1 px-2 text-zinc-600 hover:text-rose-500 transition-colors border border-transparent hover:border-zinc-800 rounded-sm"
+                                    title="Disconnect"
+                                >
+                                    <Icon icon="lucide:power" width={14} />
+                                </button>
                             </div>
                         ) : (
                             <Link
@@ -196,10 +195,10 @@ export function Navbar() {
                         </SheetTrigger>
                         <SheetContent side="right" className="bg-zinc-950/98 border-zinc-800 w-[min(90vw,380px)] backdrop-blur-2xl p-0 overflow-hidden flex flex-col">
                             {/* Decorative Top Accent */}
-                            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-violet-500/50 to-transparent z-50" />
+                            <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-violet-500/50 to-transparent z-50" />
                             
                             {/* Decorative Sidebar Gradient Mask */}
-                            <div className="absolute inset-y-0 left-0 w-[1px] bg-gradient-to-b from-transparent via-zinc-800/50 to-transparent" />
+                            <div className="absolute inset-y-0 left-0 w-px bg-linear-to-b from-transparent via-zinc-800/50 to-transparent" />
 
                             <SheetHeader className="p-6 border-b border-zinc-900/50 bg-zinc-950/50 relative shrink-0">
                                 <SheetTitle className="text-left">
@@ -304,15 +303,15 @@ export function Navbar() {
                                     <>
                                         {user ? (
                                             <div className="flex items-center justify-between p-3 bg-zinc-900/50 border border-zinc-800/50 rounded-xl">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-lg border border-zinc-800 overflow-hidden bg-zinc-900 shadow-inner">
+                                                <Link href="/pedalboard" onClick={() => setIsOpen(false)} className="flex items-center gap-3 group">
+                                                    <div className="w-10 h-10 rounded-lg border border-zinc-800 overflow-hidden bg-zinc-900 shadow-inner group-hover:border-violet-500/50 transition-colors">
                                                         {user.image ? <img src={user.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-zinc-700 bg-zinc-950"><Icon icon="lucide:user" width={20} /></div>}
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <span className="text-white text-[11px] font-black uppercase italic tracking-tight">{user.name}</span>
+                                                        <span className="text-white text-[11px] font-black uppercase italic tracking-tight group-hover:text-violet-400 transition-colors">{user.name}</span>
                                                         <span className="text-emerald-500 text-[8px] font-mono font-bold tracking-[0.2em] uppercase">{dict.resident_stable}</span>
                                                     </div>
-                                                </div>
+                                                </Link>
                                                 <button onClick={handleLogout} className="w-9 h-9 flex items-center justify-center text-rose-500 hover:bg-rose-500/10 rounded-lg border border-rose-500/20 transition-all hover:border-rose-500/40">
                                                     <Icon icon="lucide:power" width={18} />
                                                 </button>
