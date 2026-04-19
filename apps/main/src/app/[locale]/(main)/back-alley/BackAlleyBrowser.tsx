@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Badge, cn } from '@shimokitan/ui';
 import Link from '@/components/Link';
+import { useStationStore } from '@/lib/store/station-store';
 
 type Artifact = {
     id: string;
@@ -16,6 +17,9 @@ type Artifact = {
     isMajor: boolean;
     isVerified: boolean;
     artist?: string;
+    src: string;
+    format: string;
+    bitrate: string;
 };
 
 const categories = [
@@ -28,6 +32,30 @@ const categories = [
 export default function BackAlleyBrowser({ initialArtifacts }: { initialArtifacts: Artifact[] }) {
     const [activeCategory, setActiveCategory] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const station = useStationStore();
+
+    const handlePlay = (artifact: Artifact, e: React.MouseEvent) => {
+        e.preventDefault();
+        
+        if (station.currentTrack?.src === artifact.src) {
+            if (station.isClosed) station.setClosed(false);
+            window.dispatchEvent(new CustomEvent("shim_audio_command", { detail: { type: "playToggle" } }));
+        } else {
+            station.initialize({
+                title: artifact.title,
+                artist: artifact.artist || "ANON",
+                album: "Single",
+                cover: artifact.coverImage || "",
+                src: artifact.src,
+                format: artifact.format || "LOSSLESS",
+                bitrate: artifact.bitrate || "1411 KBPS",
+            });
+            station.setClosed(false);
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent("shim_audio_command", { detail: { type: "playToggle" } }));
+            }, 500);
+        }
+    };
 
     const filteredArtifacts = initialArtifacts.filter(a => {
         const matchesCategory = activeCategory === 'all' || a.nature === activeCategory;
@@ -81,18 +109,18 @@ export default function BackAlleyBrowser({ initialArtifacts }: { initialArtifact
             <div className="flex flex-col gap-4">
                 {filteredArtifacts.length > 0 ? (
                     filteredArtifacts.map((artifact) => (
-                        <Link
+                        <button
                             key={artifact.id}
-                            href={`/artifacts/${artifact.category}/${artifact.id}`}
+                            onClick={(e) => handlePlay(artifact, e)}
                             className={cn(
-                                "group/item transition-all duration-500 bg-zinc-950/20 border border-zinc-900 flex items-center p-3 relative overflow-hidden hover:border-violet-900/50",
+                                "group/item transition-all duration-500 bg-zinc-950/20 border border-zinc-900 flex items-center p-3 relative overflow-hidden hover:border-violet-900/50 text-left w-full",
                                 artifact.isMajor && "border-rose-900/30 hover:border-rose-500/50"
                             )}
                         >
                             {/* Vinyl Record Visual */}
                             <div className="relative w-24 h-24 shrink-0 mr-6">
                                 {/* The Record itself */}
-                                <div className="absolute inset-0 rounded-full bg-black border border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.8)] flex items-center justify-center overflow-hidden group-hover/item:rotate-[360deg] transition-transform duration-[3000ms] ease-linear">
+                                <div className="absolute inset-0 rounded-full bg-black border border-zinc-800 shadow-[0_0_20px_rgba(0,0,0,0.8)] flex items-center justify-center overflow-hidden group-hover/item:rotate-360 transition-transform duration-3000 ease-linear">
                                     {/* Vinyl Grooves (Fake) */}
                                     <div className="absolute inset-1 rounded-full border border-zinc-900/60" />
                                     <div className="absolute inset-3 rounded-full border border-zinc-900/60" />
@@ -110,14 +138,14 @@ export default function BackAlleyBrowser({ initialArtifacts }: { initialArtifact
                                         <div className="absolute inset-0 m-auto w-1.5 h-1.5 bg-black rounded-full border border-zinc-900" />
                                     </div>
                                     {/* Gloss / Shine Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent rounded-full pointer-events-none" />
+                                    <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-transparent rounded-full pointer-events-none" />
                                 </div>
                             </div>
 
                             {/* Track Info & Waveform */}
                             <div className="flex flex-col flex-1 min-w-0 pr-4 relative z-10">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="text-lg font-black italic tracking-tighter uppercase text-zinc-300 group-hover/item:text-white transition-colors truncate">
+                                    <h3 className="text-lg font-black italic tracking-tighter uppercase text-zinc-300 group-hover/item:text-white transition-colors truncate pr-1">
                                         {artifact.title}
                                     </h3>
                                     {artifact.isVerified && (
@@ -160,7 +188,7 @@ export default function BackAlleyBrowser({ initialArtifacts }: { initialArtifact
                                 <div className="flex flex-col items-end gap-1">
                                     <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.2em]">Quality</span>
                                     <Badge variant='clean' className="text-[10px] py-0 px-2 border-none bg-zinc-800/80">
-                                        LOSSLESS
+                                        {artifact.format || "LOSSLESS"}
                                     </Badge>
                                 </div>
                                 <div className="flex flex-col items-end gap-1 w-16">
@@ -180,8 +208,8 @@ export default function BackAlleyBrowser({ initialArtifacts }: { initialArtifact
                             </div>
                             
                             {/* Background ambient glow on hover */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-violet-900/0 via-violet-900/5 to-violet-900/0 opacity-0 group-hover/item:opacity-100 pointer-events-none transition-opacity duration-700" />
-                        </Link>
+                            <div className="absolute inset-0 bg-linear-to-r from-violet-900/0 via-violet-900/5 to-violet-900/0 opacity-0 group-hover/item:opacity-100 pointer-events-none transition-opacity duration-700" />
+                        </button>
                     ))
                 ) : (
                     <div className="flex flex-col items-center justify-center py-20 border border-dashed border-zinc-800 rounded-xl bg-zinc-950/20">

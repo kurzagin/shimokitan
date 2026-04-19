@@ -1,6 +1,6 @@
 import React from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { getAllArtifacts, resolveTranslation } from '@shimokitan/db';
+import { getDb, schema, eq, and, desc, resolveTranslation } from '@shimokitan/db';
 import BackAlleyBrowser from './BackAlleyBrowser';
 import type { Metadata } from 'next';
 
@@ -21,28 +21,79 @@ export const dynamic = "force-dynamic";
 
 export default async function BackAlleyPage(props: { params: Promise<{ locale: string }> }) {
     const { locale } = await props.params;
-    const artifacts = await getAllArtifacts();
+    const db = getDb();
+    if (!db) {
+        return <BackAlleyBrowser initialArtifacts={[]} />;
+    }
 
-    // Map DB artifacts to the format expected by the browser component
-    // Filter out only music items
-    const formattedArtifacts = artifacts
-        .filter((a: any) => a.category === 'music')
-        .map((a: any) => {
+    const hostedResources = await db.query.artifactResources.findMany({
+      where: and(
+        eq(schema.artifactResources.role, 'hosted_audio'),
+        eq(schema.artifactResources.isActive, true)
+      ),
+      orderBy: [desc(schema.artifactResources.createdAt)],
+      with: {
+        artifact: {
+          with: {
+            media: {
+              with: {
+                media: true
+              }
+            },
+            translations: true,
+            resources: true,
+            credits: {
+              with: {
+                entity: {
+                  with: {
+                    translations: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const formattedArtifacts = hostedResources
+        .filter((r: any) => r.artifact) // Ensure artifact exists
+        .map((r: any) => {
+            const a = r.artifact;
             const translation = resolveTranslation(a.translations, locale);
-            const primaryCredit = a.credits?.find((c: any) => c.isPrimary && (c.contributorClass === 'author' || c.contributorClass === 'collaborator')) || a.credits?.[0];
-            const artistName = resolveTranslation(primaryCredit?.entity?.translations, locale)?.name;
+            
+            const artistNames = a.credits
+                ?.filter((c: any) => c.isPrimary)
+                .map((c: any) => {
+                    const entityTrans = resolveTranslation(c.entity?.translations, locale);
+                    return entityTrans?.name || c.entity?.name;
+                })
+                .filter(Boolean)
+                .join(", ") || "Unknown Artist";
+
+            const artifactMedia = (a.media as any[]) || [];
+            const vinyl = artifactMedia.find((m: any) => m.role === 'vinyl')?.media;
+            const thumbnail = artifactMedia.find((m: any) => m.role === 'thumbnail')?.media;
+            const poster = artifactMedia.find((m: any) => m.role === 'poster')?.media;
+            const cover = artifactMedia.find((m: any) => m.role === 'cover')?.media;
+            const firstAnyImage = artifactMedia.find((m: any) => m.media?.type === 'image')?.media;
+
+            const coverImage = vinyl?.url || thumbnail?.url || poster?.url || cover?.url || firstAnyImage?.url || null;
 
             return {
                 id: a.id,
                 slug: a.slug,
-                title: translation?.title || (a as any).title || "Untitled",
+                title: translation?.title || a.title || "Untitled",
                 category: a.category || "UNKNOWN",
                 nature: a.nature || "original",
-                coverImage: a.thumbnail?.url || a.poster?.url || null,
+                coverImage,
                 resonance: a.resonance || 0,
                 isMajor: (a.resonance || 0) > 10,
                 isVerified: a.isVerified ?? false,
-                artist: artistName || "ANONYMOUS"
+                artist: artistNames,
+                src: r.value || "",
+                format: r.value?.includes('.m3u8') ? "HLS" : "LOSSLESS",
+                bitrate: "1411 KBPS",
             };
         });
 
