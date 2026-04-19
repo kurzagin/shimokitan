@@ -543,7 +543,8 @@
         "posted_at": "DIPOSTING",
         "analysis_pending": "ANALISIS_PENDING",
         "core_authority": "OTORITAS_INTI",
-        "collaborative_flux": "FLUX_KOLABORATIF"
+        "collaborative_flux": "FLUX_KOLABORATIF",
+        "exhibit": "EKSIBISI"
     },
     "registry": {
         "title": "ARTIST_REGISTRY_PROTOCOLS",

@@ -543,7 +543,8 @@
         "posted_at": "記録日",
         "analysis_pending": "解析待機中",
         "core_authority": "コア・オーソリティ",
-        "collaborative_flux": "コラボレーティブ・フラックス"
+        "collaborative_flux": "コラボレーティブ・フラックス",
+        "exhibit": "エキシビション"
     },
     "registry": {
         "title": "アーティスト登録プロトコル",

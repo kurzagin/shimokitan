@@ -488,7 +488,7 @@ export function ArtifactDetailView({
                 )}>
                     {isExhibitView ? (
                         <PanelHeader
-                            label="Exhibit_Immersion"
+                            label={dict.discovery.exhibit}
                             right={
                                 <div className="flex items-center gap-4">
                                     {trackData && (
@@ -502,7 +502,7 @@ export function ArtifactDetailView({
                         />
                     ) : (
                         <PanelHeader
-                            label={isIllustrationStyle ? "SIGNAL_REDUX" : (isDatabaseStyle ? "ARCHIVAL_RECORDS" : dict.discovery.media_hub)}
+                            label={isIllustrationStyle ? "SIGNAL_REDUX" : (isDatabaseStyle ? dict.discovery.exhibit : dict.discovery.media_hub)}
                             right={
                                 <div className="flex items-center gap-4">
                                     {isIllustrationStyle && (
@@ -693,6 +693,7 @@ export function ArtifactDetailView({
                                 artifactCategory={artifact.category}
                                 artifactId={artifact.id}
                                 isDatabaseStyle={isDatabaseStyle}
+                                dict={dict}
                             />
                         )}
 
@@ -821,6 +822,7 @@ export function ArtifactDetailView({
                             locale={locale}
                             artifactCategory={artifact.category}
                             artifactId={artifact.id}
+                            dict={dict}
                         />
                     )}
                 </div>

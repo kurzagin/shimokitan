@@ -543,7 +543,8 @@
         "posted_at": "POSTED AT",
         "analysis_pending": "ANALYSIS_PENDING",
         "core_authority": "CORE_AUTHORITY",
-        "collaborative_flux": "COLLABORATIVE_FLUX"
+        "collaborative_flux": "COLLABORATIVE_FLUX",
+        "exhibit": "EXHIBIT"
     },
     "registry": {
         "title": "ARTIST_REGISTRY_PROTOCOLS",

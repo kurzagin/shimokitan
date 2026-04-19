@@ -44,6 +44,7 @@ interface ExhibitGalleryProps {
   artifactCategory: string;
   artifactId: string;
   isDatabaseStyle?: boolean;
+  dict: any;
 }
 
 const TYPE_ICONS: Record<ExhibitType, string> = {
@@ -82,6 +83,7 @@ export function ExhibitGallery({
   artifactCategory,
   artifactId,
   isDatabaseStyle,
+  dict,
 }: ExhibitGalleryProps) {
   const [activeTab, setActiveTab] = useState<ExhibitType | "all">("all");
   const [lightboxExhibit, setLightboxExhibit] = useState<ExhibitItem | null>(null);
@@ -146,7 +148,7 @@ export function ExhibitGallery({
             className="text-zinc-500 shrink-0"
           />
           <span className="text-xs text-zinc-400 uppercase tracking-[0.35em] font-black">
-            Exhibit_Entryway
+            {dict.discovery.exhibit}
           </span>
           <span className="ml-auto text-[9px] text-zinc-700 font-mono uppercase">
             {exhibits.length} Item{exhibits.length !== 1 ? "s" : ""}
