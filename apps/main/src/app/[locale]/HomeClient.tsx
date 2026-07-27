@@ -147,17 +147,15 @@ export default function HomeClient({
 
   return (
     <div className="
-      grid gap-3 h-auto
-      grid-cols-2
-      sm:grid-cols-3 sm:grid-rows-2 sm:h-full
-      lg:grid-cols-5 lg:grid-rows-7 lg:h-full
+      grid h-auto grid-flow-dense grid-cols-2 gap-3
+      md:grid-cols-6
+      xl:h-full xl:grid-cols-5 xl:grid-rows-7
     ">
 
       {/* ── 1. Hero / District Branding ─────────────────────────────────────*/}
       <div className="
-        col-span-2 min-h-[280px]
-        sm:col-span-2 sm:row-span-1 sm:col-start-1 sm:row-start-1 sm:min-h-0
-        lg:col-span-2 lg:row-span-3 lg:col-start-1 lg:row-start-1
+        col-span-2 min-h-[360px] md:col-span-4 md:min-h-[400px]
+        xl:col-span-2 xl:row-span-3 xl:col-start-1 xl:row-start-1 xl:min-h-0
         relative group rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950 shadow-2xl
       ">
         {/* Hero Background Image */}
@@ -210,7 +208,7 @@ export default function HomeClient({
             <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-white/20 z-30" />
 
             {/* Top Info Bar */}
-            <div className="absolute top-8 left-8 right-8 flex justify-between items-start z-30 pointer-events-none">
+            <div className="absolute top-5 left-5 right-5 sm:top-8 sm:left-8 sm:right-8 flex justify-between items-start z-30 pointer-events-none">
               <div className="space-y-1">
                 <div className="text-[10px] font-black text-rose-500 uppercase italic tracking-tighter bg-rose-500/10 px-2 py-0.5 border-l-2 border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.1)]">
                   Emergent_Feed
@@ -220,7 +218,7 @@ export default function HomeClient({
                 </div>
               </div>
 
-              <div className="flex gap-2 pointer-events-auto">
+              <div className="flex gap-1.5 sm:gap-2 pointer-events-auto">
                 {[
                   { href: "/cinema", icon: "lucide:archive" },
                   { href: "/artists", icon: "lucide:users" },
@@ -234,7 +232,7 @@ export default function HomeClient({
                     key={i}
                     href={port.href}
                     target={port.external ? "_blank" : undefined}
-                    className="w-10 h-10 flex items-center justify-center bg-zinc-950/90 border border-white/10 text-zinc-400 hover:text-white hover:border-violet-500/50 hover:bg-violet-500/10 transition-all group/port shadow-2xl"
+                    className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-zinc-950/90 border border-white/10 text-zinc-400 hover:text-white hover:border-violet-500/50 hover:bg-violet-500/10 transition-all group/port shadow-2xl"
                   >
                     <Icon
                       icon={port.icon}
@@ -247,12 +245,12 @@ export default function HomeClient({
             </div>
 
             {/* Bottom Title Overlay */}
-            <div className="absolute bottom-10 left-8 right-8 z-50 pointer-events-none">
+            <div className="absolute bottom-6 left-5 right-5 sm:bottom-10 sm:left-8 sm:right-8 z-50 pointer-events-none">
               <div className="space-y-0.5 mb-2">
                 <span className="text-[10px] font-black text-violet-500 uppercase tracking-[0.4em] block drop-shadow-sm italic">
                   SECTOR _ SHIMOKITAZAWA
                 </span>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase italic tracking-tighter leading-none drop-shadow-[0_8px_24px_rgba(0,0,0,1)]">
+                <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black text-white uppercase italic tracking-tighter leading-none drop-shadow-[0_8px_24px_rgba(0,0,0,1)]">
                   SHIMO<span className="text-violet-500">KITAN</span>
                 </h1>
               </div>
@@ -292,9 +290,8 @@ export default function HomeClient({
       {/* ── 2. Current Signal / Audio Player ────────────────────────────────*/}
       <BentoCard
         className="
-          col-span-2 min-h-[360px]
-          sm:col-span-1 sm:row-span-1 sm:col-start-3 sm:row-start-1 sm:min-h-0
-          lg:col-span-1 lg:row-span-3 lg:col-start-3 lg:row-start-1
+          col-span-2 min-h-[390px] md:col-span-2
+          xl:col-span-1 xl:row-span-3 xl:col-start-3 xl:row-start-1 xl:min-h-0
           p-0 overflow-hidden
         "
         title="Current Signal"
@@ -607,9 +604,9 @@ export default function HomeClient({
       {/* ── 3. Featured Card Stack ───────────────────────────────────────────*/}
       <BentoCard
         className="
-          hidden
-          lg:block lg:col-span-1 lg:row-span-3 lg:col-start-4 lg:row-start-1
-          p-0 overflow-visible min-h-0
+          col-span-1 min-h-[360px] md:col-span-2
+          xl:col-span-1 xl:row-span-3 xl:col-start-4 xl:row-start-1 xl:min-h-0
+          p-0 overflow-hidden
         "
         title={dict.home.recent_shards}
         icon="lucide:star"
@@ -634,15 +631,15 @@ export default function HomeClient({
                         }px)`,
                   }}
                 >
-                  <div className="bg-white p-2 md:p-2.5 rounded-lg shadow-2xl border-2 border-zinc-800 w-40 lg:w-48 text-black">
+                  <div className="w-28 sm:w-40 xl:w-48 bg-white p-2 md:p-2.5 rounded-lg shadow-2xl border-2 border-zinc-800 text-black">
                     {item.thumbnailImage ? (
                       <img
                         src={item.thumbnailImage}
                         alt={item.title}
-                        className="w-full h-32 lg:h-40 object-cover rounded"
+                        className="w-full h-28 sm:h-32 xl:h-40 object-cover rounded"
                       />
                     ) : (
-                      <div className="w-full h-32 lg:h-40 bg-zinc-200 rounded flex items-center justify-center border border-dashed border-zinc-400">
+                      <div className="w-full h-28 sm:h-32 xl:h-40 bg-zinc-200 rounded flex items-center justify-center border border-dashed border-zinc-400">
                         <Icon
                           icon="lucide:image-off"
                           width={24}
@@ -673,8 +670,8 @@ export default function HomeClient({
       {/* ── 4. District / Dynamic Time ──────────────────────────────────────*/}
       <BentoCard
         className="
-          hidden
-          lg:block lg:col-span-1 lg:row-span-3 lg:col-start-5 lg:row-start-1
+          col-span-2 min-h-[360px] md:col-span-2
+          xl:col-span-1 xl:row-span-3 xl:col-start-5 xl:row-start-1 xl:min-h-0
           p-0 overflow-hidden relative
         "
         minimal
@@ -774,9 +771,8 @@ export default function HomeClient({
 
       {/* ── 5. In The Pit (Featured Item) ───────────────────────────────────*/}
       <div className="
-        col-span-1
-        sm:hidden
-        lg:block lg:col-span-1 lg:row-span-2 lg:col-start-1 lg:row-start-4
+        col-span-1 min-h-[360px] md:col-span-2
+        xl:col-span-1 xl:row-span-2 xl:col-start-1 xl:row-start-4 xl:min-h-0
       ">
         <BentoCard
           className="h-full"
@@ -789,13 +785,11 @@ export default function HomeClient({
               className="flex flex-col h-full group/pit relative overflow-hidden"
             >
               <div className="relative flex-1 rounded-lg overflow-hidden mb-2 bg-zinc-950 border border-zinc-800 shadow-inner group-hover/pit:border-rose-500/50 transition-all duration-500">
-                {((featuredArtifact.category === "anime" ? featuredArtifact.thumbnailImage : featuredArtifact.posterImage) || featuredArtifact.thumbnailImage || featuredArtifact.posterImage) ? (
+                {(featuredArtifact.posterImage || featuredArtifact.thumbnailImage) ? (
                   <>
                     <img
                       src={
-                        (featuredArtifact.category === "anime"
-                          ? featuredArtifact.thumbnailImage || featuredArtifact.posterImage
-                          : featuredArtifact.posterImage || featuredArtifact.thumbnailImage) || ""
+                        featuredArtifact.posterImage || featuredArtifact.thumbnailImage || ""
                       }
                       className="object-cover w-full h-full transition-all duration-1000 group-hover/pit:scale-110 blur-sm group-hover/pit:blur-0 opacity-40 group-hover/pit:opacity-80"
                       alt={featuredArtifact.title}
@@ -803,9 +797,7 @@ export default function HomeClient({
                     <div className="absolute inset-0 flex items-center justify-center">
                       <img
                         src={
-                          (featuredArtifact.category === "anime"
-                            ? featuredArtifact.thumbnailImage || featuredArtifact.posterImage
-                            : featuredArtifact.posterImage || featuredArtifact.thumbnailImage) || ""
+                          featuredArtifact.posterImage || featuredArtifact.thumbnailImage || ""
                         }
                         className="object-contain w-3/4 h-3/4 transition-all duration-700 group-hover/pit:scale-105 shadow-2xl drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
                         alt={featuredArtifact.title}
@@ -854,9 +846,8 @@ export default function HomeClient({
       {/* ── 6. District Residents List ──────────────────────────────────────*/}
       <BentoCard
         className="
-          col-span-1
-          sm:hidden
-          lg:block lg:col-span-1 lg:row-span-2 lg:col-start-2 lg:row-start-4
+          col-span-2 min-h-[300px] md:col-span-2
+          xl:col-span-1 xl:row-span-2 xl:col-start-2 xl:row-start-4 xl:min-h-0
           overflow-hidden
         "
         contentClassName="lg:p-3"
@@ -921,36 +912,28 @@ export default function HomeClient({
       {/* ── 7. Featured Archives ────────────────────────────────────────────*/}
       <BentoCard
         className="
-          col-span-2
-          sm:hidden
-          lg:block lg:col-span-1 lg:row-span-2 lg:col-start-3 lg:row-start-4
+          col-span-2 min-h-[280px] md:col-span-4
+          xl:col-span-1 xl:row-span-2 xl:col-start-3 xl:row-start-4 xl:min-h-0
         "
         title="Featured Archives"
         icon="lucide:disc"
         contentClassName="p-2 sm:p-2.5"
       >
-        <div className="grid grid-cols-[0.8fr_1.2fr] grid-rows-2 gap-1.5 h-[160px] lg:h-auto lg:flex-1 lg:min-h-0">
+        <div className="grid h-[230px] grid-cols-[minmax(90px,0.8fr)_minmax(0,1.2fr)] grid-rows-2 gap-1.5 md:h-[280px] xl:h-auto xl:flex-1 xl:min-h-0">
           {archiveArtifacts.length > 0 ? (
             (() => {
-              // 1. Find the best vertical candidate (Anime or Game) for the left slot
+              // Anime covers own the portrait slot.
               const verticalCandidate = archiveArtifacts.find(
-                (a) => a.category === "anime" || a.category === "game"
+                (a) => a.category === "anime"
               );
               
-              // 2. Find the best horizontal candidates (All other types) for the right slots
-              // This prevents vertical posters (Game/Anime) from being cropped in horizontal slots
+              // Every other category uses the horizontal slots.
               const horizontalCandidates = archiveArtifacts
                 .filter((a) => 
                   a.id !== verticalCandidate?.id && 
-                  a.category !== "anime" && 
-                  a.category !== "game"
+                  a.category !== "anime"
                 )
                 .slice(0, 2);
-
-              // 3. Absolute fallbacks if we don't have enough diversely categorized assets
-              const finalOtherArtifacts = horizontalCandidates.length > 0 
-                ? horizontalCandidates 
-                : archiveArtifacts.filter(a => a.id !== verticalCandidate?.id).slice(0, 2);
 
               return (
                 <>
@@ -984,7 +967,7 @@ export default function HomeClient({
                       </div>
                     </Link>
                   )}
-                  {finalOtherArtifacts.map((artifact: any) => (
+                  {horizontalCandidates.map((artifact: any) => (
                     <Link
                       key={artifact.id}
                       href={`/artifacts/${artifact.category}/${artifact.id}`}
@@ -1023,14 +1006,13 @@ export default function HomeClient({
       {/* ── 8. Video ────────────────────────────────────────────────────────*/}
       <BentoCard
         className="
-          col-span-2 min-h-[220px]
-          sm:hidden
-          lg:block lg:col-span-2 lg:row-span-4 lg:col-start-4 lg:row-start-4
+          col-span-2 aspect-video min-h-[200px] md:col-span-6 md:min-h-[360px]
+          xl:col-span-2 xl:row-span-4 xl:col-start-4 xl:row-start-4 xl:min-h-0 xl:aspect-auto
           overflow-hidden p-0 bg-black
         "
         minimal
       >
-        <div className="w-full h-full aspect-video sm:aspect-auto">
+        <div className="w-full h-full">
           {videoArtifact?.videoUrl ? (
             <iframe
               src={videoArtifact.videoUrl}
@@ -1049,41 +1031,11 @@ export default function HomeClient({
         </div>
       </BentoCard>
 
-      {/* ── 9a. YouTube Video — tablet only ─────────────────────────────────*/}
+      {/* ── 9. Signal Station ────────────────────────────────────────────────*/}
       <BentoCard
         className="
-          hidden
-          sm:block sm:col-span-3 sm:row-span-1 sm:col-start-1 sm:row-start-2
-          lg:hidden
-          overflow-hidden p-0 bg-black
-        "
-        minimal
-      >
-        <div className="w-full h-full">
-          {videoArtifact?.videoUrl ? (
-            <iframe
-              src={videoArtifact.videoUrl}
-              className="w-full h-full border-0 pointer-events-auto"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-zinc-800 bg-zinc-950">
-              <Icon icon="lucide:video-off" width={40} className="opacity-50" />
-              <span className="text-[11px] font-mono mt-2 tracking-widest">
-                NO_VIDEO_SIGNAL
-              </span>
-            </div>
-          )}
-        </div>
-      </BentoCard>
-
-      {/* ── 9b. Signal Station ───────────────────────────────────────────────*/}
-      <BentoCard
-        className="
-          col-span-2
-          sm:hidden
-          lg:block lg:col-span-3 lg:row-span-2 lg:col-start-1 lg:row-start-6
+          col-span-2 min-h-[340px] md:col-span-6
+          xl:col-span-3 xl:row-span-2 xl:col-start-1 xl:row-start-6 xl:min-h-0
           overflow-hidden p-0 bg-white
         "
         title="Signal Station"

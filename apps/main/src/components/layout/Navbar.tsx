@@ -66,18 +66,18 @@ export function Navbar() {
     const [isOpen, setIsOpen] = React.useState(false);
 
     return (
-        <header className="h-14 border-b border-zinc-800/80 flex items-center justify-between px-4 bg-zinc-950/40 backdrop-blur-2xl z-40 shrink-0 relative overflow-hidden">
+        <header className="h-14 border-b border-zinc-800/80 flex items-center justify-between px-3 sm:px-4 bg-zinc-950/40 backdrop-blur-2xl z-40 shrink-0 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-violet-500/50 to-transparent" />
 
-            <div className="flex items-center gap-6">
+            <div className="flex min-w-0 items-center gap-6">
                 <Link href="/" className="flex items-center gap-3 group">
                     <div className="relative">
                         <div className="w-3 h-3 bg-violet-600 rounded-sm rotate-45 pulse-glow group-hover:bg-violet-500 transition-colors" />
                         <div className="absolute inset-0 w-3 h-3 bg-violet-400 rounded-sm rotate-45 animate-ping opacity-20" />
                     </div>
-                    <div className="flex flex-col leading-none">
-                        <h1 className="font-black tracking-tighter text-lg italic uppercase group-hover:text-violet-400 transition-colors text-white">SHIMOKITAN</h1>
-                        <span className="text-zinc-500 text-[10px] font-mono tracking-[0.3em] font-bold group-hover:text-zinc-400 transition-colors">V.2.0.26 // DIGITAL_DISTRICT</span>
+                    <div className="flex min-w-0 flex-col leading-none">
+                        <h1 className="font-black tracking-tighter text-base sm:text-lg italic uppercase group-hover:text-violet-400 transition-colors text-white">SHIMOKITAN</h1>
+                        <span className="hidden min-[390px]:block text-zinc-500 text-[9px] sm:text-[10px] font-mono tracking-[0.18em] sm:tracking-[0.3em] font-bold group-hover:text-zinc-400 transition-colors whitespace-nowrap">V.2.0.26 // DIGITAL_DISTRICT</span>
                     </div>
                 </Link>
 
@@ -102,7 +102,7 @@ export function Navbar() {
 
             <div className="flex items-center gap-4">
                 {/* Language Switcher */}
-                <div className="hidden sm:flex gap-2 mr-2 border-r border-zinc-800 pr-4 h-6 items-center">
+                <div className="hidden lg:flex gap-2 mr-2 border-r border-zinc-800 pr-4 h-6 items-center">
                     {locales.map((l) => (
                         <a
                             key={l}
@@ -119,7 +119,7 @@ export function Navbar() {
                     ))}
                 </div>
 
-                <div className="hidden sm:flex items-center gap-4">
+                <div className="hidden lg:flex items-center gap-4">
                     <Link href="/gallery" className="text-zinc-500 hover:text-rose-400 transition-colors" title={navDict.gallery}>
                         <Icon icon="lucide:image" width={18} height={18} />
                     </Link>
@@ -185,7 +185,7 @@ export function Navbar() {
                 )}
 
                 {/* Mobile Menu Toggle */}
-                <div className="flex md:hidden">
+                <div className="flex lg:hidden">
                     <Sheet open={isOpen} onOpenChange={setIsOpen}>
                         <SheetTrigger asChild>
                             <button suppressHydrationWarning className="p-2 text-zinc-400 hover:text-white transition-colors bg-zinc-900/50 rounded border border-zinc-800">

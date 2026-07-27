@@ -21,14 +21,25 @@ function getS3Client() {
     const endpoint = process.env.R2_ENDPOINT;
     const accessKeyId = process.env.R2_ACCESS_KEY_ID;
     const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+    const bucketName = process.env.R2_BUCKET_NAME || 'shimokitan';
 
     if (!endpoint || !accessKeyId || !secretAccessKey) {
         throw new Error("R2_CONFIG_MISSING: Ensure R2_ENDPOINT, R2_ACCESS_KEY_ID, and R2_SECRET_ACCESS_KEY are defined.");
     }
 
+    const endpointUrl = new URL(endpoint);
+    const endpointPath = endpointUrl.pathname.replace(/^\/+|\/+$/g, '');
+    if (endpointPath === bucketName) {
+        endpointUrl.pathname = '/';
+    } else if (endpointPath) {
+        throw new Error(
+            `R2_ENDPOINT_INVALID: Expected the account endpoint without a path, received "/${endpointPath}".`
+        );
+    }
+
     s3Client = new S3Client({
         region: "auto",
-        endpoint: endpoint,
+        endpoint: endpointUrl.toString(),
         credentials: {
             accessKeyId: accessKeyId,
             secretAccessKey: secretAccessKey,

@@ -179,7 +179,19 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({ track, onClose }) => {
     useEffect(() => {
         if (!mounted || !audioRef.current) return;
         const audio = audioRef.current;
-        const targetSrc = track?.src || "";
+        const rawTargetSrc = track?.src || "";
+        let targetSrc = rawTargetSrc;
+        try {
+            const sourceUrl = new URL(rawTargetSrc);
+            if (
+                sourceUrl.hostname === "cdn.shimokitan.live"
+                && sourceUrl.pathname.startsWith("/media/audio/")
+            ) {
+                targetSrc = `/api/media${sourceUrl.pathname}`;
+            }
+        } catch {
+            // Relative and empty sources are already valid for the current origin.
+        }
 
         if (!targetSrc) {
             if (audio.src && audio.src !== window.location.href) {
@@ -191,67 +203,68 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({ track, onClose }) => {
             return;
         }
 
-        let hls: Hls | null = null;
-        
         setIsPlaying(false);
         setCurrentTime(0);
+        let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
         if (Hls.isSupported() && targetSrc.includes('.m3u8')) {
             console.log("AudioWidget: Initializing HLS for", targetSrc);
+            let networkRetryCount = 0;
             const hls = new Hls({
                 enableWorker: true,
                 lowLatencyMode: true,
-                manifestLoadingMaxRetry: 10,
+                manifestLoadingMaxRetry: 2,
                 manifestLoadingRetryDelay: 1000,
-                levelLoadingMaxRetry: 10,
+                levelLoadingMaxRetry: 2,
                 levelLoadingRetryDelay: 1000,
-                fragLoadingMaxRetry: 10,
+                fragLoadingMaxRetry: 2,
                 fragLoadingRetryDelay: 1000,
                 xhrSetup: (xhr, url) => {
                     xhr.withCredentials = false;
                 }
             });
             hlsRef.current = hls;
-            hls.loadSource(targetSrc);
             hls.attachMedia(audio);
+            hls.loadSource(targetSrc);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                  console.log("AudioWidget: HLS Manifest parsed.");
+                 networkRetryCount = 0;
                  broadcastState();
             });
-            hls.on(Hls.Events.ERROR, (event, data) => {
+            hls.on(Hls.Events.ERROR, (_event, data) => {
                 if (data.fatal) {
-                    console.error("AudioWidget: HLS Fatal ERROR:", {
-                        type: data.type,
-                        details: data.details,
-                        response: data.response,
-                        url: data.url
-                    });
-                    
                     switch (data.type) {
                       case Hls.ErrorTypes.NETWORK_ERROR:
-                        if (data.details === "manifestLoadError") {
-                            const status = (data.response as any)?.status;
-                            console.error(`AudioWidget: Manifest load error for ${data.url || 'unknown source'} (Status: ${status}). Retrying in 2s...`);
-                            toast.error(`Audio: Connection lost (Status: ${status || 'Unknown'}). Reconnecting...`);
-                            setTimeout(() => {
-                                if (hlsRef.current === hls) {
-                                    hls.startLoad();
-                                }
-                            }, 2000);
+                        const status = (data.response as { code?: number; status?: number } | undefined)?.code
+                            ?? (data.response as { status?: number } | undefined)?.status;
+                        const isMissingManifest = data.details === "manifestLoadError" && status === 404;
+                        if (isMissingManifest || networkRetryCount >= 2) {
+                            console.warn(
+                                `AudioWidget: HLS stream unavailable (${data.details}, status ${status ?? "unknown"}): ${data.url ?? targetSrc}`
+                            );
+                            toast.error("Audio: Stream unavailable");
+                            audio.pause();
+                            hls.destroy();
+                            if (hlsRef.current === hls) hlsRef.current = null;
                         } else {
-                            console.error(`AudioWidget: Network error (${data.details}). Trying to recover...`);
-                            hls.startLoad();
+                            networkRetryCount += 1;
+                            console.warn(
+                                `AudioWidget: HLS network error (${data.details}); retry ${networkRetryCount}/2`
+                            );
+                            retryTimer = setTimeout(() => {
+                                if (hlsRef.current === hls) hls.loadSource(targetSrc);
+                            }, 2000);
                         }
                         break;
                       case Hls.ErrorTypes.MEDIA_ERROR:
-                        console.error("AudioWidget: Media error, trying to recover...");
+                        console.warn("AudioWidget: HLS media error; attempting recovery");
                         hls.recoverMediaError();
                         break;
                       default:
-                        console.error("AudioWidget: Cannot recover, destroying HLS instance.");
+                        console.warn(`AudioWidget: Unrecoverable HLS error (${data.details})`);
                         toast.error(`Audio: Stream terminal failure`);
                         hls.destroy();
-                        hlsRef.current = null;
+                        if (hlsRef.current === hls) hlsRef.current = null;
                         break;
                     }
                 } else {
@@ -269,6 +282,9 @@ export const AudioWidget: React.FC<AudioWidgetProps> = ({ track, onClose }) => {
         broadcastState();
 
         return () => {
+            // HLS error recovery can outlive the source unless explicitly cancelled.
+            // The ref check inside the callback is a second guard against stale tracks.
+            if (retryTimer) clearTimeout(retryTimer);
             if (hlsRef.current) {
                 console.log("AudioWidget: Cleaning up HLS...");
                 hlsRef.current.destroy();
