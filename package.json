@@ -1,6 +1,18 @@
 {
     "name": "shimokitan",
     "private": true,
+    "author": {
+        "name": "Kur Zagin",
+        "url": "https://github.com/kurzagin"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kurzagin/shimokitan.git"
+    },
+    "homepage": "https://shimokitan.live",
+    "bugs": {
+        "url": "https://github.com/kurzagin/shimokitan/issues"
+    },
     "packageManager": "bun@1.3.9",
     "workspaces": [
         "apps/*",

@@ -5,6 +5,7 @@
 Shimokitan is an immersive, community-first ecosystem designed for the Japanese culture enthusiast. We are moving away from the "Spreadsheet Era" of anime tracking and entering the **"Album Era."** This is a space where your watch list becomes a scrapbook, your taste becomes a "Pedalboard," and your creativity earns you a place in the physical world.
 
 URL: https://shimokitan.live
+Source: https://github.com/kurzagin/shimokitan
 
 ---
 
